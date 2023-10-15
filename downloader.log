@@ -1,0 +1,34 @@
+2023-10-14 14:20:12,843:DEBUG:selector_events:selector_events.py:59:Using selector: EpollSelector
+2023-10-14 14:20:12,843:DEBUG:aiorun:aiorun.py:162:Entering run()
+2023-10-14 14:20:12,843:DEBUG:selector_events:selector_events.py:59:Using selector: EpollSelector
+2023-10-14 14:20:12,843:DEBUG:aiorun:aiorun.py:249:Creating default executor
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Starting Cyberdrop-DL
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using authentication arguments: {'gofile_api_key': '!REDACTED!', 'gofile_website_token': '', 'imgur_client_id': '!REDACTED!', 'pixeldrain_api_key': '!REDACTED!', 'reddit_personal_use_script': '!REDACTED!', 'reddit_secret': '!REDACTED!', 'nudostar_username': '', 'nudostar_password': '!REDACTED!', 'simpcity_username': '', 'simpcity_password': '!REDACTED!', 'socialmediagirls_username': '', 'socialmediagirls_password': '!REDACTED!', 'xbunker_username': '', 'xbunker_password': '!REDACTED!'}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using files arguments: {'db_file': PosixPath('/home/john/.local/share/Cyberdrop-DL/download_history.sqlite'), 'errored_download_urls_file': PosixPath('Errored_Download_URLs.csv'), 'errored_scrape_urls_file': PosixPath('Errored_Scrape_URLs.csv'), 'input_file': PosixPath('URLs.txt'), 'log_file': PosixPath('downloader.log'), 'output_folder': PosixPath('Downloads'), 'output_last_forum_post_file': PosixPath('URLs_last_post.txt'), 'unsupported_urls_file': PosixPath('Unsupported_URLs.csv'), 'variable_cache_file': PosixPath('/home/john/.cache/Cyberdrop-DL/internal_variable_cache.yaml')}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using forum options arguments: {'output_last_forum_post': False, 'scrape_single_post': False, 'separate_posts': False}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using ignore arguments: {'exclude_videos': False, 'exclude_images': False, 'exclude_audio': False, 'exclude_other': False, 'ignore_cache': False, 'ignore_history': False, 'skip_coomer_ads': False, 'skip_hosts': [], 'only_hosts': []}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using jdownloader arguments: {'apply_jdownloader': False, 'jdownloader_username': '', 'jdownloader_password': '!REDACTED!', 'jdownloader_device': ''}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using progress options arguments: {'hide_new_progress': False, 'hide_overall_progress': False, 'hide_forum_progress': False, 'hide_thread_progress': False, 'hide_domain_progress': False, 'hide_album_progress': False, 'hide_file_progress': False, 'refresh_rate': 10, 'visible_rows_threads': 2, 'visible_rows_domains': 2, 'visible_rows_albums': 2, 'visible_rows_files': 10}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using ratelimiting arguments: {'connection_timeout': 15, 'read_timeout': 300, 'ratelimit': 50, 'throttle': 0.5}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using runtime arguments: {'allow_insecure_connections': False, 'attempts': 10, 'block_sub_folders': False, 'disable_attempt_limit': False, 'filesize_minimum_images': 0, 'filesize_minimum_other': 0, 'filesize_minimum_videos': 0, 'filesize_maximum_images': 0, 'filesize_maximum_other': 0, 'filesize_maximum_videos': 0, 'include_id': False, 'max_concurrent_threads': 0, 'max_concurrent_domains': 0, 'max_concurrent_albums': 0, 'max_concurrent_downloads_per_domain': 4, 'max_filename_length': 95, 'max_folder_name_length': 60, 'output_errored_urls': False, 'output_unsupported_urls': False, 'proxy': '', 'remove_bunkr_identifier': False, 'required_free_space': 5, 'skip_check_for_partial_files_and_empty_dirs': False, 'skip_download_mark_completed': False, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0'}
+2023-10-14 14:20:12,847:DEBUG:base_functions:base_functions.py:60:Using sorting arguments: {'sort_downloads': False, 'sort_directory': PosixPath('Sorted Downloads'), 'sorted_audio': '{sort_dir}/{base_dir}/Audio', 'sorted_images': '{sort_dir}/{base_dir}/Images', 'sorted_others': '{sort_dir}/{base_dir}/Other', 'sorted_videos': '{sort_dir}/{base_dir}/Videos'}
+2023-10-14 14:20:12,848:DEBUG:base_functions:base_functions.py:60:We are running version 4.2.213 of Cyberdrop Downloader
+2023-10-14 14:20:12,849:DEBUG:base_functions:base_functions.py:60:No valid links found.
+2023-10-14 14:20:12,859:DEBUG:base_functions:base_functions.py:60:
+2023-10-14 14:20:12,860:DEBUG:base_functions:base_functions.py:60:Checking for incomplete downloads
+2023-10-14 14:20:12,861:DEBUG:base_functions:base_functions.py:60:Purging empty directories
+2023-10-14 14:20:12,861:DEBUG:base_functions:base_functions.py:60:Finished downloading. Enjoy :)
+2023-10-14 14:20:13,143:ERROR:base_events:base_events.py:1707:Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f8fe1ca6880>
+2023-10-14 14:20:13,143:ERROR:base_events:base_events.py:1707:Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f8fe1cb56a0>, 3488.961998129)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f8fe1ca6820>
+2023-10-14 14:20:13,144:DEBUG:base_functions:base_functions.py:60:
+If you enjoy using this program, please consider buying the developer a coffee :)
+https://www.buymeacoffee.com/juleswinnft
+2023-10-14 14:20:13,144:INFO:aiorun:aiorun.py:263:Entering shutdown phase.
+2023-10-14 14:20:13,144:INFO:aiorun:aiorun.py:359:Waiting for executor shutdown.
+2023-10-14 14:20:13,144:INFO:aiorun:aiorun.py:363:Shutting down async generators
+2023-10-14 14:20:13,145:INFO:aiorun:aiorun.py:365:Closing the loop.
+2023-10-14 14:20:13,145:INFO:aiorun:aiorun.py:367:Leaving. Bye!
+2023-10-14 14:20:13,145:DEBUG:sql_helper:sql_helper.py:281:Successfully closed sqlite database connection
