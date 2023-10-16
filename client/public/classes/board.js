@@ -1,5 +1,6 @@
 import { PLAYER1_PIECES } from "../res/player.js";
 import { PLAYER2_PIECES } from "../res/player.js";
+import { BoardMax } from "../res/player.js";
 import boardBlock from "./block.js";
 
 export default class gessBoard extends Phaser.GameObjects.Container {
@@ -63,11 +64,14 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     addPieces(){
         let otherPlayerPieces=this.getOtherPlayerPieces()
         let myPieces=this.getMyPieces()
+        this.pieces={}
         
         for (let i = 0; i < Math.pow(this.squaresCount,2); i++) {
             this.add(this.board[i].initPiece())
+            let piece=this.board[i].piece
+            this.pieces[i+1]=piece
             if (myPieces.has(i+1)==true){
-                this.board[i].piece.newOwner=this.color   
+                piece.newOwner=this.color   
                 this.board[i].piece.allowDraggable()  
             } 
             //just show other player pieces
@@ -77,6 +81,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             //secret grab zone
             else{
                 this.board[i].piece.allowDraggable()
+
             }
 
            
@@ -89,12 +94,17 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
 
-
+    getPiece(index){
+        if (index>=BoardMax){
+            return null
+        }
+        return this.pieces[index]
+    }
 
      
     extendBoardArray(){
         for (let i = 0; i < Math.pow(this.squaresCount,2); i++){
-            let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i)
+            let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,this)
             this.board.push(rect)
             this.add(rect)
             this.add(rect.zone)

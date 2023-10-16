@@ -18,18 +18,6 @@ create() {
     
 
 
-    // this.input.on('dragstart', (pointer, gameObject, dropped) =>
-    // {
-    // this.dragGroup.push(gameObject)
-    // for (ele in [-1,1,-18,18,-19,19,-17,17]){
-
-    // }
-
-
-     
-     
-    // });
-
 
 
     this.input.on('drop', (pointer, gameObject, dropZone) =>
