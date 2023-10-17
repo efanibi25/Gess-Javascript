@@ -128,8 +128,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                 else{
                     this.board.push(rect)
                     this.add(rect)
-                    // rect.setStrokeStyle(this.stroke, 0x000000);
-                    rect.makeinvisible()
+                    rect.setStrokeStyle(this.stroke, 0x000000);
+                    // rect.makeinvisible()
                 }
                 k=k+1
              
