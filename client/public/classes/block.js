@@ -65,7 +65,6 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
     initPiece(){
         this.piece=new boardPiece(this.scene,0,0,this.width/2-10,this.index,this)
-        this.piece.prevBlock=this
         Phaser.Display.Align.In.Center(this.piece,this)
         return this.piece
     }

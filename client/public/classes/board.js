@@ -69,6 +69,9 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             let row=this.board[i].row
             let col=this.board[i].col
             this.board[i].addZone()
+            this.board[i].index=i+1
+            this.add(this.board[i].initPiece())
+
             if (row==sideborder/2 && col<squaresCount+(sideborder/2)+1 && col>sideborder/2){
                 this.board[i].addText(col)
             }
@@ -79,10 +82,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             else if ((row<=sideborder/2 || col<=sideborder/2 || col>=squaresCount+(sideborder/2)+1 || col>=squaresCount+(sideborder/2)+1)==false){    
             let index=k+1
             //use raw index
-            this.board[i].index=i+1
-            this.add(this.board[i].initPiece())
             let piece=this.board[i].piece
-
             if (myPieces.has(index)==true){
                 piece.owner=this.color   
                 this.board[i].piece.allowDraggable()  

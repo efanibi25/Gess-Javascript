@@ -67,7 +67,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         let valid=true
 
         if(Object.values(this.neighbors)
-            .filter(ele.owner==this.block.board.otherColor).length>0){
+            .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
@@ -80,7 +80,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
     }
 
-        else if(Object.values(this.neighbors).filter(ele.owner==this.block.board.color).length==0){
+        else if(Object.values(this.neighbors).filter(ele=>ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
@@ -184,6 +184,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     swapNeighbors(){
         let colorDict={}
+        this.newBlock.piece.getNeighbors()
+
         for(const key of Object.keys(this.neighbors)){
 
             colorDict[key]=this.block.piece.neighbors[key].owner
@@ -191,8 +193,14 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             this.block.piece.neighbors[key].alignCenter()
         }
         for(const key of Object.keys(this.neighbors)){
-            if(this.newBlock.col>squaresCount+(sideborder/2)+1 || this.newBlock.col>=sideborder/2) continue
-            if(this.newBlock.row>squaresCount+(sideborder/2)+1 || this.newBlock.row>=sideborder/2) continue
+            if(this.newBlock.piece.neighbors[key].block.col>squaresCount+(sideborder/2)+1 || 
+            this.newBlock.piece.neighbors[key].block.col<sideborder/2+1) continue
+
+            if(this.newBlock.piece.neighbors[key].block.row>squaresCount+(sideborder/2)+1 || 
+            this.newBlock.piece.neighbors[key].block.row<sideborder/2+1) continue
+
+            this.newBlock.piece.neighbors[key].owner=colorDict[key]
+
         }
         
         
@@ -208,7 +216,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         if (this.neighbors==null){
             this.getNeighbors()
         }
-        console.log(this.neighbors)
     }
     
     doDrag(event){
