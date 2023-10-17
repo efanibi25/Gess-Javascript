@@ -1,4 +1,5 @@
 import boardPiece from "./pieces.js";
+import { sideborder } from "../res/player.js";
 const zoneMulti=1.2
 const showZoneLine=false
 const color=0xadd8e6
@@ -45,7 +46,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
     addText(num){
 
-        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-3,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-sideborder/2,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }

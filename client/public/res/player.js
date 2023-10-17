@@ -5,5 +5,5 @@ export const PLAYER2_PIECES=new Set([218,221,224,227,230,233,272,274,276,277,278
     ,295,296,297,298,300,302,304,305,306,308,310,312,313,314,315,316,317,318,319,321,323])
 export const BoardMax=325
 export const squaresCount=18
-export const sideborder=6
+export const sideborder=4
 

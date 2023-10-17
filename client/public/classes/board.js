@@ -16,7 +16,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.height = (this.canvas.height - this.chessboardOffsetY);
         this.squareSize = Math.floor(Math.min((this.width / squaresCount),(this.height / (squaresCount+sideborder))))
         this.board=[]
-        this.pieces={}
         this.stroke=8
         this.player=player
         this.color=color
@@ -63,28 +62,26 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     upDateGameBlocks(){
         let otherPlayerPieces=this.getOtherPlayerPieces()
         let myPieces=this.getMyPieces()
-        this.pieces={}
         let i=0
         let k=0
 
-        while ( i< Math.pow(squaresCount+6,2)) {
+        while ( i< Math.pow(squaresCount+sideborder,2)) {
             let row=this.board[i].row
             let col=this.board[i].col
             this.board[i].addZone()
-            if (row==3 && col<22 && col>3){
+            if (row==sideborder/2 && col<squaresCount+(sideborder/2)+1 && col>sideborder/2){
                 this.board[i].addText(col)
             }
-            else if (col==3 && row<22 && row>3){
+            else if (col==sideborder/2 && row<squaresCount+(sideborder/2)+1 && row>sideborder/2){
                 this.board[i].addText(row)
             }
             
-            else if ((row<=3 || col<=3 || col>=22 || col>=22)==false){    
+            else if ((row<=sideborder/2 || col<=sideborder/2 || col>=squaresCount+(sideborder/2)+1 || col>=squaresCount+(sideborder/2)+1)==false){    
             let index=k+1
             //use raw index
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
             let piece=this.board[i].piece
-            this.pieces[k+1]=piece
 
             if (myPieces.has(index)==true){
                 piece.owner=this.color   
@@ -125,7 +122,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             while (k <squaresCount+sideborder){
                 //full board has invisible pieces
                 let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,this)
-                if ((i<=2 || k<=2 || i>=21 || k>=21)==false){
+                if ((i<(sideborder/2) || k<(sideborder/2) || i>=squaresCount+(sideborder/2) || k>=squaresCount+(sideborder/2))==false){
                     this.board.push(rect)
                     this.add(rect)
                     rect.setStrokeStyle(this.stroke, 0x000000);
@@ -134,7 +131,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                 else{
                     this.board.push(rect)
                     this.add(rect)
-                    // rect.setStrokeStyle(this.stroke, 0x000000);
                     rect.makeinvisible()
                 }
                 k=k+1

@@ -67,20 +67,20 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         let valid=true
 
         if(Object.values(this.neighbors)
-            .filter(ele=>ele!=null && ele.owner==this.block.board.otherColor).length>0){
+            .filter(ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
         }
 
         else if(Object.values(this.neighbors)
-        .filter(ele=>ele!=null).length!=9){
+        .filter(ele=>ele.owner!="out").length!=9){
         document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
         valid=false
         setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
     }
 
-        else if(Object.values(this.neighbors).filter(ele=>ele!=null && ele.owner==this.block.board.color).length==0){
+        else if(Object.values(this.neighbors).filter(ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
@@ -164,8 +164,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
         }
-        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
-            document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
+        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>sideborder/2){
+            document.querySelector("#alertBar").textContent="You can only move sideborder/2 blocks in a direction without a center piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);    
         }
@@ -175,7 +175,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
     revertNeighbors(){
-        for(const ele of Object.values(this.neighbors).filter(ele=>ele!=null)){
+        for(const ele of Object.values(this.neighbors).filter(ele=>ele.owner!="out")){
                 ele.revertPiece()
             }
    
@@ -183,8 +183,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
 
     swapNeighbors(){
-
-        this.newBlock.piece.getNeighbors()
         let colorDict={}
         for(const key of Object.keys(this.neighbors)){
 
@@ -193,7 +191,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             this.block.piece.neighbors[key].alignCenter()
         }
         for(const key of Object.keys(this.neighbors)){
-            this.newBlock.piece.neighbors[key] ==null ? null: this.newBlock.piece.neighbors[key].owner=colorDict[key]
+            if(this.newBlock.col>squaresCount+(sideborder/2)+1 || this.newBlock.col>=sideborder/2) continue
+            if(this.newBlock.row>squaresCount+(sideborder/2)+1 || this.newBlock.row>=sideborder/2) continue
         }
         
         
