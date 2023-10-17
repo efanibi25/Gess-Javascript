@@ -164,7 +164,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
         }
-        else if(this.owner==null && (this.newBlock.index/this.block.index)/dir>3){
+        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
             document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);    
