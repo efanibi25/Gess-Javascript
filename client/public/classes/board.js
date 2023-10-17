@@ -70,16 +70,21 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         while ( i< Math.pow(squaresCount+6,2)) {
             let row=this.board[i].row
             let col=this.board[i].col
-            
             this.board[i].addZone()
-            if ((row<=3 || col<=3 || col>=22 || col>=22)==false){    
+            if (row==3 && col<22 && col>3){
+                this.board[i].addText(col)
+            }
+            else if (col==3 && row<22 && row>3){
+                this.board[i].addText(row)
+            }
+            
+            else if ((row<=3 || col<=3 || col>=22 || col>=22)==false){    
             let index=k+1
             //use raw index
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
             let piece=this.board[i].piece
             this.pieces[k+1]=piece
-
 
             if (myPieces.has(index)==true){
                 piece.owner=this.color   
@@ -96,10 +101,10 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             k=k+1
         }
         i=i+1
-
-           
+  
            
         }
+       
         this.scene.events.emit('updatePiece');
 
 
@@ -124,12 +129,13 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                     this.board.push(rect)
                     this.add(rect)
                     rect.setStrokeStyle(this.stroke, 0x000000);
+
                 }
                 else{
                     this.board.push(rect)
                     this.add(rect)
-                    rect.setStrokeStyle(this.stroke, 0x000000);
-                    // rect.makeinvisible()
+                    // rect.setStrokeStyle(this.stroke, 0x000000);
+                    rect.makeinvisible()
                 }
                 k=k+1
              

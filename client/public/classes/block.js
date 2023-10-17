@@ -2,6 +2,7 @@ import boardPiece from "./pieces.js";
 const zoneMulti=1.2
 const showZoneLine=false
 const color=0xadd8e6
+const altColor=0xD6D6B3
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
@@ -9,15 +10,30 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         super(scene, x, y,width,height)
         this.row=row+1
         this.col=col+1
-        this.setFillStyle(color)
         this.width=width
         this.height=height
         this.board=board
         this.scene=scene
         this.piece=null
         this.zone=null
+        this.text=null
+        this.addBlockColor()
 
 
+    }
+    addBlockColor(){
+        if(Number.isInteger(this.row/2)==false || Number.isInteger(this.col/2)==false){
+            this.setFillStyle(altColor)
+        }
+    
+        else {
+            this.setFillStyle(color)
+
+        }
+    }
+    addExtra(){
+        this.addZone()
+        this.addText()
     }
 
     addZone(){
@@ -27,6 +43,13 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     this.setZoneCenter()
 
     }
+    addText(num){
+
+        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-3,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+        this.scene.add.existing(this.text)
+        Phaser.Display.Align.In.Center(this.text,this) 
+    }
+    
 
     setZoneCenter(){
         let zone=this.zone

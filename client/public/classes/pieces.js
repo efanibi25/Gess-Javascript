@@ -6,8 +6,8 @@ Note: Piece never change location only attributes based on grab events and valid
 */
 import { squaresCount } from "../res/player.js"
 import { sideborder } from "../res/player.js"
-const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,squaresCount-sideborder+1]
-const dirNeighbors=[-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,squaresCount-sideborder+1]
+const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+const dirNeighbors=[-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
@@ -96,7 +96,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         let colchange=this.newBlock.col-this.block.col
 
         if(colchange==0 && rowchange==0){
-            return
+            return 0
         }
         else if(colchange==0 && rowchange>=1){
             return squaresCount+sideborder
@@ -146,7 +146,12 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         let valid=true
         let dir=this.getDir()
         console.log(dir)
-        if (dir==null){
+        if (dir==0){
+            document.querySelector("#alertBar").textContent="You must Move at least 1 block"
+            valid=false
+            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);     
+        }
+        else if (dir==null){
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);  
