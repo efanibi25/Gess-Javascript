@@ -43,7 +43,7 @@ create() {
             gameObject.revertNeighbors()
         }
         else{
-            gameObject.swapNeighbors()
+            gameObject.movePiece()
             this.events.emit('updatePiece');
 
         }

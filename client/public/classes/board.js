@@ -110,7 +110,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
     getPiece(index){
-        return this.board[index].piece
+        return this.board[index-1].piece
     }
 
      
@@ -132,6 +132,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                     this.board.push(rect)
                     this.add(rect)
                     rect.makeinvisible()
+                    rect.setStrokeStyle(this.stroke, 0x0000FF);
+
                 }
                 k=k+1
              

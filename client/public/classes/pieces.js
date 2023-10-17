@@ -30,7 +30,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     getNeighbors(){
     let out={}
     for (const ele of neighbors){
-        let piece=this.block.board.getPiece(this.index+ele-1)
+        let piece=this.block.board.getPiece(this.index+ele)
         out[ele]=piece   
     }
     this.neighbors=out
@@ -182,27 +182,59 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
 
-    swapNeighbors(){
+    movePiece(){
+    let dir=this.getDir()
+    if(dir>0) this.movePieceRight(dir)
+    else this.movePieceLeft(dir)
+    }
+
+    movePieceRight(dir){
+        for(let i=this.block.index;i<this.newBlock.index;i=i+dir){
+            if(this.swapNeighbors(i,dir)==false){
+                break
+            }
+        }
+        }
+    
+
+        movePieceLeft(dir){
+            for(let i=this.block.index;i>this.newBlock.index;i=i-dir){
+                if(this.swapNeighbors(i,dir)==false){
+                    break
+                }
+            }
+            }
+
+    
+
+
+    swapNeighbors(index,dir){
         let colorDict={}
-        this.newBlock.piece.getNeighbors()
+        let target=this.block.board.getPiece(index+dir)
+        let start=this.block.board.getPiece(index)
+        target.getNeighbors()
+        start.getNeighbors()
+        let noOverlap=true
+     
+        for(const key of Object.keys(start.neighbors)){
 
-        for(const key of Object.keys(this.neighbors)){
-
-            colorDict[key]=this.block.piece.neighbors[key].owner
-            this.block.piece.neighbors[key].owner=null
-            this.block.piece.neighbors[key].alignCenter()
+            colorDict[key]=start.block.piece.neighbors[key].owner
+            start.block.piece.neighbors[key].owner=null
+            start.block.piece.neighbors[key].alignCenter()
         }
         for(const key of Object.keys(this.neighbors)){
-            if(this.newBlock.piece.neighbors[key].block.col>squaresCount+(sideborder/2)+1 || 
-            this.newBlock.piece.neighbors[key].block.col<sideborder/2+1) continue
+            console.log(target.block.piece.neighbors[key].owner)
+            if(target.block.piece.neighbors[key].block.col>squaresCount+(sideborder/2)+1 || 
+            target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
 
-            if(this.newBlock.piece.neighbors[key].block.row>squaresCount+(sideborder/2)+1 || 
-            this.newBlock.piece.neighbors[key].block.row<sideborder/2+1) continue
+            if(target.block.piece.neighbors[key].block.row>squaresCount+(sideborder/2)+1 || 
+            target.block.piece.neighbors[key].block.row<sideborder/2+1) continue
+            if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
 
-            this.newBlock.piece.neighbors[key].owner=colorDict[key]
+            target.block.piece.neighbors[key].owner=colorDict[key]
 
         }
-        
+        return noOverlap
         
 
         }

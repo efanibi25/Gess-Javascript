@@ -46,7 +46,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
     addText(num){
 
-        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-sideborder/2,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-sideborder/2+1,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }
