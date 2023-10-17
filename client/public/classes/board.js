@@ -9,8 +9,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     constructor(scene,x=0,y=0,player=1,color="white",otherColor="black"){
         super(scene, x, y);
         this.scene=scene
-        this.chessboardOffsetX =20
-        this.chessboardOffsetY=10
+        this.chessboardOffsetX =5
+        this.chessboardOffsetY=5
         this.canvas=scene.game.canvas
         this.width = (this.canvas.width - this.chessboardOffsetX);
         this.height = (this.canvas.height - this.chessboardOffsetY);

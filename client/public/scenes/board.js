@@ -44,6 +44,8 @@ create() {
         }
         else{
             gameObject.swapNeighbors()
+            this.events.emit('updatePiece');
+
         }
        
         

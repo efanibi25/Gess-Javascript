@@ -20,8 +20,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.index=index
         this.block=block
         this.newBlock=null
-        this.neigbors=null
-        // this.input.on('drag',this.doDrag,this)
+        this.neighbors=null
+        this.prevOwner=null
     }
 
 
@@ -31,11 +31,9 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     let out={}
     for (const ele of neighbors){
         let piece=this.block.board.getPiece(this.index+ele-1)
-        if (piece){
-            out[ele]=piece
-        }
-       
+        out[ele]=piece   
     }
+    this.neighbors=out
     return out
     }
 
@@ -68,27 +66,32 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     testValidBlock(){
         let valid=true
 
-        if(Object.values(this.neigbors)
-            .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
+        if(Object.values(this.neighbors)
+            .filter(ele=>ele!=null && ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
         }
 
-
-        if(Object.values(this.neigbors).length!=9){
+        else if(Object.values(this.neighbors)
+        .filter(ele=>ele!=null).length!=9){
         document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
         valid=false
         setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
     }
 
-        else if(Object.values(this.neigbors).filter(ele=>ele.owner==this.block.board.color).length==0){
+        else if(Object.values(this.neighbors).filter(ele=>ele!=null && ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
         }
 
         return valid
+    }
+
+
+    alignCenter(){
+    Phaser.Display.Align.In.Center(this,this.block)
     }
 
     getDir(){
@@ -156,7 +159,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);  
         }
-        else if (this.neigbors[dir].owner!=this.block.board.color ){
+        else if (this.neighbors[dir].owner!=this.block.board.color ){
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
@@ -167,7 +170,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
     revertNeighbors(){
-        for(const ele of Object.values(this.neigbors)){
+        for(const ele of Object.values(this.neighbors).filter(ele=>ele!=null)){
                 ele.revertPiece()
             }
    
@@ -176,29 +179,38 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     swapNeighbors(){
 
+        this.newBlock.piece.getNeighbors()
+        let colorDict={}
+        for(const key of Object.keys(this.neighbors)){
 
-    //     for(const ele of Object.values(this.neigbors)){
-    //         this.newBlock.index+ele.index
-    // }
-
-        //revert after swamp properties
-        for(const ele of Object.values(this.neigbors)){
-                ele.revertPiece()
+            colorDict[key]=this.block.piece.neighbors[key].owner
+            this.block.piece.neighbors[key].owner=null
+            this.block.piece.neighbors[key].alignCenter()
         }
+        for(const key of Object.keys(this.neighbors)){
+            this.newBlock.piece.neighbors[key] ==null ? null: this.newBlock.piece.neighbors[key].owner=colorDict[key]
+        }
+        
+        
+
+        }
+        
+
    
-    }
+    
 
 
     startDrag(){
-        if (this.neigbors==null){
-            this.neigbors=this.getNeighbors()
+        if (this.neighbors==null){
+            this.getNeighbors()
         }
+        console.log(this.neighbors)
     }
     
     doDrag(event){
         let difX=event.x-this.x
         let difY=event.y-this.y
-        for(const ele of Object.values(this.neigbors)){
+        for(const ele of Object.values(this.neighbors).filter(e=>e)){
             ele.x = ele.x+difX;
             ele.y = ele.y+difY;
         }
@@ -213,6 +225,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     updatePiece(){
         if(this.owner==null){
             this.setFillStyle(0xffffff,0)
+            this.setStrokeStyle()
+
         }
         else if(this.owner=="white"){
             this.setFillStyle(0xffffff)
