@@ -148,7 +148,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     testValidBlockMove(){
         let valid=true
         let dir=this.getDir()
-        console.log(dir)
+
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
             valid=false
@@ -163,6 +163,11 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
+        }
+        else if(this.owner==null && (this.newBlock.index/this.block.index)/dir>3){
+            document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
+            valid=false
+            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);    
         }
         return valid
 
