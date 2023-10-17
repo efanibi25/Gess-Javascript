@@ -32,13 +32,22 @@ create() {
     this.input.on('dragend', (pointer, gameObject, dropped) =>
     {
 
+
         if (!dropped)
         {
             gameObject.x = gameObject.input.dragStartX;
             gameObject.y = gameObject.input.dragStartY;
+            gameObject.setNewBlock(gameObject.block)
         }
-        gameObject.testValid()
-     
+        if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
+            gameObject.revertNeighbors()
+        }
+        else{
+            gameObject.swapNeighbors()
+        }
+       
+        
+
     });
 
 

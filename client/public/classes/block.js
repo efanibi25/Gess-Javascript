@@ -5,16 +5,26 @@ const color=0xadd8e6
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
-    constructor(scene,x=0,y=0,width,height,index,board){
+    constructor(scene,x=0,y=0,width,height,row,col,board){
         super(scene, x, y,width,height)
-        this.index=index+1
+        this.row=row+1
+        this.col=col+1
         this.setFillStyle(color)
-        this.zone= new Phaser.GameObjects.Zone(this.scene, 0, 0, width, height).setRectangleDropZone(width*zoneMulti, width*zoneMulti)      
-        this.zone.block=this
         this.width=width
         this.height=height
         this.board=board
+        this.scene=scene
+        this.piece=null
+        this.zone=null
 
+
+    }
+
+    addZone(){
+    this.zone= new Phaser.GameObjects.Zone(this.scene, 0, 0, this.width, this.height).setRectangleDropZone(this.width*zoneMulti, this.width*zoneMulti)      
+    this.zone.block=this
+    this.scene.add.existing(this.zone)
+    this.setZoneCenter()
 
     }
 
@@ -34,6 +44,10 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.piece.prevBlock=this
         Phaser.Display.Align.In.Center(this.piece,this)
         return this.piece
+    }
+    makeinvisible(){
+        this.setFillStyle(0xffffff,0)
+        this.index=null
     }
 
 }
