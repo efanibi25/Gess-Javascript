@@ -45,6 +45,7 @@ create() {
         else{
             gameObject.movePiece()
             this.events.emit('updatePiece');
+            console.log(this.gessBoard.checkRings(this.gessBoard.rings).length)
 
         }
        

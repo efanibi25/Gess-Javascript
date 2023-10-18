@@ -6,7 +6,7 @@ import { sideborder } from "../res/player.js";
 
 export default class gessBoard extends Phaser.GameObjects.Container {
 
-    constructor(scene,x=0,y=0,player=1,color="white",otherColor="black"){
+    constructor(scene,x=0,y=0,player=2,color="white",otherColor="black"){
         super(scene, x, y);
         this.scene=scene
         this.chessboardOffsetX =5
@@ -20,11 +20,13 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.player=player
         this.color=color
         this.otherColor=otherColor
+        this.rings=[]
     
     }
     create(){
         this.createBoard()
         this.upDateGameBlocks()
+        this.firstRing()
         this.scene.add.existing(this);
     }
 
@@ -144,6 +146,15 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         
            
         }
+      }
+      firstRing(){
+        if(this.player==1){
+            this.rings.push(this.getPiece(79))
+        }
+      }
+      checkRings(input){
+        this.rings=input.filter(e=>e.checkRing()==true)
+        return this.rings
       }
 
 

@@ -41,7 +41,10 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
 
     
-    
+    checkRing(){
+        this.getNeighbors()
+        return (Object.values(this.neighbors).filter(ele=>ele.index!=this.index && ele.owner==this.block.board.color).length==8)
+    }
     
     allowDraggable(){
     this.setInteractive({ draggable: true});
@@ -184,11 +187,11 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     movePiece(){
     let dir=this.getDir()
-    if(dir>0) this.movePieceRight(dir)
-    else this.movePieceLeft(dir)
+    if(dir>0) this.movePiecePos(dir)
+    else this.movePieceNeg(dir)
     }
 
-    movePieceRight(dir){
+    movePiecePos(dir){
         for(let i=this.block.index;i<this.newBlock.index;i=i+dir){
             if(this.swapNeighbors(i,dir)==false){
                 break
@@ -197,8 +200,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         }
     
 
-        movePieceLeft(dir){
-            for(let i=this.block.index;i>this.newBlock.index;i=i-dir){
+        movePieceNeg(dir){
+            for(let i=this.block.index;i>this.newBlock.index;i=i+dir){
                 if(this.swapNeighbors(i,dir)==false){
                     break
                 }
@@ -223,7 +226,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             start.block.piece.neighbors[key].alignCenter()
         }
         for(const key of Object.keys(this.neighbors)){
-            console.log(target.block.piece.neighbors[key].owner)
             if(target.block.piece.neighbors[key].block.col>squaresCount+(sideborder/2)+1 || 
             target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
 
