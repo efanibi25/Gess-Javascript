@@ -37,7 +37,13 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     return out
     }
 
-
+    addNeighborRings(){
+    this.block.board.addRings([this])
+    for (const ele of dirNeighbors){
+        this.block.board.addRings([this.block.board.getPiece(this.index+ele),this.block.board.getPiece(this.index+ele*2),this.block.board.getPiece(this.index+ele*3)])  
+    }   
+    
+    }
 
 
     
@@ -167,8 +173,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
         }
-        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>sideborder/2){
-            document.querySelector("#alertBar").textContent="You can only move sideborder/2 blocks in a direction without a center piece"
+        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
+            document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);    
         }
@@ -226,10 +232,10 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             start.block.piece.neighbors[key].alignCenter()
         }
         for(const key of Object.keys(this.neighbors)){
-            if(target.block.piece.neighbors[key].block.col>squaresCount+(sideborder/2)+1 || 
+            if(target.block.piece.neighbors[key].block.col>=squaresCount+(sideborder/2)+1 || 
             target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
 
-            if(target.block.piece.neighbors[key].block.row>squaresCount+(sideborder/2)+1 || 
+            if(target.block.piece.neighbors[key].block.row>=squaresCount+(sideborder/2)+1 || 
             target.block.piece.neighbors[key].block.row<sideborder/2+1) continue
             if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
 

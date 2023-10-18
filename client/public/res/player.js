@@ -3,7 +3,7 @@ export const PLAYER1_PIECES=new Set([2,4,6,7,8,9,10,11,12,13,15,17,19,20,21,23,2
 
 export const PLAYER2_PIECES=new Set([218,221,224,227,230,233,272,274,276,277,278,279,280,281,282,283,285,287,289,290,291,293
     ,295,296,297,298,300,302,304,305,306,308,310,312,313,314,315,316,317,318,319,321,323])
-export const BoardMax=325
+export const BoardMax=484
 export const squaresCount=18
 export const sideborder=4
 

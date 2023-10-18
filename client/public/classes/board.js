@@ -3,6 +3,7 @@ import { PLAYER2_PIECES } from "../res/player.js";
 import boardBlock from "./block.js";
 import { squaresCount } from "../res/player.js";
 import { sideborder } from "../res/player.js";
+import { BoardMax } from "../res/player.js";
 
 export default class gessBoard extends Phaser.GameObjects.Container {
 
@@ -112,6 +113,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
     getPiece(index){
+        if (index<0) return 
+        if (index>=BoardMax) return 
         return this.board[index-1].piece
     }
 
@@ -151,11 +154,23 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         if(this.player==1){
             this.rings.push(this.getPiece(79))
         }
+        else{
+            this.rings.push(this.getPiece(409))
+        }
       }
-      checkRings(input){
-        this.rings=input.filter(e=>e.checkRing()==true)
+      checkRings(input=null){
+        this.rings=[...this.rings,...(input||[])].filter((e)=>e=!null)
+        this.rings=this.rings.filter(e=>e.checkRing()==true)
         return this.rings
       }
+
+      addRings(input){
+        this.input=[...this.input,...input].filter((e)=>e=!null)
+
+      }
+
+
+
 
 
      
