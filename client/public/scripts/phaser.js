@@ -6,9 +6,11 @@ import preload from "../scenes/board.js";
     width: screen.width,
     height: screen.height,
     transparent:true,
+    expandParent: false,
+    parent:"game",
     scale: {
       mode: Phaser.Scale.ScaleModes.FIT,
-      autoCenter: Phaser.Scale.Center.CENTER_BOTH
+      // autoCenter: Phaser.Scale.Center.CENTER_BOTH
     },
   };
   

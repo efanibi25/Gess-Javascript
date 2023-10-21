@@ -11,6 +11,21 @@
       font-weight: bold;
 
     }
+
+     .button{
+     display: inline-block;
+       font-size: 50px;
+    }
+    #button-container{
+             height:5vh
+
+    }
+
+    #game{
+      overflow:auto;
+      height:85vh;
+    }
+ 
   </style> 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
    <script type="module" src="/scripts/phaser.js"></script>
@@ -20,7 +35,17 @@
    {{/if}}
   <title>Gess</title>
 
+
+
 </head>
 <body>
+
   <div id="alertBar"></div>
+  <div id="button-container">
+        <button id="plus-button" class="button">+</button>
+  <button id="minus-button" class="button">-</button>
+  </div>
+    <div id="game"></div>
+
+
 </body>

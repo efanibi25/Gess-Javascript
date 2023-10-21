@@ -75,10 +75,10 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
 
-            if (row==sideborder/2 && col<squaresCount+(sideborder/2)+1 && col>sideborder/2){
+            if (row==sideborder/2){
                 this.board[i].addText(col)
             }
-            else if (col==sideborder/2 && row<squaresCount+(sideborder/2)+1 && row>sideborder/2){
+            else if (col==sideborder/2){
                 this.board[i].addText(row)
             }
             
@@ -114,7 +114,9 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
     getPiece(index){
         if (index<0) return 
-        if (index>=BoardMax) return 
+        else if (index>=BoardMax) return 
+        console.log([index,this.board])
+
         return this.board[index-1].piece
     }
 
@@ -159,6 +161,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         }
       }
       checkRings(input=null){
+        console.log(this.rings)
         this.rings=[...this.rings,...(input||[])].filter((e)=>e=!null)
         this.rings=this.rings.filter(e=>e.checkRing()==true)
         return this.rings

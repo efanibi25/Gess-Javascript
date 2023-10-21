@@ -1,6 +1,6 @@
 import boardPiece from "./pieces.js";
 import { sideborder } from "../res/player.js";
-const zoneMulti=1.2
+const zoneMulti=.8
 const showZoneLine=false
 const color=0xadd8e6
 const altColor=0xD6D6B3
@@ -70,7 +70,6 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
     makeinvisible(){
         this.setFillStyle(0xffffff,0)
-        this.index=null
     }
 
 }

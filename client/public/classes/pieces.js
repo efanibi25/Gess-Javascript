@@ -6,14 +6,14 @@ Note: Piece never change location only attributes based on grab events and valid
 */
 import { squaresCount } from "../res/player.js"
 import { sideborder } from "../res/player.js"
-const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+let neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+neighbors=[0]
 const dirNeighbors=[-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
         super(scene, x, y,radius=radius)
         this.scene=scene
-        this.addListener('drag', this.doDrag);
         this.addListener('dragstart', this.startDrag);
         this.scene.events.addListener('updatePiece', this.updatePiece,this);
         this.owner=null
@@ -74,6 +74,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
     testValidBlock(){
         let valid=true
+        return valid
 
         if(Object.values(this.neighbors)
             .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
@@ -157,6 +158,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     testValidBlockMove(){
         let valid=true
         let dir=this.getDir()
+        return valid
 
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
@@ -198,7 +200,9 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
     movePiecePos(dir){
+        console.log(["t",this.block,this.index,this.newBlock.index])
         for(let i=this.block.index;i<this.newBlock.index;i=i+dir){
+
             if(this.swapNeighbors(i,dir)==false){
                 break
             }
@@ -207,6 +211,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     
 
         movePieceNeg(dir){
+            console.log(["t",this.index,this.newBlock.index])
+
             for(let i=this.block.index;i>this.newBlock.index;i=i+dir){
                 if(this.swapNeighbors(i,dir)==false){
                     break
@@ -231,7 +237,9 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             start.block.piece.neighbors[key].owner=null
             start.block.piece.neighbors[key].alignCenter()
         }
+        console.log(colorDict)
         for(const key of Object.keys(this.neighbors)){
+
             if(target.block.piece.neighbors[key].block.col>=squaresCount+(sideborder/2)+1 || 
             target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
 
@@ -240,6 +248,12 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
 
             target.block.piece.neighbors[key].owner=colorDict[key]
+            if (start.block.piece.owner!="white"&&start.block.piece.owner!="black"){
+                console.log("dad")
+            }
+            if (target.block.piece.owner!="white"&&target.block.piece.owner!="black"){
+                console.log("dad")
+            }
 
         }
         return noOverlap
@@ -258,17 +272,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         }
     }
     
-    doDrag(event){
-        let difX=event.x-this.x
-        let difY=event.y-this.y
-        for(const ele of Object.values(this.neighbors).filter(e=>e)){
-            ele.x = ele.x+difX;
-            ele.y = ele.y+difY;
-        }
-    
-       
-        // this.y = event.y;
-    }
+  
 
     disableDrag(){
 
