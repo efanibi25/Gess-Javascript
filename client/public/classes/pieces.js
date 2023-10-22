@@ -6,22 +6,36 @@ Note: Piece never change location only attributes based on grab events and valid
 */
 import { squaresCount } from "../res/player.js"
 import { sideborder } from "../res/player.js"
-let neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
-neighbors=[0]
+const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
 const dirNeighbors=[-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+const lineThick=3
+const lineColor=0xFF0000
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
-        super(scene, x, y,radius=radius)
+        super(scene, x, y,radius=Math.max(radius,7))
         this.scene=scene
+        this._radius=this.radius
+        this.ogwidth=this.width
         this.addListener('dragstart', this.startDrag);
+        this.addListener("dragenter",this.enterTarget)
+        this.addListener("dragleave",this.leaveTarget)
+        this.addListener("pointerdown",this.handlePointerDown)
+        this.addListener("pointerup",this.handlePointerUp)
+        this.addListener("pointerout",this.handlePointerUp)
+
+        this.addListener("drop",this.dropTarget)
+
+
         this.scene.events.addListener('updatePiece', this.updatePiece,this);
+        
         this.owner=null
         this.index=index
         this.block=block
         this.newBlock=null
         this.neighbors=null
         this.prevOwner=null
+
     }
 
 
@@ -126,7 +140,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             return -1
         }
 
-        else if(rowchange!=colchange){
+        else if(Math.abs(rowchange)!=Math.abs(colchange)){
             return
         }
       
@@ -158,7 +172,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     testValidBlockMove(){
         let valid=true
         let dir=this.getDir()
-        return valid
 
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
@@ -166,12 +179,18 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);     
         }
         else if (dir==null){
-            document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
+            document.querySelector("#alertBar").textContent="The Given Move is not valid"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);  
         }
-        else if (this.neighbors[dir].owner!=this.block.board.color ){
+        else if (this.neighbors[dir].owner==null ){
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
+            valid=false
+            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
+        }
+
+        else if (this.neighbors[dir].owner!=this.block.board.color ){
+            document.querySelector("#alertBar").textContent="The Given Direction has the opponent piece"
             valid=false
             setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
         }
@@ -285,16 +304,40 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         }
         else if(this.owner=="white"){
             this.setFillStyle(0xffffff)
-            this.setStrokeStyle(7,0xFF0000)
+            this.setStrokeStyle(lineThick,lineColor)
 
         }
 
         else if(this.owner=="black"){
             this.setFillStyle(0x000000)
-            this.setStrokeStyle(7,0xFF0000)
+            this.setStrokeStyle(lineThick,lineColor)
 
         }
 
+    }
+
+    handlePointerDown(){
+        this.setRadius(Math.max(this.radius/4,2))
+
+    }
+
+    handlePointerUp(){
+        this.removeListener("pointerdown")
+        this.setRadius(Math.max(this._radius,7))
+        this.addListener("pointerdown",this.handlePointerDown)
+
+
+    }
+
+    enterTarget(pointer,target){
+        target.addZoneLine()
+
+    }
+    leaveTarget(pointer,target){
+        target.removeZoneLine()
+    }
+    dropTarget(pointer,target){
+        target.removeZoneLine()
     }
 
 

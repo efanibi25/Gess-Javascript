@@ -43,8 +43,9 @@ create() {
 
 
 
-    const dragfunct=(event, gameObject, dropZone) =>
+    const dragfunct=(event, gameObject) =>
     {
+
 
         let difX=event.position.x-gameObject.x
         let difY=event.position.y-gameObject.y

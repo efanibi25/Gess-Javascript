@@ -4,7 +4,8 @@ import boardBlock from "./block.js";
 import { squaresCount } from "../res/player.js";
 import { sideborder } from "../res/player.js";
 import { BoardMax } from "../res/player.js";
-
+const stroke=8
+const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {
 
     constructor(scene,x=0,y=0,player=2,color="white",otherColor="black"){
@@ -17,7 +18,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.height = (this.canvas.height - this.chessboardOffsetY);
         this.squareSize = Math.floor(Math.min((this.width / squaresCount),(this.height / (squaresCount+sideborder))))
         this.board=[]
-        this.stroke=8
+        
         this.player=player
         this.color=color
         this.otherColor=otherColor
@@ -71,7 +72,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         while ( i< Math.pow(squaresCount+sideborder,2)) {
             let row=this.board[i].row
             let col=this.board[i].col
-            this.board[i].addZone()
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
 
@@ -81,11 +81,13 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             else if (col==sideborder/2){
                 this.board[i].addText(row)
             }
+
             
             else if ((row<=sideborder/2 || col<=sideborder/2 || col>=squaresCount+(sideborder/2)+1 || col>=squaresCount+(sideborder/2)+1)==false){    
             let index=k+1
             //use raw index
             let piece=this.board[i].piece
+            this.board[i].addZone()
             if (myPieces.has(index)==true){
                 piece.owner=this.color   
                 this.board[i].piece.allowDraggable()  
@@ -113,33 +115,43 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
     getPiece(index){
+        let block=this.getBlock(index)
+        if(block){
+            return block.piece
+        }
+        return block
+    }
+
+    getBlock(index){
         if (index<0) return 
         else if (index>=BoardMax) return 
-        console.log([index,this.board])
-
-        return this.board[index-1].piece
+        return this.board[index-1]
     }
+
 
      
     extendBoardArray(){
         let i=0
         let k=0
+        let count=0
         while (i <squaresCount+sideborder){
             k=0
             while (k <squaresCount+sideborder){
                 //full board has invisible pieces
-                let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,this)
+                let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,count,this)
+                count=count+1
                 if ((i<(sideborder/2) || k<(sideborder/2) || i>=squaresCount+(sideborder/2) || k>=squaresCount+(sideborder/2))==false){
                     this.board.push(rect)
                     this.add(rect)
-                    rect.setStrokeStyle(this.stroke, 0x000000);
+                
+                    if(showStroke) rect.setStrokeStyle(stroke, 0x000000);
 
                 }
                 else{
                     this.board.push(rect)
                     this.add(rect)
                     rect.makeinvisible()
-                    rect.setStrokeStyle(this.stroke, 0x0000FF);
+                    if(showStroke) rect.setStrokeStyle(stroke, 0x0000FF);
 
                 }
                 k=k+1
