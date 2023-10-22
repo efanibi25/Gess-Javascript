@@ -20,7 +20,7 @@ export default class Zone extends Phaser.GameObjects.Zone {
     addGraphics(){
         if(this.graphics==null){
             this.graphics=this.scene.add.graphics();
-            this.graphics.setDepth(3)
+            this.graphics.setDepth(5)
         }
      
     }
@@ -34,17 +34,26 @@ export default class Zone extends Phaser.GameObjects.Zone {
 
   
     }
-    addZoneLine(color=zoneColor){
+    addZoneLine(color=null,thick=null){
+        if(color==null){
+            color=zoneColor
+        }
+        if(thick==null){
+            thick=zoneLineThick
+        }
         let zone=this
         this.addGraphics()
         const graphics = this.graphics
-        graphics.lineStyle(zoneLineThick,color);
+        graphics.lineStyle(thick,color);
         graphics.strokeRect(zone.x - zone.input.hitArea.width / 2, zone.y - zone.input.hitArea.height / 2, zone.input.hitArea.width, zone.input.hitArea.height);     
     }
     removeZoneLine(){
-        this.graphics.destroy()
-        this.graphics=null
-       
+        if(this.graphics){
+            this.graphics.destroy()
+            this.graphics=null
+           
+        }
+      
         
 
     }

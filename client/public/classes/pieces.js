@@ -19,6 +19,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.ogwidth=this.width
         this.addListener('dragstart', this.startDrag);
         this.addListener("dragenter",this.enterTarget)
+
         this.addListener("dragleave",this.leaveTarget)
         this.addListener("pointerdown",this.handlePointerDown)
         this.addListener("pointerup",this.handlePointerUp)
@@ -289,7 +290,17 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         if (this.neighbors==null){
             this.getNeighbors()
         }
+        this.addStartIndicator()
+
     }
+
+    addStartIndicator(){
+        this.block.zone.removeZoneLine()
+        this.block.zone.addZoneLine(0x39FF33,15)
+        
+    }
+
+
     
   
 
@@ -330,14 +341,21 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
     enterTarget(pointer,target){
+        if (target==this.block.zone){
+            return
+        }
         target.addZoneLine()
 
     }
     leaveTarget(pointer,target){
+        if (target==this.block.zone){
+            return
+        }
         target.removeZoneLine()
     }
     dropTarget(pointer,target){
         target.removeZoneLine()
+        this.block.zone.removeZoneLine()
     }
 
 
