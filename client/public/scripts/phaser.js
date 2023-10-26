@@ -27,20 +27,14 @@ import { socket,gameID,getPlayerNumber, setPlayerNumber,emit} from "./client.js"
           // autoCenter: Phaser.Scale.Center.CENTER_BOTH
         },
       };
-    
-      function preload() {
-  this.load.setPath("assets")
-  let wood="wood.jp g";
-  this.load.image("wood", `${window.location.origin}/assets/${wood}`);
- 
-  // temp()
 
-    }
-      const game = new Phaser.Game(config);
-      const url=window.location.origin;
-      const key=document.getElementById('key').textContent
-      game.scene.add('preload', preload);
-      game.scene.start('preload')
+  
+  const game = new Phaser.Game(config);
+  const url=window.location.origin;
+  const key=document.getElementById('key').textContent
+  game.scene.add('preload', preload);
+  game.scene.start('preload')
+  
     })()
 
   });
