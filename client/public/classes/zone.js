@@ -1,6 +1,6 @@
 const zoneMulti=.9
 const showZoneLine=false
-const zoneLineThick=10
+const zoneLineThick=12
 const zoneColor=0xffff00
 export default class Zone extends Phaser.GameObjects.Zone {
 

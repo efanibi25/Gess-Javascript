@@ -4,7 +4,7 @@ import { squaresCount } from "../res/player.js"
 import Zone from "./zone.js";
 const color=0xadd8e6
 const altColor=0xD6D6B3
-const blockColor=false
+const showblockColor=true
 let neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
 
 
@@ -29,7 +29,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
     }
     addBlockColor(){
-        if(!blockColor){
+        if(!showblockColor){
             return
         }
         if(Number.isInteger(this.row/2)==false || Number.isInteger(this.col/2)==false){
@@ -71,7 +71,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
     initPiece(){
         this.piece=new boardPiece(this.scene,0,0,this.width/5,this.index,this)
-        Phaser.Display.Align.In.Center(this.piece,this)
+        this.piece.alignCenter()
         return this.piece
     }
     makeinvisible(){

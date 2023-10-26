@@ -7,9 +7,14 @@ Note: Piece never change location only attributes based on grab events and valid
 import { squaresCount } from "../res/player.js"
 import { sideborder } from "../res/player.js"
 const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
-const dirNeighbors=[-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
 const lineThick=3
 const lineColor=0xFF0000
+const checkValidMove=true
+const checkValidBlock=true
+const showHidden=false
+//alpha 0 disables interactivity
+const hiddenAlpha=.01
+const showAlpha=.5
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
@@ -17,17 +22,11 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.scene=scene
         this._radius=this.radius
         this.ogwidth=this.width
+        this.on('pointerdown', this.handlePointerDown)
+        this.on('pointerup', this.handlePointerUp)
         this.addListener('dragstart', this.startDrag);
         this.addListener("dragenter",this.enterTarget)
-
         this.addListener("dragleave",this.leaveTarget)
-        this.addListener("pointerdown",this.handlePointerDown)
-        this.addListener("pointerup",this.handlePointerUp)
-        this.addListener("pointerout",this.handlePointerUp)
-
-        this.addListener("drop",this.dropTarget)
-
-
         this.scene.events.addListener('updatePiece', this.updatePiece,this);
         
         this.owner=null
@@ -39,9 +38,93 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     }
 
+    //manipulators
+       
+    allowDraggable(){
+        this.setInteractive(new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains);
+        this.scene.input.setDraggable(this, true)
+        this.alignCenter()
+    
+        }
+        disableDraggable(){
+            this.setInteractive({ draggable: false});
+            this.scene.input.setDraggable(this, false)
+        }
+
+        revertPiece(){
+            this.newBlock=this.block
+            Phaser.Display.Align.In.Center(this,this.block)
+        }    
+
+        setNewBlock(block){
+            this.newBlock=block
+        }
 
 
+        alignCenter(){
+            Phaser.Display.Align.In.Center(this,this.block)
+            }
+            updatePiece(){
+                if(this.owner==null){
+                    this.setFillStyle(0xeb3434)
+                    this.setAlpha(showHidden?1:hiddenAlpha)
+        
+                }
+                else if(this.owner=="white"){
+                    this.setFillStyle(0xffffff)
+                    this.setStrokeStyle(lineThick,lineColor)
+                    this.setAlpha(1)
+        
+                }
+        
+                else if(this.owner=="black"){
+                    this.setFillStyle(0x000000)
+                    this.setStrokeStyle(lineThick,lineColor)
+                    this.setAlpha(1)
+        
+        
+        
+                }
+        
+            }
+    shrink(){
+        this.setRadius(Math.max(this.radius/4,2))
 
+    }
+    normalSize(){
+        this.setRadius(Math.max(this._radius,7))
+
+    }
+
+//checkers
+
+checkRing(){
+    this.getNeighbors()
+
+    if(this.owner==null){
+        return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner==this.block.board.color).length==8
+    }
+    return false
+}
+
+checkDraggable(){
+    let col=this.block.col
+    let row=this.block.row
+
+    if ((row>sideborder/2+1 && col>sideborder/2+1&& col<squaresCount+(sideborder/2) && row<squaresCount+(sideborder/2))==true) return true
+    return false  
+
+
+}
+checkGamePiece(){
+    let col=this.block.col
+    let row=this.block.row
+    if ((row>sideborder/2 && col>sideborder/2 && col<squaresCount+(sideborder/2)+1 && row<squaresCount+(sideborder/2)+1)==true) return true
+    return false
+}
+
+
+//neighors
     getNeighbors(){
     let out={}
     for (const ele of neighbors){
@@ -52,44 +135,41 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     return out
     }
 
-    addNeighborRings(){
-    this.block.board.addRings([this])
-    for (const ele of dirNeighbors){
-        this.block.board.addRings([this.block.board.getPiece(this.index+ele),this.block.board.getPiece(this.index+ele*2),this.block.board.getPiece(this.index+ele*3)])  
-    }   
+
+
+getRingNeighbors(){
+    let piece=this.newBlock.piece
+
+    piece.getNeighbors()
+    return Object.keys(this.neighbors).filter(ele=>ele!=0).reduce((accumulator, currentValue)=>{
+        accumulator.push(piece.neighbors[currentValue])
+        piece.neighbors[currentValue].getNeighbors()
+        accumulator.push(piece.neighbors[currentValue].neighbors[currentValue])
+        return accumulator
+    },[this.newBlock.piece])
+
+
+
+}
+revertNeighbors(){
+    for(const ele of Object.values(this.neighbors).filter(ele=>ele.owner!="out")){
+            ele.revertPiece()
+        }
+
+}
+
     
-    }
+ 
 
 
+
+//tester
     
-    checkRing(){
-        this.getNeighbors()
-        return (Object.values(this.neighbors).filter(ele=>ele.index!=this.index && ele.owner==this.block.board.color).length==8)
-    }
-    
-    allowDraggable(){
-    this.setInteractive({ draggable: true});
-    this.scene.input.setDraggable(this, true)
-
-    }
-    disableDraggable(){
-        this.setInteractive({ draggable: false});
-        this.scene.input.setDraggable(this, false)
-    }
-
-    setNewBlock(block){
-        this.newBlock=block
-    }
-
-
-    revertPiece(){
-        this.newBlock=this.block
-        Phaser.Display.Align.In.Center(this,this.block)
-        
-    }
     testValidBlock(){
         let valid=true
-        return valid
+        if(!checkValidBlock){
+            return valid
+        }
 
         if(Object.values(this.neighbors)
             .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
@@ -115,56 +195,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     }
 
 
-    alignCenter(){
-    Phaser.Display.Align.In.Center(this,this.block)
-    }
 
-    getDir(){
-        let rowchange=this.newBlock.row-this.block.row
-        let colchange=this.newBlock.col-this.block.col
-
-        if(colchange==0 && rowchange==0){
-            return 0
-        }
-        else if(colchange==0 && rowchange>=1){
-            return squaresCount+sideborder
-        }
-        else if(colchange==0 && rowchange<0){
-            return -squaresCount-sideborder
-        }
-      
-        else if(rowchange==0 && colchange>=1){
-            return 1
-        }
-
-        else if(rowchange==0 && colchange<0){
-            return -1
-        }
-
-        else if(Math.abs(rowchange)!=Math.abs(colchange)){
-            return
-        }
-      
-
-        else if(rowchange<0 && colchange<0){
-            return -squaresCount-sideborder-1
-        }
-
-
-        else if(rowchange<0 && colchange>0){
-            return -squaresCount-sideborder+1
-        }
-
-        else if(rowchange>0 && colchange<0){
-            return squaresCount+sideborder-1
-        }
-
-
-        else if(rowchange>0 && colchange>0){
-            return squaresCount+sideborder+1
-        }
-
-    }
     
     
     
@@ -173,7 +204,9 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     testValidBlockMove(){
         let valid=true
         let dir=this.getDir()
-
+        if(!checkValidMove){
+            return valid
+        }
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
             valid=false
@@ -205,13 +238,56 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     }
 
-    revertNeighbors(){
-        for(const ele of Object.values(this.neighbors).filter(ele=>ele.owner!="out")){
-                ele.revertPiece()
-            }
-   
+ 
+
+//event helpers
+
+getDir(){
+    let rowchange=this.newBlock.row-this.block.row
+    let colchange=this.newBlock.col-this.block.col
+
+    if(colchange==0 && rowchange==0){
+        return 0
+    }
+    else if(colchange==0 && rowchange>=1){
+        return squaresCount+sideborder
+    }
+    else if(colchange==0 && rowchange<0){
+        return -squaresCount-sideborder
+    }
+  
+    else if(rowchange==0 && colchange>=1){
+        return 1
     }
 
+    else if(rowchange==0 && colchange<0){
+        return -1
+    }
+
+    else if(Math.abs(rowchange)!=Math.abs(colchange)){
+        return
+    }
+  
+
+    else if(rowchange<0 && colchange<0){
+        return -squaresCount-sideborder-1
+    }
+
+
+    else if(rowchange<0 && colchange>0){
+        return -squaresCount-sideborder+1
+    }
+
+    else if(rowchange>0 && colchange<0){
+        return squaresCount+sideborder-1
+    }
+
+
+    else if(rowchange>0 && colchange>0){
+        return squaresCount+sideborder+1
+    }
+
+}
 
     movePiece(){
     let dir=this.getDir()
@@ -224,6 +300,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         for(let i=this.block.index;i<this.newBlock.index;i=i+dir){
 
             if(this.swapNeighbors(i,dir)==false){
+                this.newBlock=this.block.board.getBlock(i+dir)
                 break
             }
         }
@@ -231,61 +308,55 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     
 
         movePieceNeg(dir){
-            console.log(["t",this.index,this.newBlock.index])
-
             for(let i=this.block.index;i>this.newBlock.index;i=i+dir){
                 if(this.swapNeighbors(i,dir)==false){
+                    this.newBlock=this.block.board.getBlock(i+dir)
                     break
                 }
             }
             }
 
+            swapNeighbors(index,dir){
+                let colorDict={}
+                let target=this.block.board.getPiece(index+dir)
+                let start=this.block.board.getPiece(index)
+                target.getNeighbors()
+                start.getNeighbors()
+                let noOverlap=true
+        
+        
+                
+                for(const key of Object.keys(start.neighbors)){
+        
+                    colorDict[key]=start.block.piece.neighbors[key].owner
+                    start.block.piece.neighbors[key].owner=null
+                    start.block.piece.neighbors[key].alignCenter()
+                }
+                console.log(colorDict)
+                for(const key of Object.keys(this.neighbors)){
+                    //out of bounds
+                    if(target.block.piece.neighbors[key].block.col>=squaresCount+(sideborder/2)+1 || 
+                    target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
+        
+                    else if(target.block.piece.neighbors[key].block.row>=squaresCount+(sideborder/2)+1 || 
+                    target.block.piece.neighbors[key].block.row<sideborder/2+1) continue
+        
+                    //other test
+                    if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
+                    if(colorDict[key]==null) continue
+        
+                    target.block.piece.neighbors[key].owner=colorDict[key]
+        
+                }
+                return noOverlap
+                
+        
+                }
+
     
-
-
-    swapNeighbors(index,dir){
-        let colorDict={}
-        let target=this.block.board.getPiece(index+dir)
-        let start=this.block.board.getPiece(index)
-        target.getNeighbors()
-        start.getNeighbors()
-        let noOverlap=true
-     
-        for(const key of Object.keys(start.neighbors)){
-
-            colorDict[key]=start.block.piece.neighbors[key].owner
-            start.block.piece.neighbors[key].owner=null
-            start.block.piece.neighbors[key].alignCenter()
-        }
-        console.log(colorDict)
-        for(const key of Object.keys(this.neighbors)){
-
-            if(target.block.piece.neighbors[key].block.col>=squaresCount+(sideborder/2)+1 || 
-            target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
-
-            if(target.block.piece.neighbors[key].block.row>=squaresCount+(sideborder/2)+1 || 
-            target.block.piece.neighbors[key].block.row<sideborder/2+1) continue
-            if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
-
-            target.block.piece.neighbors[key].owner=colorDict[key]
-            if (start.block.piece.owner!="white"&&start.block.piece.owner!="black"){
-                console.log("dad")
-            }
-            if (target.block.piece.owner!="white"&&target.block.piece.owner!="black"){
-                console.log("dad")
-            }
-
-        }
-        return noOverlap
-        
-
-        }
-        
+//events
 
    
-    
-
-
     startDrag(){
         if (this.neighbors==null){
             this.getNeighbors()
@@ -303,41 +374,37 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     
   
+handlePointerDown(){
 
-    disableDrag(){
-
-    }
-    updatePiece(){
-        if(this.owner==null){
-            this.setFillStyle(0xffffff,0)
-            this.setStrokeStyle()
-
-        }
-        else if(this.owner=="white"){
-            this.setFillStyle(0xffffff)
-            this.setStrokeStyle(lineThick,lineColor)
-
-        }
-
-        else if(this.owner=="black"){
-            this.setFillStyle(0x000000)
-            this.setStrokeStyle(lineThick,lineColor)
-
-        }
+        setTimeout(()=>{
+            this.shrink()
+            this.showNeighbors()
+        },0)
+        
 
     }
-
-    handlePointerDown(){
-        this.setRadius(Math.max(this.radius/4,2))
-
+    showNeighbors(){
+        this.getNeighbors()
+        Object.values(this.neighbors).filter((e)=>e.owner==null).forEach((e)=> e.setAlpha(showAlpha)
+        )
     }
 
+
+    hideNeighbors(){
+        this.getNeighbors()
+        Object.values(this.neighbors).filter((e)=>e.owner==null).forEach((e)=>e.setAlpha(showHidden?1:hiddenAlpha))
+    }
+    handlePointerOut(){
+        setTimeout(()=>{
+            this.setRadius(Math.max(this._radius,7))
+        },0)
+    
+    }
     handlePointerUp(){
-        this.removeListener("pointerdown")
-        this.setRadius(Math.max(this._radius,7))
-        this.addListener("pointerdown",this.handlePointerDown)
-
-
+        setTimeout(()=>{
+            this.normalSize()
+            this.hideNeighbors()
+        },0)
     }
 
     enterTarget(pointer,target){
@@ -352,10 +419,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             return
         }
         target.removeZoneLine()
-    }
-    dropTarget(pointer,target){
-        target.removeZoneLine()
-        this.block.zone.removeZoneLine()
     }
 
 

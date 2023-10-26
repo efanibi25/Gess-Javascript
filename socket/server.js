@@ -1,146 +1,86 @@
-//  express = require('express')
-// var app = express()
-// var server = require('http').Server(app)
-const server = require("http").createServer();
-export const io = require("socket.io")(server, {
+const httpServer= require("http").createServer();
+require('dotenv').config({ path: '../.env' })
+const { Server } = require("socket.io");
+const url = require('url')
+const base64id = require('base64id');
+const { call } = require("file-loader");
+
+
+
+const usersByRooms = {}
+const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:8080",
+    origin:/\.*/,
     methods: ["GET", "POST"],
   }
 });
 
+io.engine.generateId = req => {
 
-
-players = new Map();
-gameKeys = new Map();
-players.set('Player1',0)
-players.set('Player2',0)
-io.on('connection', function (socket) {
-  console.log("A user connected:",socket.id)
-  socket.join('gessgame')
-
-
-  if(io.sockets.adapter.rooms.get('gessgame').length>2){
-    console.log("This Game Already has two Players")
-    socket.leave('gessgame');
-    return
+  const parsedUrl = new url.parse(req.url,true)
+  const prevId = parsedUrl.query.socketId
+  if (prevId.length>0) {
+    return prevId
   }
-      socket.on('disconnect', function () {
-      socket.leave(socket.id)
-      if(players.get('Player1')==socket.id)
-       {
+  return base64id.generateId()
+}
 
-     players.set('Player1',0)
-     console.log('Player1 Disconnected')
+io.on('connection', (socket) => {
+  console.log('a user connected');
 
-       }
+  socket.on("joingame", (room,clientID,playerID,callback) => {
+    console.log(callback)
+    // console.log(clientID)
+    // console.log(playerID)
+ 
+    if (usersByRooms[room] == undefined) {
+      usersByRooms[room]={
+        "player1":null,
+        "player2":null} 
+  } 
 
-       else
-       {
-    	players.set('Player2',0)
-       	console.log('Player2 Disconnected')
-       }
+  if(playerID){
+    socket.join(room);
+    usersByRooms[room][playerID]=clientID
+    socket.emit("setplayer",playerID)
+  }
+  else if(!usersByRooms[room]["player1"]){
+    socket.join(room);
+    usersByRooms[room]["player1"]=clientID
+    socket.emit("setplayer","player1")
+  }
 
 
+  else if(!usersByRooms[room]["player2"]){
+    socket.join(room);
+    usersByRooms[room]["player2"]=clientID
+    socket.emit("setplayer","player2")
+
+  }
+
+  
+  else {
+   console.log("game has two players")
+  }
+
+  console.log(usersByRooms)
+  callback({
+    status: "ok"
   });
 
-
-
-
-
-//save game state some how probably after a drag movement
-//set which player is current player etc
-
-
-
-//First Player to connect is always player A
-
-  socket.on('checkNewGame', function (gameKey) {
-    gameKeys.set(socket.id,gameKey)
-    if (io.sockets.adapter.rooms.get('gessgame').length<2){
-      console.log("Waiting For Other Player")
-      return
-    }
-    //Add First Player
-    var dictkeys= io.sockets.adapter.rooms.get('gessgame').keys()
-    for (keys in dictkeys){
-      var key1=keys[0]
-    }
-
-    if(gameKeys.get(key1)==0 || gameKeys.get(key2)==0){
-      console.log("starting a new Game")
-      io.to(key1).emit('selectPlayer')
-      return
-    }
-    if(gameKeys.get(key1)==gameKeys.get(key2)){
-      console.log("Restore Your old Game")
-    }
-
-
   });
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 
-   socket.on('addSecondPlayer', function () {
-     var dictkeys= io.sockets.adapter.rooms.get('gessgame').keys()
-     for (keys in dictkeys){
-       var key1=keys[0]
-        var key2=keys[1]
-      }
-        var player1=players.get('Player1')
-        var player2=players.get('Player2')
-        console.log('Setting Player 2:' ,key2)
-        if(player1!=0){
-        players.set('Player2',socket.id)
-        io.to(key2).emit('isPlayer2',true)
-        return
-        }
-        if(player2!=0){
-        players.set('Player1',socket.id)
-        io.to(key2).emit('isPlayer1',true)
-        return
-        }
+io.of("/").adapter.on("create-room", (room) => {
+  console.log(`room ${room} was created`);
+});
 
-    });
-
- socket.on('ObjectDrag', function (dragX,dragY) {
-        io.emit('ObjectDrag',dragX,dragY);
-    });
-
- socket.on('addFirstPlayer', function (isPlayer1) {
-    if (isPlayer1=="true") {
-        socket.emit('isPlayer1',true);
-        players.set('Player1',socket.id)
-        console.log('Setting Player 1:' ,socket.id)
-        return
-
-    };
-
-     if (isPlayer1=="false") {
-        socket.emit('isPlayer2',true);
-         players.set('Player2',socket.id)
-        console.log('Setting Player 2:' ,socket.id)
-        return
-
-    };
-
-
-  })
-
-
-   socket.on('CheckPlayer', function (result) {
-    console.log("result",result)
-    if(result.isConfirmed && players.get('Player1')!=0)
-    {
-      return
-    }
-    if(result.isDenied && players.get('Player2')!=0)
-    {
-      return
-
-    }
-    else
-    {
-      socket.emit('CheckPlayer',1)
-    }
+io.of("/").adapter.on("join-room", (room, id) => {
+  console.log(`socket ${id} has joined room ${room}`);
+});
 
 
 
@@ -148,13 +88,9 @@ io.on('connection', function (socket) {
 
 
 
-    });
 
-})
+const port= process.env.SERVER_PORT
 
-
-const port= process.env.PORT || 7000
-
-server.listen(port, function () {
+httpServer.listen(port, function () {
     console.log('Server started! on port',port)
 });

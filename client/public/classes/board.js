@@ -8,7 +8,7 @@ const stroke=8
 const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {
 
-    constructor(scene,x=0,y=0,player=2,color="white",otherColor="black"){
+    constructor(scene,x=0,y=0,player="player1",color="white",otherColor="black"){
         super(scene, x, y);
         this.scene=scene
         this.chessboardOffsetX =5
@@ -46,7 +46,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     }
 
     getOtherPlayerPieces(){
-        if(this.player==1){
+        if(this.player=="player1"){
             return PLAYER2_PIECES
         }
         else{
@@ -54,7 +54,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         }
     }
     getMyPieces(){
-        if(this.player==1){
+        if(this.player=="player1"){
             return PLAYER1_PIECES
         }
         else{
@@ -82,36 +82,67 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                 this.board[i].addText(row)
             }
 
-            
-            else if ((row<=sideborder/2 || col<=sideborder/2 || col>=squaresCount+(sideborder/2)+1 || col>=squaresCount+(sideborder/2)+1)==false){    
-            let index=k+1
-            //use raw index
+
+
+
+
+
             let piece=this.board[i].piece
-            this.board[i].addZone()
-            if (myPieces.has(index)==true){
-                piece.owner=this.color   
-                this.board[i].piece.allowDraggable()  
-            } 
-            //just show other player pieces
-            else if (otherPlayerPieces.has(index)==true){
-                this.board[i].piece.owner=this.otherColor  
-            } 
-            //secret grab zone
-            else{
-                this.board[i].piece.allowDraggable()
+
+
+            if (piece.checkGamePiece()){    
+                let index=k+1
+                //use raw index
+                let piece=this.board[i].piece
+                this.board[i].addZone()
+                if (myPieces.has(index)==true){
+                    piece.owner=this.color   
+                    piece.checkDraggable()==true?this.board[i].piece.allowDraggable() :null
+                } 
+                //just show other player pieces
+                else if (otherPlayerPieces.has(index)==true){
+                    this.board[i].piece.owner=this.otherColor  
+                } 
+                //secret grab zone
+                else{
+                    piece.checkDraggable()==true?this.board[i].piece.allowDraggable() :null
+                }
+                k=k+1
             }
-            k=k+1
-        }
+
+        //     if(piece.checkGamePiece()){
+        //         let index=k+1
+        //     //use raw index
+            
+        //     this.board[i].addZone()
+        //     if (myPieces.has(index)==true){
+        //         piece.owner=this.color   
+        //         this.board[i].piece.checkDraggable()?this.board[i].piece.allowDraggable() :null
+        //     } 
+        //     //just show other player pieces
+        //     else if (otherPlayerPieces.has(index)==true){
+        //         this.board[i].piece.owner=this.otherColor  
+        //     } 
+        //     //secret grab zone
+        //     else{
+        //         this.board[i].piece.allowDraggable()
+        //     }
+
+            
+          
+        // }
+        
+
         i=i+1
   
-           
-        }
+        
+        
        
         this.scene.events.emit('updatePiece');
 
 
     }
-
+    }
 
 
     getPiece(index){
@@ -173,16 +204,17 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         }
       }
       checkRings(input=null){
+        if(input==null){
+            input=[]
+        }
+        this.rings=[...this.rings,...input].filter((e)=>e=!null)
         console.log(this.rings)
-        this.rings=[...this.rings,...(input||[])].filter((e)=>e=!null)
         this.rings=this.rings.filter(e=>e.checkRing()==true)
+        console.log(["rings check",this.rings])
         return this.rings
       }
 
-      addRings(input){
-        this.input=[...this.input,...input].filter((e)=>e=!null)
 
-      }
 
 
 

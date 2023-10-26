@@ -1,6 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
+import { getPlayerNumber } from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -13,7 +14,7 @@ image.src = url
 }
 create() {
     this.add.image(0, 0, 'background');
-    this.gessBoard=new gessBoard(this)
+    this.gessBoard=new gessBoard(this,player=getPlayerNumber())
     this.gessBoard.create()
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
@@ -37,27 +38,34 @@ create() {
         gameObject.x = dropZone.x;
         gameObject.y = dropZone.y;
         gameObject.setNewBlock(dropZone.block)
+        dropZone. removeZoneLine()
 
     });
 
 
 
 
-    const dragfunct=(event, gameObject) =>
-    {
 
 
-        let difX=event.position.x-gameObject.x
-        let difY=event.position.y-gameObject.y
-        for(const ele of Object.values(gameObject.neighbors).filter(e=>e)){
-            ele.x = ele.x+difX;
-            ele.y = ele.y+difY;
-        }
-    
 
-    }
 
-    this.input.on('drag', dragfunct)
+
+const dragfunct= (event, gameObject) =>
+{
+
+
+    let difX=event.position.x-gameObject.x
+    let difY=event.position.y-gameObject.y
+    gameObject.getNeighbors()
+    Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
+        ele.x = ele.x+difX;
+        ele.y = ele.y+difY;
+    })
+
+
+}
+
+    this.input.on('drag',dragfunct)
 
 
 
@@ -70,22 +78,29 @@ create() {
         
         if (!dropped)
         {
-            gameObject.x = gameObject.input.dragStartX;
-            gameObject.y = gameObject.input.dragStartY;
-            gameObject.setNewBlock(gameObject.block)
+            gameObject.revertNeighbors()
+            gameObject.hideNeighbors()
+
         }
         else if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
 
             gameObject.revertNeighbors()
+            gameObject.hideNeighbors()
+
         }
         else{
 
             gameObject.movePiece()
             this.events.emit('updatePiece');
-            console.log(["this number of rings",this.gessBoard.checkRings()])
+            this.gessBoard.checkRings(gameObject.getRingNeighbors())
+            gameObject.hideNeighbors()
+
 
         }
         this.input.addListener("drag",dragfunct)
+        gameObject.normalSize()
+        gameObject.block.zone.removeZoneLine()
+      
 
        
         
