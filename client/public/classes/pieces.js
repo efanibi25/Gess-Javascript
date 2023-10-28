@@ -4,9 +4,8 @@ Piece Libary
 Note: Piece never change location only attributes based on grab events and validation of moves
 
 */
-import { squaresCount } from "../res/player.js"
-import { sideborder } from "../res/player.js"
-const neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+import { data } from "../scripts/client.js"
+const neighbors=[0,-1,1,-data["squaresCount"]-data["sideborder"],data["squaresCount"]+data["sideborder"],data["squaresCount"]+data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-data["sideborder"]+1]
 const lineThick=3
 const lineColor=0xFF0000
 const checkValidMove=true
@@ -15,6 +14,7 @@ const showHidden=false
 //alpha 0 disables interactivity
 const hiddenAlpha=.01
 const showAlpha=.5
+const alertTimeout=4000
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
@@ -111,7 +111,7 @@ checkDraggable(){
     let col=this.block.col
     let row=this.block.row
 
-    if ((row>sideborder/2+1 && col>sideborder/2+1&& col<squaresCount+(sideborder/2) && row<squaresCount+(sideborder/2))==true) return true
+    if ((row>data["sideborder"]/2+1 && col>data["sideborder"]/2+1&& col<data["squaresCount"]+(data["sideborder"]/2) && row<data["squaresCount"]+(data["sideborder"]/2))==true) return true
     return false  
 
 
@@ -119,7 +119,7 @@ checkDraggable(){
 checkGamePiece(){
     let col=this.block.col
     let row=this.block.row
-    if ((row>sideborder/2 && col>sideborder/2 && col<squaresCount+(sideborder/2)+1 && row<squaresCount+(sideborder/2)+1)==true) return true
+    if ((row>data["sideborder"]/2 && col>data["sideborder"]/2 && col<data["squaresCount"]+(data["sideborder"]/2)+1 && row<data["squaresCount"]+(data["sideborder"]/2)+1)==true) return true
     return false
 }
 
@@ -175,20 +175,20 @@ revertNeighbors(){
             .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
         }
 
         else if(Object.values(this.neighbors)
         .filter(ele=>ele.owner!="out").length!=9){
         document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
         valid=false
-        setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
+        setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
     }
 
         else if(Object.values(this.neighbors).filter(ele=>ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
         }
 
         return valid
@@ -210,28 +210,28 @@ revertNeighbors(){
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);     
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);     
         }
         else if (dir==null){
             document.querySelector("#alertBar").textContent="The Given Move is not valid"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);  
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);  
         }
         else if (this.neighbors[dir].owner==null ){
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout); 
         }
 
         else if (this.neighbors[dir].owner!=this.block.board.color ){
             document.querySelector("#alertBar").textContent="The Given Direction has the opponent piece"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000); 
+            setTimeout(()=>data["setCurrentPlayerIndicator"]() ,alertTimeout); 
         }
         else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
             document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
             valid=false
-            setTimeout(()=>document.querySelector("#alertBar").textContent="", 2000);    
+            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);    
         }
         return valid
 
@@ -250,10 +250,10 @@ getDir(){
         return 0
     }
     else if(colchange==0 && rowchange>=1){
-        return squaresCount+sideborder
+        return data["squaresCount"]+data["sideborder"]
     }
     else if(colchange==0 && rowchange<0){
-        return -squaresCount-sideborder
+        return -data["squaresCount"]-data["sideborder"]
     }
   
     else if(rowchange==0 && colchange>=1){
@@ -270,24 +270,27 @@ getDir(){
   
 
     else if(rowchange<0 && colchange<0){
-        return -squaresCount-sideborder-1
+        return -data["squaresCount"]-data["sideborder"]-1
     }
 
 
     else if(rowchange<0 && colchange>0){
-        return -squaresCount-sideborder+1
+        return -data["squaresCount"]-data["sideborder"]+1
     }
 
     else if(rowchange>0 && colchange<0){
-        return squaresCount+sideborder-1
+        return data["squaresCount"]+data["sideborder"]-1
     }
 
 
     else if(rowchange>0 && colchange>0){
-        return squaresCount+sideborder+1
+        return data["squaresCount"]+data["sideborder"]+1
     }
 
 }
+
+ 
+
 
     movePiece(){
     let dir=this.getDir()
@@ -335,11 +338,11 @@ getDir(){
                 console.log(colorDict)
                 for(const key of Object.keys(this.neighbors)){
                     //out of bounds
-                    if(target.block.piece.neighbors[key].block.col>=squaresCount+(sideborder/2)+1 || 
-                    target.block.piece.neighbors[key].block.col<sideborder/2+1) continue
+                    if(target.block.piece.neighbors[key].block.col>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
+                    target.block.piece.neighbors[key].block.col<data["sideborder"]/2+1) continue
         
-                    else if(target.block.piece.neighbors[key].block.row>=squaresCount+(sideborder/2)+1 || 
-                    target.block.piece.neighbors[key].block.row<sideborder/2+1) continue
+                    else if(target.block.piece.neighbors[key].block.row>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
+                    target.block.piece.neighbors[key].block.row<data["sideborder"]/2+1) continue
         
                     //other test
                     if(target.block.piece.neighbors[key].owner!=null) noOverlap=false

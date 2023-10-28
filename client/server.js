@@ -12,8 +12,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(bodyParser.json())
-app.engine('handlebars', exphbs.engine({ extname: '.hbs', defaultLayout: "main.handlebars"}));
+app.engine('handlebars', exphbs.engine({ extname: '.handlebars', defaultLayout: "main"}));
 app.set('view engine', 'handlebars');
+app.set('views',  `${__dirname}/views`);
 app.use(session({ secret: 'edlBz4FDdbvgIuZlOGEresgliR0', cookie: { maxAge: 60000 }}))
 
 

@@ -1,27 +1,24 @@
-import { PLAYER1_PIECES } from "../res/player.js";
-import { PLAYER2_PIECES } from "../res/player.js";
 import boardBlock from "./block.js";
-import { squaresCount } from "../res/player.js";
-import { sideborder } from "../res/player.js";
-import { BoardMax } from "../res/player.js";
+import { data } from "../scripts/client.js";
 const stroke=8
 const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {
 
-    constructor(scene,x=0,y=0,player="player1",color="white",otherColor="black"){
-        super(scene, x, y);
+    constructor(scene,player="player1"){
+        super(scene, 0, 0);
         this.scene=scene
         this.chessboardOffsetX =5
         this.chessboardOffsetY=5
         this.canvas=scene.game.canvas
         this.width = (this.canvas.width - this.chessboardOffsetX);
         this.height = (this.canvas.height - this.chessboardOffsetY);
-        this.squareSize = Math.floor(Math.min((this.width / squaresCount),(this.height / (squaresCount+sideborder))))
+        this.squareSize = Math.floor(Math.min((this.width / data["squaresCount"]),(this.height / (data["squaresCount"]+data["sideborder"]))))
         this.board=[]
         
         this.player=player
-        this.color=color
-        this.otherColor=otherColor
+        this.setColor()
+       
+
         this.rings=[]
     
     }
@@ -35,33 +32,50 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     createBoard(){
         this.extendBoardArray()
         Phaser.Actions.GridAlign(this.board, {
-          width:squaresCount+sideborder,
-          height: squaresCount+sideborder,
-          x: this.chessboardOffsetX/2+(this.width/2)-(this.squareSize*(squaresCount+sideborder)/2),
+          width:data["squaresCount"]+data["sideborder"],
+          height: data["squaresCount"]+data["sideborder"],
+          x: this.chessboardOffsetX/2+(this.width/2)-(this.squareSize*(data["squaresCount"]+data["sideborder"])/2),
           y: this.chessboardOffsetY/2,
           cellWidth:this.squareSize,
           cellHeight:this.squareSize
           
       });
     }
+    setColor(){
+        if(this.player=="player1"){
+            this.color="white"
+            this.otherColor="black"
+        }
 
+        else{
+            this.color="black"
+            this.otherColor="white" 
+        }
+    }
     getOtherPlayerPieces(){
         if(this.player=="player1"){
-            return PLAYER2_PIECES
+            return data["PLAYER2_PIECES"]
         }
         else{
-            return PLAYER1_PIECES
+            return data["PLAYER1_PIECES"]
         }
     }
     getMyPieces(){
         if(this.player=="player1"){
-            return PLAYER1_PIECES
+            return data["PLAYER1_PIECES"]
         }
         else{
-            return PLAYER2_PIECES
+            return data["PLAYER2_PIECES"]
         }
     }
 
+    movePieceAuto(startdex,endex){
+        let block=this.getPiece(startdex)
+        block.newBlock=this.getBlock(endex)
+        block.movePiece()
+        this.scene.events.emit('updatePiece');
+
+    }
 
     upDateGameBlocks(){
         let otherPlayerPieces=this.getOtherPlayerPieces()
@@ -69,16 +83,16 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         let i=0
         let k=0
 
-        while ( i< Math.pow(squaresCount+sideborder,2)) {
+        while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
             let row=this.board[i].row
             let col=this.board[i].col
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
 
-            if (row==sideborder/2){
+            if (row==data["sideborder"]/2){
                 this.board[i].addText(col)
             }
-            else if (col==sideborder/2){
+            else if (col==data["sideborder"]/2){
                 this.board[i].addText(row)
             }
 
@@ -155,7 +169,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
     getBlock(index){
         if (index<0) return 
-        else if (index>=BoardMax) return 
+        else if (index>=data["BoardMax"]) return 
         return this.board[index-1]
     }
 
@@ -165,13 +179,13 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         let i=0
         let k=0
         let count=0
-        while (i <squaresCount+sideborder){
+        while (i <data["squaresCount"]+data["sideborder"]){
             k=0
-            while (k <squaresCount+sideborder){
+            while (k <data["squaresCount"]+data["sideborder"]){
                 //full board has invisible pieces
                 let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,count,this)
                 count=count+1
-                if ((i<(sideborder/2) || k<(sideborder/2) || i>=squaresCount+(sideborder/2) || k>=squaresCount+(sideborder/2))==false){
+                if ((i<(data["sideborder"]/2) || k<(data["sideborder"]/2) || i>=data["squaresCount"]+(data["sideborder"]/2) || k>=data["squaresCount"]+(data["sideborder"]/2))==false){
                     this.board.push(rect)
                     this.add(rect)
                 

@@ -10,7 +10,24 @@
       border: 8px solid black;
       font-size: 25px;
       font-weight: bold;
+      width:70vw;
+      display: inline-block;
+      vertical-align: top;
+    }
 
+
+      #playerindicator{
+      height: 6vh;
+      width:20vw;
+      border: 8px solid black;
+      font-size: 25px;
+      font-weight: bold;
+      display:inline-block;
+      vertical-align: top;
+    }
+
+      #playerindicator > *{
+     display: blockremo;
     }
 
      .button{
@@ -20,6 +37,10 @@
     #button-container{
              height:5vh
 
+    }
+    #top-contaienr{
+      display: flex;
+      vertical-align:top;
     }
 
     #game{
@@ -40,8 +61,12 @@
 
 </head>
 <body>
-
+<div id="top-container">
   <div id="alertBar"></div>
+  <div id="playerindicator">
+    <div></div>
+     <div></div>
+</div>
   <div id="button-container">
         <button id="plus-button" class="button">+</button>
   <button id="minus-button" class="button">-</button>

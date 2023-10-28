@@ -1,11 +1,11 @@
 import boardPiece from "./pieces.js";
-import { sideborder } from "../res/player.js";
-import { squaresCount } from "../res/player.js"
+import { data } from "../scripts/client.js";
 import Zone from "./zone.js";
+
 const color=0xadd8e6
 const altColor=0xD6D6B3
 const showblockColor=true
-let neighbors=[0,-1,1,-squaresCount-sideborder,squaresCount+sideborder,squaresCount+sideborder+1,-squaresCount-sideborder-1,squaresCount+sideborder-1,-squaresCount-sideborder+1]
+let neighbors=[0,-1,1,-data["squaresCount"]-data["sideborder"],data["squaresCount"]+data["sideborder"],data["squaresCount"]+data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-data["sideborder"]+1]
 
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
@@ -60,7 +60,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
     addText(num){
 
-        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-sideborder/2+1,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-data["sideborder"]/2+1,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }

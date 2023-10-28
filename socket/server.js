@@ -1,13 +1,13 @@
 const httpServer= require("http").createServer();
-require('dotenv').config({ path: '../.env' })
+const path = require('path');
+require('dotenv').config({ path: path.join(path.dirname(__dirname),".env") })
+const {BoardMax,PLAYER1_PIECES,PLAYER2_PIECES,squaresCount,sideborder}=require("./res/player.js")
 const { Server } = require("socket.io");
 const url = require('url')
 const base64id = require('base64id');
-const { call } = require("file-loader");
 
 
-
-const usersByRooms = {}
+let usersByRooms = {}
 const io = new Server(httpServer, {
   cors: {
     origin:/\.*/,
@@ -24,53 +24,137 @@ io.engine.generateId = req => {
   }
   return base64id.generateId()
 }
-
 io.on('connection', (socket) => {
-  console.log('a user connected');
+
+  console.log(`a user connected: ${socket.id}`);
+
+  socket.on("creategame", (room,callback) => {
+  console.log(`current room ${JSON.stringify(usersByRooms[room])}`)
+  if(!usersByRooms[room]){
+    usersByRooms[room]={
+      "player1":null,
+      "player2":null,
+      "currentplayer":null,
+      "otherplayer":null,
+      "room":room,
+      "ready":0,
+}
+  }
+
+  //save 
+  socket.usersByRooms=usersByRooms[room]
+
+  callback({
+    response: "ok"
+  });
+  socket.emit("joingame")
+  })
+
+
+
+  socket.on("sendmove", (startdex,endex,callback) => {
+    socket.usersByRooms["currentplayer"]=null
+    io.to(socket.usersByRooms[socket.usersByRooms["otherplayer"]]).emit("sendmove",startdex,endex);
+    callback({
+      response: "ok"
+    });
+  })
+
+
+  socket.on("switchplayer", (callback) => {
+    console.log("switchplayer")
+    console.log(["before switch",socket.usersByRooms])
+   if(socket.usersByRooms["otherplayer"]=="player1"){
+    socket.usersByRooms["currentplayer"]="player1"
+    socket.usersByRooms["otherplayer"]="player2"
+   }
+   else{
+    socket.usersByRooms["currentplayer"]="player2"
+    socket.usersByRooms["otherplayer"]="player1"
+   }
+    console.log(["after switch",socket.usersByRooms])
+   io.emit("setplayerindicator",socket.usersByRooms["currentplayer"])
+   callback({
+    response: "ok"
+  });
+  })
+
+
+
+
+  socket.on("getplayer", (callback) => {
+    console.log(`getting player`)
+    console.log(socket.usersByRooms)
+
+    if(!socket.usersByRooms){
+      callback({'error': 'retry getting player'});
+    }
+    callback({
+      response:socket.usersByRooms["currentplayer"]
+    });
+  });
 
   socket.on("joingame", (room,clientID,playerID,callback) => {
-    console.log(callback)
-    // console.log(clientID)
-    // console.log(playerID)
- 
-    if (usersByRooms[room] == undefined) {
-      usersByRooms[room]={
-        "player1":null,
-        "player2":null} 
-  } 
-
-  if(playerID){
+    if(playerID){
+    console.log([playerID,clientID,"has joined"])
     socket.join(room);
-    usersByRooms[room][playerID]=clientID
-    socket.emit("setplayer",playerID)
+    socket.usersByRooms[playerID]=clientID
+    socket.emit("setdata",playerID,BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
   }
-  else if(!usersByRooms[room]["player1"]){
+
+  else if(! socket.usersByRooms["player1"]){
+    console.log(["player1",clientID,"has joined"])
     socket.join(room);
-    usersByRooms[room]["player1"]=clientID
-    socket.emit("setplayer","player1")
+    socket.usersByRooms["player1"]=clientID
+    socket.emit("setdata","player1",BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
   }
 
 
-  else if(!usersByRooms[room]["player2"]){
+  else if(! socket.usersByRooms["player2"]){
+    console.log(["player2",clientID,"has joined"])
     socket.join(room);
-    usersByRooms[room]["player2"]=clientID
-    socket.emit("setplayer","player2")
+    socket.usersByRooms["player2"]=clientID
+    socket.emit("setdata","player2",BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
+
 
   }
 
-  
-  else {
-   console.log("game has two players")
-  }
 
-  console.log(usersByRooms)
+
+  console.log(socket.usersByRooms)
+
   callback({
-    status: "ok"
+   response: "ok"
   });
 
   });
+
+  socket.on("startgame", (callback) => {
+    console.log("test me shit")
+    socket.usersByRooms["ready"]= socket.usersByRooms["ready"]+1
+    console.log(["ready",socket.usersByRooms["ready"]])
+
+    if( socket.usersByRooms["ready"]==2){
+      socket.usersByRooms["ready"]=0
+      socket.usersByRooms["currentplayer"]="player1"
+      socket.usersByRooms["otherplayer"]="player2"
+
+      io.emit("startgame")
+    }
+
+    callback({
+      response: "ok"
+     });
+
+  })
+
+
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log('user disconnected reseting room');
+    if(socket.usersByRooms){
+      socket.usersByRooms=null
+    }
+    
   });
 });
 

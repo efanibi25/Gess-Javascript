@@ -1,7 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
-import { getPlayerNumber } from "../scripts/client.js";
+import { getPlayerNumber ,getCurrentPlayer,emit,socket, setCurrentPlayerIndicator} from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -12,9 +12,13 @@ image.src = url
     this.load.image('background', url );
     this.canvas = this.sys.game.canvas;
 }
+
+
 create() {
     this.add.image(0, 0, 'background');
-    this.gessBoard=new gessBoard(this,player=getPlayerNumber())
+    this.gessBoard=new gessBoard(this,getPlayerNumber())
+    document.querySelector("#playerindicator").children[1].textContent =`Color: ${this.gessBoard.color}`
+
     this.gessBoard.create()
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
@@ -65,18 +69,34 @@ const dragfunct= (event, gameObject) =>
 
 }
 
-    this.input.on('drag',dragfunct)
+socket.on("sendmove", (startdex,endex) => {
+    //scene resets
+    this.gessBoard.scene=this
+   this.gessBoard.movePieceAuto(startdex,endex)
+   emit("switchplayer")
+})
+
+
+this.input.on('drag',dragfunct)
 
 
 
 
 
-    this.input.on('dragend', (pointer, gameObject, dropped) =>
+    this.input.on('dragend', async(pointer, gameObject, dropped) =>
     {
 
         this.input.removeListener("drag")
+        let currentplayer=await getCurrentPlayer()
+        let playeNumber=getPlayerNumber()
+        if(currentplayer!=playeNumber){
+            gameObject.revertNeighbors()
+            gameObject.hideNeighbors() 
+            document.querySelector("#alertBar").textContent=`It is not ${playeNumber}'s turn`
+            setTimeout(async()=>document.querySelector("#alertBar").textContent=await setCurrentPlayerIndicator(), 4000);  
+        }
         
-        if (!dropped)
+        else if (!dropped)
         {
             gameObject.revertNeighbors()
             gameObject.hideNeighbors()
@@ -88,18 +108,22 @@ const dragfunct= (event, gameObject) =>
             gameObject.hideNeighbors()
 
         }
+        
         else{
 
             gameObject.movePiece()
             this.events.emit('updatePiece');
             this.gessBoard.checkRings(gameObject.getRingNeighbors())
             gameObject.hideNeighbors()
+            emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
+
 
 
         }
         this.input.addListener("drag",dragfunct)
         gameObject.normalSize()
         gameObject.block.zone.removeZoneLine()
+
       
 
        
