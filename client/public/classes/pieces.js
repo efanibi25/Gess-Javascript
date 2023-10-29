@@ -5,7 +5,8 @@ Note: Piece never change location only attributes based on grab events and valid
 
 */
 import { data } from "../scripts/client.js"
-const neighbors=[0,-1,1,-data["squaresCount"]-data["sideborder"],data["squaresCount"]+data["sideborder"],data["squaresCount"]+data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-data["sideborder"]+1]
+
+
 const lineThick=3
 const lineColor=0xFF0000
 const checkValidMove=true
@@ -22,6 +23,12 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.scene=scene
         this._radius=this.radius
         this.ogwidth=this.width
+        this.neighborsDexes=[0,-1,1,-data["squaresCount"]-data["sideborder"],
+        data["squaresCount"]+data["sideborder"],data["squaresCount"]+
+        data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,
+        data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-
+        data["sideborder"]+1]
+        
         this.on('pointerdown', this.handlePointerDown)
         this.on('pointerup', this.handlePointerUp)
         this.addListener('dragstart', this.startDrag);
@@ -111,7 +118,10 @@ checkDraggable(){
     let col=this.block.col
     let row=this.block.row
 
-    if ((row>data["sideborder"]/2+1 && col>data["sideborder"]/2+1&& col<data["squaresCount"]+(data["sideborder"]/2) && row<data["squaresCount"]+(data["sideborder"]/2))==true) return true
+    if ((row>data["sideborder"]/2+1 && col>data["sideborder"]/2+1&& col<data["squaresCount"]+(data["sideborder"]/2) && row<data["squaresCount"]+(data["sideborder"]/2))==true)
+    {
+        return true
+    }
     return false  
 
 
@@ -125,9 +135,10 @@ checkGamePiece(){
 
 
 //neighors
+
     getNeighbors(){
     let out={}
-    for (const ele of neighbors){
+    for (const ele of this.neighborsDexes){
         let piece=this.block.board.getPiece(this.index+ele)
         out[ele]=piece   
     }

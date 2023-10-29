@@ -4,7 +4,7 @@ const stroke=8
 const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {
 
-    constructor(scene,player="player1"){
+    constructor(scene,player){
         super(scene, 0, 0);
         this.scene=scene
         this.chessboardOffsetX =5

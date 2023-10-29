@@ -5,7 +5,6 @@ import Zone from "./zone.js";
 const color=0xadd8e6
 const altColor=0xD6D6B3
 const showblockColor=true
-let neighbors=[0,-1,1,-data["squaresCount"]-data["sideborder"],data["squaresCount"]+data["sideborder"],data["squaresCount"]+data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-data["sideborder"]+1]
 
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
@@ -22,12 +21,19 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.zone=null
         this.text=null
         this.index=index
+        this.neighborsDexes=[0,-1,1,-data["squaresCount"]-data["sideborder"],
+        data["squaresCount"]+data["sideborder"],data["squaresCount"]+
+        data["sideborder"]+1,-data["squaresCount"]-data["sideborder"]-1,
+        data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-
+        data["sideborder"]+1]
         this.addBlockColor()
+
         
 
 
 
     }
+  
     addBlockColor(){
         if(!showblockColor){
             return
@@ -80,7 +86,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
     getNeighbors(){
         let out=[]
-        for (const ele of neighbors){
+        for (const ele of this.neighborsDexes){
             let block=this.board.getBlock(this.index+ele)
             out[ele]=block
         }

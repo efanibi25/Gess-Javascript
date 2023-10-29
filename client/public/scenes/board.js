@@ -1,7 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
-import { getPlayerNumber ,getCurrentPlayer,emit,socket, setCurrentPlayerIndicator} from "../scripts/client.js";
+import { getPlayerNumber ,getCurrentPlayer,emit,socket, setCurrentPlayerIndicator,gameID} from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -23,6 +23,36 @@ create() {
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
 
+    socket.on("destroy", () => {
+
+        try{
+            console.log("destroying game")
+       this.game.destroy(true)    
+        }
+        catch(e){
+            this.events.emit("destroy")
+
+        }
+        
+      })
+
+
+socket.on("sendmove", (startdex,endex) => {
+    //scene resets
+    this.gessBoard.scene=this
+   this.gessBoard.movePieceAuto(startdex,endex)
+   emit("switchplayer")
+})
+
+this.events.addListener("destroy",()=>{
+
+    console.log("remaking game")
+    emit("creategame",gameID);
+    document.querySelector("#alertBar").textContent="created game"
+})
+
+    
+    
 
     document.querySelector("#plus-button").addEventListener("click", (function() {
         this.gameHeight=this.gameHeight*1.1
@@ -68,13 +98,6 @@ const dragfunct= (event, gameObject) =>
 
 
 }
-
-socket.on("sendmove", (startdex,endex) => {
-    //scene resets
-    this.gessBoard.scene=this
-   this.gessBoard.movePieceAuto(startdex,endex)
-   emit("switchplayer")
-})
 
 
 this.input.on('drag',dragfunct)

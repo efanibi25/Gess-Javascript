@@ -38,6 +38,7 @@ io.on('connection', (socket) => {
       "otherplayer":null,
       "room":room,
       "ready":0,
+      "playerID":null
 }
   }
 
@@ -84,14 +85,19 @@ io.on('connection', (socket) => {
 
   socket.on("getplayer", (callback) => {
     console.log(`getting player`)
-    console.log(socket.usersByRooms)
+  
 
     if(!socket.usersByRooms){
       callback({'error': 'retry getting player'});
+
     }
-    callback({
-      response:socket.usersByRooms["currentplayer"]
-    });
+    else{
+      console.log(socket.usersByRooms["currentplayer"])
+      callback({
+        response:socket.usersByRooms["currentplayer"]
+      });
+    }
+    
   });
 
   socket.on("joingame", (room,clientID,playerID,callback) => {
@@ -99,6 +105,7 @@ io.on('connection', (socket) => {
     console.log([playerID,clientID,"has joined"])
     socket.join(room);
     socket.usersByRooms[playerID]=clientID
+    socket.usersByRooms["playerID"]=playerID
     socket.emit("setdata",playerID,BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
   }
 
@@ -106,6 +113,7 @@ io.on('connection', (socket) => {
     console.log(["player1",clientID,"has joined"])
     socket.join(room);
     socket.usersByRooms["player1"]=clientID
+    socket.usersByRooms["playerID"]="player1"
     socket.emit("setdata","player1",BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
   }
 
@@ -114,9 +122,8 @@ io.on('connection', (socket) => {
     console.log(["player2",clientID,"has joined"])
     socket.join(room);
     socket.usersByRooms["player2"]=clientID
+    socket.usersByRooms["playerID"]="player2"
     socket.emit("setdata","player2",BoardMax,[... PLAYER1_PIECES.keys()],[...PLAYER2_PIECES.keys()],squaresCount,sideborder)
-
-
   }
 
 
@@ -130,9 +137,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on("startgame", (callback) => {
-    console.log("test me shit")
     socket.usersByRooms["ready"]= socket.usersByRooms["ready"]+1
-    console.log(["ready",socket.usersByRooms["ready"]])
+    console.log(["ready to start game",socket.usersByRooms["ready"]])
 
     if( socket.usersByRooms["ready"]==2){
       socket.usersByRooms["ready"]=0
@@ -152,8 +158,9 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected reseting room');
     if(socket.usersByRooms){
-      socket.usersByRooms=null
+      usersByRooms[socket.usersByRooms["room"]]=null
     }
+    io.emit("destroy")
     
   });
 });

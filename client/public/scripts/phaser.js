@@ -66,10 +66,6 @@ let game =null;
         },
       };
 
-      if(game){
-        game.destroy(true, false)
-      }
-    
         game = new Phaser.Game(config);
         game.scene.add('preload', preload);
         game.scene.start('preload')

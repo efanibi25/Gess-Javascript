@@ -20,7 +20,7 @@ export function setSocketID(id){
 }
 
 export function getPlayerNumber(){
-     localStorage.getItem(`player_${gameID}`) || null;
+    return localStorage.getItem(`player_${gameID}`);
 }
 
 export async function getCurrentPlayer(){
