@@ -42,6 +42,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.newBlock=null
         this.neighbors=null
         this.prevOwner=null
+        this.gamePiece=true
 
     }
 
@@ -49,13 +50,12 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
        
     allowDraggable(){
         this.setInteractive(new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains);
-        this.scene.input.setDraggable(this, true)
+        this.scene.input.setDraggable([this], true)
         this.alignCenter()
     
         }
         disableDraggable(){
-            this.setInteractive({ draggable: false});
-            this.scene.input.setDraggable(this, false)
+            this.disableInteractive()
         }
 
         revertPiece(){
@@ -129,8 +129,8 @@ checkDraggable(){
 checkGamePiece(){
     let col=this.block.col
     let row=this.block.row
-    if ((row>data["sideborder"]/2 && col>data["sideborder"]/2 && col<data["squaresCount"]+(data["sideborder"]/2)+1 && row<data["squaresCount"]+(data["sideborder"]/2)+1)==true) return true
-    return false
+    if ((row>data["sideborder"]/2 && col>data["sideborder"]/2 && col<data["squaresCount"]+(data["sideborder"]/2)+1 && row<data["squaresCount"]+(data["sideborder"]/2)+1)==true) this.gamePiece=true
+    else this.gamePiece=false
 }
 
 
@@ -186,20 +186,20 @@ revertNeighbors(){
             .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
+            setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
         }
 
         else if(Object.values(this.neighbors)
         .filter(ele=>ele.owner!="out").length!=9){
         document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
         valid=false
-        setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
+        setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
     }
 
         else if(Object.values(this.neighbors).filter(ele=>ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);
+            setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
         }
 
         return valid

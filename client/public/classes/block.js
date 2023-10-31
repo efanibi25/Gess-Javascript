@@ -33,6 +33,12 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
 
     }
+    destroyAll(){
+        this.destroy()
+        if(this.zone)this.zone.destroy()
+        if(this.piece)this.piece.destroy()
+
+    }
   
     addBlockColor(){
         if(!showblockColor){

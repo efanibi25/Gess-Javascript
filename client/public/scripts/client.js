@@ -1,9 +1,7 @@
+  
 export const gameID=window.location.pathname.split("/").pop()
-
-
 export const data={}
-
-export const socket = io(`http://localhost:7000`,{
+export const socket = io(`http://localhost:${document.querySelector("#server").textContent}`,{
     query: {
         socketId: getSocketID() || ''
       }

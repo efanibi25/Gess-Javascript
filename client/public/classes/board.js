@@ -29,6 +29,11 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
     }
 
+    destroyAll(){
+        this.destroy()
+        this.board.forEach(e=e.destroyAll())
+    }
+
     createBoard(){
         this.extendBoardArray()
         Phaser.Actions.GridAlign(this.board, {
@@ -95,67 +100,54 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             else if (col==data["sideborder"]/2){
                 this.board[i].addText(row)
             }
-
-
-
-
-
-
+        
+            i=i+1
+        
+        }
+        i=0
+        while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
             let piece=this.board[i].piece
-
-
-            if (piece.checkGamePiece()){    
+            piece.checkGamePiece()
+            i=i+1
+        }
+        i=0
+        while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
+                let piece=this.board[i].piece
+                if(piece.gamePiece){
                 let index=k+1
                 //use raw index
                 let piece=this.board[i].piece
                 this.board[i].addZone()
                 if (myPieces.has(index)==true){
                     piece.owner=this.color   
-                    piece.checkDraggable()==true?this.board[i].piece.allowDraggable() :null
                 } 
                 //just show other player pieces
                 else if (otherPlayerPieces.has(index)==true){
-                    this.board[i].piece.owner=this.otherColor  
+                    piece.owner=this.otherColor  
                 } 
-                //secret grab zone
-                else{
-                    piece.checkDraggable()==true?this.board[i].piece.allowDraggable() :null
-                }
+            
                 k=k+1
             }
 
-        //     if(piece.checkGamePiece()){
-        //         let index=k+1
-        //     //use raw index
-            
-        //     this.board[i].addZone()
-        //     if (myPieces.has(index)==true){
-        //         piece.owner=this.color   
-        //         this.board[i].piece.checkDraggable()?this.board[i].piece.allowDraggable() :null
-        //     } 
-        //     //just show other player pieces
-        //     else if (otherPlayerPieces.has(index)==true){
-        //         this.board[i].piece.owner=this.otherColor  
-        //     } 
-        //     //secret grab zone
-        //     else{
-        //         this.board[i].piece.allowDraggable()
-        //     }
+            i=i+1
+        }
+        this.scene.events.emit('updatePiece');
 
-            
-          
-        // }
+        }
+
         
 
-        i=i+1
   
         
         
        
-        this.scene.events.emit('updatePiece');
 
 
-    }
+    
+    
+
+    getDraggablePieces(){
+        return this.board.map(e=>e.piece).filter(e=>e.gamePiece && (e.owner==null ||this.color==e.owner)).filter(e=>e.checkDraggable())
     }
 
 

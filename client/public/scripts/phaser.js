@@ -3,29 +3,25 @@ import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setCurrentPlayerIn
 import preload from "../scenes/board.js";
 
 let game =null;
-
 (()=>{
   //prevent double board glitch
   
 
   socket.on("connect", () => {
-    emit("creategame",gameID);
-    document.querySelector("#alertBar").textContent="created game"
+    console.log("creategame")
+
+  emit("creategame",gameID,socket.id,getPlayerNumber());
+    document.querySelector("#alertBar").textContent="waiting on other player"
 
   }
   
   );
 
 
-  socket.on("joingame", () => {
-    emit("joingame",gameID,socket.id,getPlayerNumber());
-    document.querySelector("#alertBar").textContent="waiting on other player"
-  });
 
 
 
-
-  socket.on("setdata", (...data) => {
+  socket.on("setdata", async (...data) => {
 
     let [playernum,BoardMax,PLAYER1_PIECES,PLAYER2_PIECES,squaresCount,sideborder]=data
     setPlayerNumber(playernum);
@@ -37,20 +33,24 @@ let game =null;
 
     //start game after setting player
     document.querySelector("#playerindicator").children[0].textContent=playernum.charAt(0).toUpperCase() + playernum.slice(1);
-    emit("startgame")
-  
+    await startgame()  
   })
 
 
   socket.on("setplayerindicator", (player) => {
     document.querySelector("#alertBar").textContent=`It is currently ${player} turn`
-
   })
 
-  socket.on("startgame",async ()=>{
+async function startgame(){
 
     //set current player
-    await setCurrentPlayerIndicator();
+    document.querySelector("#alertBar").textContent=`waiting on server`
+
+    if(game){
+      game.destroy()
+      game=null
+      Array.from(document.querySelector("#game").children).forEach((e)=>e.remove())
+    }
    
     (()=>{
       const config = {
@@ -70,16 +70,11 @@ let game =null;
         game.scene.add('preload', preload);
         game.scene.start('preload')
 
-      
-  
-
   
     })()
 
-  });
-  
-  
-})()
+  }})()
+
 
 
 

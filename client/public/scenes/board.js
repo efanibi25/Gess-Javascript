@@ -18,70 +18,32 @@ create() {
     this.add.image(0, 0, 'background');
     this.gessBoard=new gessBoard(this,getPlayerNumber())
     document.querySelector("#playerindicator").children[1].textContent =`Color: ${this.gessBoard.color}`
-
     this.gessBoard.create()
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
+    emit("toggleinteractive")
 
-    socket.on("destroy", () => {
-
-        try{
-            console.log("destroying game")
-       this.game.destroy(true)    
-        }
-        catch(e){
-            this.events.emit("destroy")
-
-        }
-        
-      })
 
 
 socket.on("sendmove", (startdex,endex) => {
     //scene resets
     this.gessBoard.scene=this
    this.gessBoard.movePieceAuto(startdex,endex)
-   emit("switchplayer")
+   emit("toggleinteractive")
 })
 
-this.events.addListener("destroy",()=>{
-
-    console.log("remaking game")
-    emit("creategame",gameID);
-    document.querySelector("#alertBar").textContent="created game"
+socket.on("restartboard", () => {
+    if(this.gessBoard){
+        this.gessBoard.destroy()
+    }
+    this.gessBoard.create()
+    
 })
 
-    
-    
 
-    document.querySelector("#plus-button").addEventListener("click", (function() {
-        this.gameHeight=this.gameHeight*1.1
-        document.querySelector("#game").style.height=`${this.gameHeight}vh`
-    }).bind(this));
-
-
-    document.querySelector("#minus-button").addEventListener("click", (function() {
-        this.gameHeight=this.gameHeight/1.1
-        document.querySelector("#game").style.height=`${this.gameHeight}vh`
-
-
-    }).bind(this));
-    this.input.on('drop', (pointer, gameObject, dropZone) =>
-    {
-
-        gameObject.x = dropZone.x;
-        gameObject.y = dropZone.y;
-        gameObject.setNewBlock(dropZone.block)
-        dropZone. removeZoneLine()
-
-    });
-
-
-
-
-
-
-
+socket.on("enableinteractive", () => {
+    //scene resets
+    console.log("enable interactivety")
 
 
 const dragfunct= (event, gameObject) =>
@@ -100,13 +62,13 @@ const dragfunct= (event, gameObject) =>
 }
 
 
-this.input.on('drag',dragfunct)
+this.input.addListener('drag',dragfunct)
 
 
 
 
 
-    this.input.on('dragend', async(pointer, gameObject, dropped) =>
+    this.input.addListener('dragend', async(pointer, gameObject, dropped) =>
     {
 
         this.input.removeListener("drag")
@@ -124,11 +86,15 @@ this.input.on('drag',dragfunct)
             gameObject.revertNeighbors()
             gameObject.hideNeighbors()
 
+            this.input.addListener("drag",dragfunct)
+
         }
         else if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
 
             gameObject.revertNeighbors()
             gameObject.hideNeighbors()
+            this.input.addListener("drag",dragfunct)
+
 
         }
         
@@ -139,11 +105,12 @@ this.input.on('drag',dragfunct)
             this.gessBoard.checkRings(gameObject.getRingNeighbors())
             gameObject.hideNeighbors()
             emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
+            emit("toggleinteractive")
+
 
 
 
         }
-        this.input.addListener("drag",dragfunct)
         gameObject.normalSize()
         gameObject.block.zone.removeZoneLine()
 
@@ -153,6 +120,66 @@ this.input.on('drag',dragfunct)
         
 
     });
+
+    this.input.addListener('drop', (pointer, gameObject, dropZone) =>
+    {
+
+        gameObject.x = dropZone.x;
+        gameObject.y = dropZone.y;
+        gameObject.setNewBlock(dropZone.block)
+        dropZone. removeZoneLine()
+
+    })
+    this.gessBoard.getDraggablePieces().forEach(e=>e.allowDraggable())
+})
+
+socket.on("disableinteractive", () => {
+    console.log("disable interactivety")
+
+    this.input.removeListener("drag")
+    this.input.removeListener("dragend")
+    this.input.removeListener("drop")
+    this.gessBoard.getDraggablePieces().forEach(e=>e.disableDraggable())
+})
+
+
+
+
+document.querySelector("#plus-button").addEventListener("click", (function() {
+    this.gameHeight=this.gameHeight*1.1
+    document.querySelector("#game").style.height=`${this.gameHeight}vh`
+}).bind(this));
+
+document.querySelector("#minus-button").addEventListener("click", (function() {
+    this.gameHeight=this.gameHeight/1.1
+    document.querySelector("#game").style.height=`${this.gameHeight}vh`
+
+
+}).bind(this));
+
+
+// this.events.addListener("destroy",()=>{
+
+//     console.log("remaking game")
+//     emit("creategame",gameID);
+//     document.querySelector("#alertBar").textContent="created game"
+//     Array.from(document.querySelector("#game").children).forEach(e=>{e.remove()})
+    
+// })
+
+    
+    
+
+;
+
+
+
+
+
+
+
+
+
 
 
 
