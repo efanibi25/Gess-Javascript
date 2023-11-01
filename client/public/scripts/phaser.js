@@ -1,17 +1,21 @@
 
-import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setCurrentPlayerIndicator, setGameData} from "./client.js";
+import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setGameData} from "./client.js";
 import preload from "../scenes/board.js";
 
 let game =null;
 (()=>{
-  //prevent double board glitch
-  
+  //remove all listeners that may be present
+ 
 
   socket.on("connect", () => {
     console.log("creategame")
+    //remove listeners because scene variable in event function is set to null on remove+ gameobject persist
+    socket.removeAllListeners("enableinteractive");
+    socket.removeAllListeners("disableinteractive");
 
   emit("creategame",gameID,socket.id,getPlayerNumber());
     document.querySelector("#alertBar").textContent="waiting on other player"
+
 
   }
   
@@ -23,6 +27,7 @@ let game =null;
 
   emit("creategame",gameID,socket.id,getPlayerNumber());
     document.querySelector("#alertBar").textContent="waiting on other player"
+    //remove listeners because scene variable in event function is set to null on remove+ gameobject persis
 
   }
   
@@ -57,10 +62,12 @@ async function startgame(){
     //set current player
     document.querySelector("#alertBar").textContent=`waiting on server`
 
-    if(game){
-      game.destroy()
-      game=null
-      Array.from(document.querySelector("#game").children).forEach((e)=>e.remove())
+    if(game!=null){
+      game.scene.remove('preload');
+
+      game.scene.add('preload', preload,true);
+
+      return
     }
    
     (()=>{
@@ -78,9 +85,7 @@ async function startgame(){
       };
 
         game = new Phaser.Game(config);
-        game.scene.add('preload', preload);
-        game.scene.start('preload')
-
+        game.scene.add('preload', preload,true);
   
     })()
 

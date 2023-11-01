@@ -16,7 +16,6 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.width=width
         this.height=height
         this.board=board
-        this.scene=scene
         this.piece=null
         this.zone=null
         this.text=null

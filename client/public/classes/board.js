@@ -6,7 +6,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
     constructor(scene,player){
         super(scene, 0, 0);
-        this.scene=scene
         this.chessboardOffsetX =5
         this.chessboardOffsetY=5
         this.canvas=scene.game.canvas
@@ -14,7 +13,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.height = (this.canvas.height - this.chessboardOffsetY);
         this.squareSize = Math.floor(Math.min((this.width / data["squaresCount"]),(this.height / (data["squaresCount"]+data["sideborder"]))))
         this.board=[]
-        
+    
         this.player=player
         this.setColor()
        

@@ -20,7 +20,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){
         super(scene, x, y,radius=Math.max(radius,7))
-        this.scene=scene
         this._radius=this.radius
         this.ogwidth=this.width
         this.neighborsDexes=[0,-1,1,-data["squaresCount"]-data["sideborder"],
@@ -49,7 +48,8 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     //manipulators
        
     allowDraggable(){
-        this.setInteractive(new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains);
+        this.scene.sys.input.enable(this, new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains, false);
+        // this.setInteractive();
         this.scene.input.setDraggable([this], true)
         this.alignCenter()
     

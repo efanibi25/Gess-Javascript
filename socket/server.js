@@ -185,7 +185,6 @@ io.on('connection', (socket) => {
       socket.usersByRooms[socket["playerID"]]=null
       socket.usersByRooms["moves"]=0
     }
-    // (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("toggleinteractive"))
     (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("creategame"))
 
   });

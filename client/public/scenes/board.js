@@ -10,20 +10,52 @@ preload() {
     let url="../assets/wood.jpg"
 image.src = url
     this.load.image('background', url );
-    this.canvas = this.sys.game.canvas;
 }
 
 
 create() {
+    //cleanup
+    this.events.on('destroy',()=>
+    {
+        socket.removeAllListeners("enableinteractive");
+        socket.removeAllListeners("disableinteractive");
+        socket.removeAllListeners("sendmove");
+        socket.removeAllListeners("restboard");
+        this.input.removeListener("drag")
+        this.input.removeListener("dragend")
+        this.input.removeListener("drop")
+        document.querySelector("#plus-button").removeEventListener("click",this.handleplus)
+        document.querySelector("#minus-button").removeEventListener("click",this.handleminus)
+        this.gessBoard.board.forEach((e)=>{
+            e.piece.removeAllListeners()
+            e.piece=null
+            console.log(e.zone)
+            e.zone!=null? e.zone.removeAllListeners():null 
+            e.zone=null
+            e.removeAllListeners()
+            e=null
+        })
+        this.gessBoard=null
+
+
+
+
+    
+
+        })
+
     this.add.image(0, 0, 'background');
     this.gessBoard=new gessBoard(this,getPlayerNumber())
     document.querySelector("#playerindicator").children[1].textContent =`Color: ${this.gessBoard.color}`
     this.gessBoard.create()
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
-    emit("toggleinteractive")
 
 
+    this.events.once('preupdate', function() {
+        emit("toggleinteractive")
+    });
+    
 
 socket.on("sendmove", (startdex,endex) => {
     //scene resets
@@ -130,7 +162,10 @@ this.input.addListener('drag',dragfunct)
         dropZone. removeZoneLine()
 
     })
-    this.gessBoard.getDraggablePieces().forEach(e=>e.allowDraggable())
+
+    this.gessBoard.getDraggablePieces().forEach(
+        e=>e.allowDraggable()
+        )
 })
 
 socket.on("disableinteractive", () => {
@@ -139,23 +174,23 @@ socket.on("disableinteractive", () => {
     this.input.removeListener("drag")
     this.input.removeListener("dragend")
     this.input.removeListener("drop")
-    this.gessBoard.getDraggablePieces().forEach(e=>e.disableDraggable())
+    this.gessBoard.getDraggablePieces().filter(e=>e.InteractiveObject!=null).forEach(e=>e.removeInteractive())
 })
 
 
-
-
-document.querySelector("#plus-button").addEventListener("click", (function() {
+this.handleplus=function() {
     this.gameHeight=this.gameHeight*1.1
     document.querySelector("#game").style.height=`${this.gameHeight}vh`
-}).bind(this));
-
-document.querySelector("#minus-button").addEventListener("click", (function() {
+}.bind(this)
+this.handleminus=function() {
     this.gameHeight=this.gameHeight/1.1
     document.querySelector("#game").style.height=`${this.gameHeight}vh`
 
+}.bind(this)
 
-}).bind(this));
+document.querySelector("#plus-button").addEventListener("click", this.handleplus);
+
+document.querySelector("#minus-button").addEventListener("click", this.handleminus);
 
 
 // this.events.addListener("destroy",()=>{
@@ -187,8 +222,14 @@ document.querySelector("#minus-button").addEventListener("click", (function() {
   
 
 
+ready(){
+    emit("toggleinteractive")
+}
+destroy(){
+    console.log("dadad")
+}
 
-  update(){
+update(){
   }
 
 }
