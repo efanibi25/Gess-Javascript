@@ -1,6 +1,6 @@
 const httpServer= require("http").createServer();
 const path = require('path');
-require('dotenv').config({ path: path.join(path.dirname(__dirname),".env") })
+require('dotenv').config(".env")
 const {BoardMax,PLAYER1_PIECES,PLAYER2_PIECES,squaresCount,sideborder}=require("./res/player.js")
 const { Server } = require("socket.io");
 const url = require('url')

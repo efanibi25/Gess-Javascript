@@ -1,6 +1,6 @@
 express = require('express')
 var path = require('path');
-require('dotenv').config({ path: path.join(path.dirname(__dirname),".env") })
+require('dotenv').config(".env")
 
 var session = require('express-session')
 const app = express();
@@ -83,6 +83,7 @@ app.post('/join_game/', function (req, res) {
 
 
 app.get('/game/:key', function (req, res) {
+  console.log(process.env.SERVER_PORT)
   key={"key":req.params.key,"server":process.env.SERVER_PORT}
   res.render('game',key)
 })
