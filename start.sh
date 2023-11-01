@@ -1,0 +1,1 @@
+concurrently "nodemon socket.js" "nodemon phaser.js"
