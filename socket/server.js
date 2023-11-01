@@ -180,12 +180,14 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', async () => {
     console.log('user disconnected reseting room');
+    //some changes for without redux
     if(socket.usersByRooms){
       socket.usersByRooms[socket["playerID"]]=null
-
+      socket.usersByRooms["moves"]=0
     }
-    (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("toggleinteractive"))
-    
+    // (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("toggleinteractive"))
+    (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("creategame"))
+
   });
 });
 

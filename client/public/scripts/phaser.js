@@ -18,6 +18,17 @@ let game =null;
   );
 
 
+  socket.on("creategame", () => {
+    console.log("creategame")
+
+  emit("creategame",gameID,socket.id,getPlayerNumber());
+    document.querySelector("#alertBar").textContent="waiting on other player"
+
+  }
+  
+  );
+
+
 
 
 
