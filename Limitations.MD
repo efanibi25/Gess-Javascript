@@ -1,3 +1,4 @@
+<ins>
 # Cheating 
 
 With the current implementation it is possible that the user could change the input to the socket, and present a invalid move
@@ -53,12 +54,8 @@ We also don't have physics or other complexities in this game
 - client needs to get updates from server
 
 
-
-## Server Validation
-Anothdd
-
 ## Move Obfuscation
 https://incolumitas.com/2014/01/26/the-art-of-cheating-making-a-chess-com-chess-bot-using-a-unusual-approach/
-
+</ins>
 
 
