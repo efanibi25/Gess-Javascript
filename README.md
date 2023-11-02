@@ -15,7 +15,7 @@ Easiest way to do this is to install via docker
 npm install
 ```
 
-## 3 install concurrently globall
+## 3 install concurrently globally
 
 
 ```
