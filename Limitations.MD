@@ -5,7 +5,7 @@ With the current implementation it is possible that the user could change the in
 
 After some research, I found that there may be a few ways to meditate this 
 
-update:
+# Update
 
 I decided to go with server base confirmation
 snapshot-interpolation is very interesting, but I think it is very cool, but I think it is overkill
