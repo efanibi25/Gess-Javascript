@@ -1,6 +1,64 @@
 
 
-This files list previous limitations/ fixes to this problems
+This files list previous limitations/issues fixes to this problems
+
+# Server support
+Handling more clients could be improved by using cluster support
+
+https://socket.io/docs/v4/tutorial/step-9
+
+
+# Connection State Recovery
+"
+a Socket.IO client is not always connected
+a Socket.IO server does not store any event
+"
+"
+There is no such buffer on the server, which means that any event that was missed by a disconnected client will not be transmitted to that client upon reconnection
+"
+"
+Even over a stable network, it is not possible to maintain a connection alive forever.
+"
+
+I've tried to simply the number of messages in this program, since it makes it easier to debug. It also makes it easier to track which messages are sent to which client
+
+Having redis support should help in a lot of instances were messages may be lost
+
+This could be an issue during the move confirmation stage, if the client loses the next move message the game could be in a standstill as the currentplayer will be set to null, and the message will not be reried
+
+
+## Fix
+
+Socket.io provides built in server to client recovery
+https://socket.io/docs/v4/tutorial/handling-disconnections
+https://socket.io/docs/v4/tutorial/step-6
+https://socket.io/docs/v4/tutorial/step-7
+
+
+# At Least Once vs Exactly Once
+Most messages should be able to handle client retries
+
+This again could cause issues during the sendmove stage for example
+- player 1 sends move
+- player 2 timeout and the messages is retry
+- but  each time the number of moves is updated
+
+We could update the number of moves after sendmove is succesful, but I'm not sure if the data would be guaranteed to be up to date once the toggleinteractive confirmation happens (this is where the player switch happens)
+
+
+
+
+
+
+Previous version of the script had the current player make a request to switchplayer this was troublesome 
+- because any player could send this message
+- multiple messages could potentially having a undesirable effect
+
+
+Now we use confirmation from both user having multiple messages won't matter as the value for one user will be set to true
+Also as a additional safety, currentuser is based on the number moves
+
+
 
 
 # env variables
@@ -10,6 +68,74 @@ This was fixed by using a inline script, I like this method a little bit more si
 <s>
 The client side javascript server can't accept env variables for information like the socket.io server address
 </s>
+
+# Simplify messages
+I was unable to find best practices for socket.io
+
+So much of the implementation here was based on looking at other example online 
+gess is not a popular game, so I looked at chess implementations
+
+- https://github.com/fratorgano/SocketChess/blob/master/server.js
+
+- https://medium.com/@nguyen10/build-a-real-time-chess-using-express-and-socket-io-part-1-get-started-with-express-generator-b089fae8f223
+
+
+
+
+See gess.drawio.pdf
+- We have room to manage messages from different games, through it is pretty easy most of the time to send messages to both clients seperately
+- Instead of having 3-4 sever events for the init stage, we cut it down to about two 
+* creating+joingame, 2 confirmations + interactivty toggle+playerswitch
+
+- During the game instead of having 3-4 messages for switching players we cut it down to around  
+* 2 secondplayer gets move, 2 confirmations + interactivty toggle+playerswitch
+
+This was the initial plan for the program, but it has changed after testing
+- previously the flow would be creategame, tell client game is created, client join game, tell client game has been join, client the requests data tell client data has been requested then the client starts the game. This was confusing/buggy and hard to debug so to improve
+
+Now the creategame and joingame events happen in the same server handler, and once this happens the client receives the data from the same handler
+
+- Previously the current player  would send a move to the non current player, then this client would make a request to switchplayer and then the server would send a confirmation to the current player. The other player would also be notified that they could move. We also had a special event to mark player1 as the initial player
+
+Now we have the a client send the move to server which sends it to the other player
+Both client send a confirmation, and once there are two confirmations the change happens within the same event, this also happens within the init stage of the game
+
+toggleconfirmation is used to confirm which user has control of the board, and for switching players
+
+# this.system.scene issue
+
+This was a confusing issue to debug as it only happened within the event handler and the other properties seem to be fine.
+
+It also only happened after removing scene, and reinitiating it 
+
+## Fix
+The fix was a little hidden in the documentation 
+https://newdocs.phaser.io/docs/3.60.0/Phaser.Scenes.Events.DESTROY
+
+"
+You should destroy any resources that may be in use by your Scene in this event handler.
+"
+
+Reading the documentation a little closer it also states here that the the destroy event is sent when calling remove
+https://newdocs.phaser.io/docs/3.60.0/Phaser.Scenes.SceneManager#remove
+
+I'm listing the debugging process since I came to the same conclusion another way
+
+- look at debugger the value was okay in the object but in the event handler the property was missing 
+- It would be fine if I added a value like _scene, I took some time to look at the code as the scene was removed
+
+* this.scene refers to a sceneplugin which interfaces with a scenemanger 
+* scene plugin remove function just calls remove on scenemanager https://github.com/photonstorm/phaser/blob/v3.55.2/src/scene/ScenePlugin.js
+ 
+* Nothing really interesting here other then call scene.sys.destroy https://github.com/photonstorm/phaser/blob/v3.55.2/src/scene/SceneManager.js
+* some values set to null here https://github.com/photonstorm/phaser/blob/v3.55.2/src/scene/Systems.js 
+* It also sends the destroy event
+
+- I also notice that the gameobjects don't seem to be removed they are just removed from the screen
+- The event handlers might be a closure according to this, https://stackoverflow.com/questions/19655783/understanding-javascript-closure-with-event-handlers
+- I play around with the variables and confirm that the the gameobjects in the event handler are probably the ones that were previous there, and not the ones from the reinitiated scene
+- so in the end I need to cleanup all my changes after the scene is destroyed
+
 
 # Small Hit Zones
 This was fixed with two changes
@@ -25,8 +151,12 @@ Hit zone can be very small, this is also troublesome because some pieces are hid
 
 
 
+# Redis Changes
 
-
+1. We can save player1 and player2 id, but we have to keep socket.id constant
+2. userData is no longer sync between socket, so at certain points calling to redis to get latest data is important
+3. redis supports hashes, but I was unable to find a way to get the entire dictionary back. So instead we are use JSON module
+4. We have a set to keep track of which games are already created
 
 
 
