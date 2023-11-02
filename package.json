@@ -10,6 +10,7 @@
     "express-validator": "^7.0.1",
     "jsdom": "^22.1.0",
     "mysql": "^2.18.1",
+    "redis": "^4.6.10",
     "socket.io": "^4.7.2"
   },
   "scripts": {

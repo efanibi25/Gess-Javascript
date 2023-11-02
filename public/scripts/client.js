@@ -1,6 +1,6 @@
   
 export const gameID=window.location.pathname.split("/").pop()
-export const data={}
+export const data={"currentplayer":"waiting on server"}
 export const socket = io(`http://localhost:${server}`,{
     query: {
         socketId: getSocketID() || ''
@@ -9,12 +9,12 @@ export const socket = io(`http://localhost:${server}`,{
 
 
 export function getSocketID(){
-    return localStorage.getItem(`gess_game_${gameID}`);
+    return localStorage.getItem(`socketid_${gameID}`);
 }
 
 
 export function setSocketID(id){
-    localStorage.setItem(`gess_game_${gameID}`,id);
+    localStorage.setItem(`socketid_${gameID}`,id);
 }
 
 export function getPlayerNumber(){
@@ -22,7 +22,7 @@ export function getPlayerNumber(){
 }
 
 export async function getCurrentPlayer(){
-  return await emitPromise(socket,"getplayer")
+  return await emitPromise(socket,"getcurrentplayer")
 
 }
 export async function setCurrentPlayerIndicator(){
@@ -30,10 +30,11 @@ export async function setCurrentPlayerIndicator(){
     if(player==null){
       player="waiting on server"
       document.querySelector("#alertBar").textContent=player
-      return
     }
-    document.querySelector("#alertBar").textContent=`It is currently ${player} turn`
-
+    else{
+      document.querySelector("#alertBar").textContent=`It is currently ${player} turn`
+    }
+    data["currentplayer"]=player
 }
 
 export function setPlayerNumber(num){

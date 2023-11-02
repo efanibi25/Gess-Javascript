@@ -48,14 +48,17 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
     //manipulators
        
     allowDraggable(){
-        this.scene.sys.input.enable(this, new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains, false);
+        this.setInteractive( new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains)
         // this.setInteractive();
         this.scene.input.setDraggable([this], true)
         this.alignCenter()
+        this.draggable=true
     
         }
         disableDraggable(){
             this.disableInteractive()
+            this.draggable=false
+
         }
 
         revertPiece(){
@@ -186,20 +189,20 @@ revertNeighbors(){
             .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
             document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
             valid=false
-            setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
+            setTimeout(()=> data["currentplayer"], alertTimeout);
         }
 
         else if(Object.values(this.neighbors)
         .filter(ele=>ele.owner!="out").length!=9){
         document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
         valid=false
-        setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
+        setTimeout(()=> data["currentplayer"], alertTimeout);
     }
 
         else if(Object.values(this.neighbors).filter(ele=>ele.owner==this.block.board.color).length==0){
             document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
             valid=false
-            setTimeout(()=>setCurrentPlayerIndicator(), alertTimeout);
+            setTimeout(()=> data["currentplayer"], alertTimeout);
         }
 
         return valid
@@ -221,28 +224,28 @@ revertNeighbors(){
         if (dir==0){
             document.querySelector("#alertBar").textContent="You must Move at least 1 block"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);     
+            setTimeout(()=>data["currentplayer"], alertTimeout);     
         }
         else if (dir==null){
             document.querySelector("#alertBar").textContent="The Given Move is not valid"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);  
+            setTimeout(()=> data["currentplayer"], alertTimeout);  
         }
         else if (this.neighbors[dir].owner==null ){
             document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout); 
+            setTimeout(()=> data["currentplayer"], alertTimeout); 
         }
 
         else if (this.neighbors[dir].owner!=this.block.board.color ){
             document.querySelector("#alertBar").textContent="The Given Direction has the opponent piece"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"]() ,alertTimeout); 
+            setTimeout(()=> data["currentplayer"] ,alertTimeout); 
         }
         else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
             document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
             valid=false
-            setTimeout(()=>data["setCurrentPlayerIndicator"](), alertTimeout);    
+            setTimeout(()=> data["currentplayer"], alertTimeout);    
         }
         return valid
 

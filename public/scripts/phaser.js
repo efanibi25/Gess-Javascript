@@ -1,5 +1,5 @@
 
-import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setGameData} from "./client.js";
+import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setGameData,setSocketID} from "./client.js";
 import preload from "../scenes/board.js";
 
 let game =null;
@@ -8,12 +8,8 @@ let game =null;
  
 
   socket.on("connect", () => {
-    console.log("creategame")
-    //remove listeners because scene variable in event function is set to null on remove+ gameobject persist
-    socket.removeAllListeners("enableinteractive");
-    socket.removeAllListeners("disableinteractive");
-
-  emit("creategame",gameID,socket.id,getPlayerNumber());
+    setSocketID(socket.id)
+  emit("creategame",gameID);
     document.querySelector("#alertBar").textContent="waiting on other player"
 
 
@@ -25,7 +21,7 @@ let game =null;
   socket.on("creategame", () => {
     console.log("creategame")
 
-  emit("creategame",gameID,socket.id,getPlayerNumber());
+  emit("creategame",gameID);
     document.querySelector("#alertBar").textContent="waiting on other player"
     //remove listeners because scene variable in event function is set to null on remove+ gameobject persis
 

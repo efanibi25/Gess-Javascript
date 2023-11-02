@@ -1,7 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
-import { getPlayerNumber ,getCurrentPlayer,emit,socket, setCurrentPlayerIndicator,gameID} from "../scripts/client.js";
+import { getPlayerNumber ,getCurrentPlayer,emit,socket} from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -75,7 +75,7 @@ socket.on("restartboard", () => {
 
 socket.on("enableinteractive", () => {
     //scene resets
-    console.log("enable interactivety")
+    console.log("enable interactive")
 
 
 const dragfunct= (event, gameObject) =>
@@ -106,11 +106,12 @@ this.input.addListener('drag',dragfunct)
         this.input.removeListener("drag")
         let currentplayer=await getCurrentPlayer()
         let playeNumber=getPlayerNumber()
+        
         if(currentplayer!=playeNumber){
             gameObject.revertNeighbors()
             gameObject.hideNeighbors() 
             document.querySelector("#alertBar").textContent=`It is not ${playeNumber}'s turn`
-            setTimeout(async()=>document.querySelector("#alertBar").textContent=await setCurrentPlayerIndicator(), 4000);  
+            setTimeout(async()=>document.querySelector("#alertBar").textContent=data["currentplayer"], 4000);  
         }
         
         else if (!dropped)
@@ -174,7 +175,7 @@ socket.on("disableinteractive", () => {
     this.input.removeListener("drag")
     this.input.removeListener("dragend")
     this.input.removeListener("drop")
-    this.gessBoard.getDraggablePieces().filter(e=>e.InteractiveObject!=null).forEach(e=>e.removeInteractive())
+    this.gessBoard.getDraggablePieces().filter(e=>e.draggable==true).forEach(e=>e.disableDraggable())
 })
 
 
@@ -220,15 +221,6 @@ document.querySelector("#minus-button").addEventListener("click", this.handlemin
 
 }
   
-
-
-ready(){
-    emit("toggleinteractive")
-}
-destroy(){
-    console.log("dadad")
-}
-
 update(){
   }
 
