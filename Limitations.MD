@@ -3,7 +3,21 @@
 
 With the current implementation it is possible that the user could change the input to the socket, and present a invalid move
 
-After some research I found that they may be a few ways to medigate this 
+After some research, I found that there may be a few ways to meditate this 
+
+update:
+
+I decided to go with server base confirmation
+snapshot-interpolation is very interesting, but I think it is very cool, but I think it is overkill
+for a board game
+
+Once the cache system is made the steps for making a move will be
+- The server cache system for the game will serve as source of truth
+- user sends the move to the server and the server checks if move is legal, before updating or rejecting
+- the second user does not receive the move until it is accepted
+- Once both users confirm the move the game will switch players
+
+
 <s>
 ## Code Obfuscation
 One idea would be simply to run a tool like javascript-obfuscator as a webpack plugin. This would make the code unreadable to humans, and thus increase the difficulty of cheating
