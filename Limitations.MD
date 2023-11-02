@@ -1,11 +1,73 @@
 
+
+This files list previous limitations/ fixes to this problems
+
+
+# env variables
+
+This was fixed by using a inline script, I like this method a little bit more since it keeps the dom clean
+
+<s>
+The client side javascript server can't accept env variables for information like the socket.io server address
+</s>
+
+# Small Hit Zones
+This was fixed with two changes
+
+1. Phaser when setting an object as interactive sets a square around that object by default to handle input, but you can modify
+this object. I modified the object to try to take the entire square a piece is in or most of it. This way it is easier to grab the piece, even if it center is hidden
+2. Taking inspiration from fps, the piece is shrunk while mouse is held down on it making it easier to target the correct drop zone.
+We also have some convience features like highlighting of start and end zones to make it easier to keep track of movement
+<s>
+Drop zone for pieces can be very small
+Hit zone can be very small, this is also troublesome because some pieces are hidden so getting the right area for a nine square piece can be hard
+</s>
+
+
+
+
+
+
+
+
+
+# Better Support of Disconnect
+This was fixed with redis and hardcoded socket.id to games
+
+Which allows for us to use matching socket.id to match playernumber
+
+<s>
+A player could switch the playernumber, and take over for another player
+- socket id change every connection
+- we are trusting the localdata for restoring which player is which
+</s>
+
+# Socket ID
+This was fixed by following guide to generate socket.sid
+
+We have to use middleware to generate socket.id
+since 3.0 
+
+https://github.com/socketio/socket.io/discussions/4190
+<s>
+Redis Now saves the playerid, but this causes issue on re-entry since by default socket.io gets a new ID
+</s>
+
+
+# Incognito
+Currently the socket.id is saved to localdata
+If a user uses incognito and closes the browser, the game will no longer be accecible to them since the won't have a matching socket.id and a new one will be geneerated
+
+## Fix
+Probably need some sort of account system to tie a socket id to allow for restoration of games
+
 # Cheating 
 
 With the current implementation it is possible that the user could change the input to the socket, and present a invalid move
 
 After some research, I found that there may be a few ways to meditate this 
 
-# Update
+## Update
 
 I decided to go with server base confirmation
 snapshot-interpolation is very interesting, but I think it is very cool, but I think it is overkill
