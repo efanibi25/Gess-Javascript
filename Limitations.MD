@@ -1,10 +1,10 @@
-<ins>
+
 # Cheating 
 
 With the current implementation it is possible that the user could change the input to the socket, and present a invalid move
 
 After some research I found that they may be a few ways to medigate this 
-
+<s>
 ## Code Obfuscation
 One idea would be simply to run a tool like javascript-obfuscator as a webpack plugin. This would make the code unreadable to humans, and thus increase the difficulty of cheating
 ### Upsides
@@ -56,6 +56,6 @@ We also don't have physics or other complexities in this game
 
 ## Move Obfuscation
 https://incolumitas.com/2014/01/26/the-art-of-cheating-making-a-chess-com-chess-bot-using-a-unusual-approach/
-</ins>
+</s>
 
 
