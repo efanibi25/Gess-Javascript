@@ -1,7 +1,7 @@
 const httpServer= require("http").createServer();
 const {addGameList,getGame, updateGame}= require("./redis.js")
 const {BoardMax,squaresCount,sideborder}=require("../res/player.js")
-const path = require('path');
+const {board}=require("./board.js")
 require('dotenv').config(".env")
 
 // const gessBoard =require("../public/classes/board.js")
@@ -37,7 +37,6 @@ io.use((socket, next) => {
 io.on('connection', (socket) => {
   console.log(`a user connected: ${socket.id}`);
   socket.on("creategame", async (room,callback) => {
-
     console.log(`creating game and joining ${room}`);
 
 
@@ -54,33 +53,33 @@ io.on('connection', (socket) => {
 //join game
   let join=(async()=>{
     let player=null
-    console.log(socket.userRoom)
 
     if(socket.userRoom['player1']==socket.id){
       player="player1"
-      console.log(["player1",socket.id,"has joined",room])
       socket.join(room);
       socket.playerID=socket.id
       socket.otherplayer="player2"
       socket.usersByRoom=await updateGame(room,{
         "player1":socket.id
       })
+      socket.board=new board(socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Pieces"],1)
+    
     }
     else if(socket.userRoom['player2']==socket.id){
       player="player2"
-      console.log(["player2",socket.id,"has joined",room])
       socket.join(room);
       socket.playerID=socket.id
       socket.otherplayer="player1"
       socket.usersByRoom=await updateGame(room,  {
         "player2":socket.id
       })
+      socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],2)
+
     }
 
   
     else if(! socket.userRoom["player1"]){
       player="player1"
-      console.log(["player1",socket.id,"has joined",room])
       socket.join(room);
       socket.playerID=socket.id
       socket.otherplayer="player2"
@@ -89,28 +88,33 @@ io.on('connection', (socket) => {
         "player1":socket.id
       }
       )
+      socket.board=new board(socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Pieces"],1)
+
     }
   
   
     else if(! socket.userRoom["player2"]){
       player="player2"
-      console.log(["player2",socket.id,"has joined",room])
       socket.join(room);
       socket.playerID=socket.id
       socket.otherplayer="player1"
 
       socket.usersByRoom=await updateGame(room,  {
       "player2":socket.id
-    })
+    }
+    )
+    socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],2)
+
     } 
     else{
       return
     }
+    socket.board.validate(70,114)
 
-    socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
+    // socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
 
-  
-    console.log(['current room join',socket.userRoom]);
+    console.log([player,socket.id,"has joined",room])
+
 
 
   })
@@ -172,9 +176,6 @@ io.on('connection', (socket) => {
     socket.ready=true
     console.log(["ready to set interactive",socket.room,socket.userRoom!=null])
     let sockets=await io.in(socket.room).fetchSockets()
-    sockets.forEach((e,i)=>{
-      console.log(["ready status",`${i+1}/${sockets.length}`,e.id,e.ready])
-    })
     if(!socket.userRoom){
       callback({
         response: "ok"

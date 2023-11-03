@@ -29,7 +29,6 @@ create() {
         this.gessBoard.board.forEach((e)=>{
             e.piece.removeAllListeners()
             e.piece=null
-            console.log(e.zone)
             e.zone!=null? e.zone.removeAllListeners():null 
             e.zone=null
             e.removeAllListeners()
