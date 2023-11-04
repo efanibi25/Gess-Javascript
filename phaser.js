@@ -83,7 +83,6 @@ app.post('/join_game/', function (req, res) {
 
 
 app.get('/game/:key', function (req, res) {
-  console.log(process.env.SERVER_PORT)
   key={"key":req.params.key,"server":process.env.SERVER_PORT}
   res.render('game',key)
 })

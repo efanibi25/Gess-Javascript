@@ -117,11 +117,11 @@ export default class gessBoard extends Phaser.GameObjects.Container {
                 //use raw index
                 let piece=this.board[i].piece
                 this.board[i].addZone()
-                if (myPieces.has(i)==true){
+                if (myPieces.has(i+1)==true){
                     piece.owner=this.color   
                 } 
                 //just show other player pieces
-                else if (otherPlayerPieces.has(i)==true){
+                else if (otherPlayerPieces.has(i+1)==true){
                     piece.owner=this.otherColor  
                 } 
             

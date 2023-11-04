@@ -28,7 +28,7 @@ checkGamePiece(){
 
 class piece{
     constructor(index,row,col,board){
-        this.index=index+1
+        this.index=index
         this.row=row+1
         this.col=col+1
         this.neighborsDexes=[0,-1,1,-squaresCount-sideborder,
@@ -226,20 +226,18 @@ class board{
 
 
     addPieces(){
-        let i=0  
-        let gamePieceCount=1
+        let i=0
         while ( i< Math.pow(squaresCount+sideborder,2)) { 
             let block=this.board[i]
             if(block.checkGamePiece()){
                 block.piece= new piece(block.index,block.row,block.col,this)
-                if(this.myPieces.has(gamePieceCount)){
+                if(this.myPieces.has(i+1)){
                     block.piece.owner="mine"
                 }
-                else if(this.opponentPieces.has(gamePieceCount)){
+                else if(this.opponentPieces.has(i+1)){
                     block.piece.owner="opponent"
                 }
             
-                gamePieceCount=gamePieceCount+1
             }
             i=i+1
 

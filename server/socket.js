@@ -110,7 +110,6 @@ io.on('connection', (socket) => {
     else{
       return
     }
-    // socket.board.validate(70,114)
 
     socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
 
@@ -155,7 +154,6 @@ io.on('connection', (socket) => {
       let game=await getGame(socket.room)
       let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateSets(startdex,endex)}
       socket.usersRoom=await updateGame(socket.room,update)
-
       io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
@@ -247,12 +245,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', async () => {
     console.log('user disconnected saving room');
     //some changes for without redux
-    if(socket.usersByRoom){
-      temp={}
-      temp[socket.playerID]=null
-      temp["moves"]=0
-      await updateGame(socket.room,temp)
-    }
     (await io.in(socket.room).fetchSockets()).forEach(e=>e.emit("creategame"))
 
   });
@@ -263,7 +255,7 @@ io.on('connection', (socket) => {
 // });
 
 // io.of("/").adapter.on("join-room", (room, id) => {
-//   console.log(`socket ${id} has joined room ${room}`);
+//   console.log(`socket ${id} has joined room ${room}`);1,; c
 // });
 
 
