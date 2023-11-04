@@ -65,11 +65,11 @@ sendmove could be troublesome too, the client is sent up to retry message after 
 The number of moves should stay the same no matter, I think the biggest issue is that repeating board moves or player set changes could cause issue. 
 ## Example
 Move piece only 1 block
-![Alt text](image.png)
+![Alt text](screens/image.png)
 The code for handle updating the board won't block, even though the game internal board has been updating. 
 
 And the piece is still valid after the move
-![Alt text](image-1.png)
+![Alt text](screens/image-1.png)
 
 
 
