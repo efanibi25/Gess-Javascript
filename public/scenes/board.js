@@ -74,6 +74,10 @@ socket.on("sendmove", (startdex,endex,test=true) => {
 
 socket.on("enableinteractive", () => {
     //scene resets
+    console.log("disable previously enabled")
+    this.input.removeListener("drag")
+    this.input.removeListener("dragend")
+    this.input.removeListener("drop")
     console.log("enable interactive")
 
 
