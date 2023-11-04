@@ -2,7 +2,7 @@
 
 This files list previous limitations/issues fixes to this problems
 
-# Handling Player Switch
+# Update on Handling Player Switch 11/4/2023
 
 Previously after the current player made a move. The game would set the current player to null, and the server would send the move to the other player. At one point the current player switch was handled by switching that value with a otherplayer value. So at that point having the the switch happen only once was very important as to not switch back to the same player. This was simplified to be controlled by the a move counter
 
@@ -17,33 +17,16 @@ I believe socket.io loses messages from client to server on disconnect, so this 
 
 
 
-
-
-
-
-# something about the shutdown process/side effects like
-# listeners and timeout
-
-# talk about removing ready status, just send updates for switching players and interactivty passed on client seperated
-
-
-
-
-
-
-
-
-Both player would then send a confirmation to the server to trigger a player switch
-
-
-
-# Server support
+# Server support 11/3/2023
 Handling more clients could be improved by using cluster support
-
 https://socket.io/docs/v4/tutorial/step-9
 
 
-# Connection State Recovery
+
+
+
+
+# Connection State Recovery  Info 11/2/2023
 "
 a Socket.IO client is not always connected
 a Socket.IO server does not store any event
@@ -70,15 +53,54 @@ https://socket.io/docs/v4/tutorial/step-6
 https://socket.io/docs/v4/tutorial/step-7
 
 
-# At Least Once vs Exactly Once
-Most messages should be able to handle client retries
 
-This again could cause issues during the sendmove stage for example
-- player 1 sends move
-- player 2 timeout and the messages is retry
-- but  each time the number of moves is updated
 
-We could update the number of moves after sendmove is succesful, but I'm not sure if the data would be guaranteed to be up to date once the toggleinteractive confirmation happens (this is where the player switch happens)
+# At Least Once vs Exactly Once 11/2/2023
+https://socket.io/docs/v4/delivery-guarantees#at-least-once
+
+
+It seems that the only places that might cause issue are toggle interactivey, I think it might be possible that the enableinteractvity message could be sent twice. This could be bad, because of course duplicating listeners can lead to issue. This could be fix on the client by removing the liseners before enabling them
+
+sendmove could be troublesome too, the client is sent up to retry message after time out. So a possiblility is that the redis server could go out if this happens then of course the client would keep retrying, as they would never get the confirmation. 
+The number of moves should stay the same no matter, I think the biggest issue is that repeating board moves or player set changes could cause issue. 
+## Example
+Move piece only 1 block
+![Alt text](image.png)
+The code for handle updating the board won't block, even though the game internal board has been updating. 
+
+And the piece is still valid after the move
+![Alt text](image-1.png)
+
+
+
+This would might be fixed of course on reload, but it could lead to confusion for users
+
+At least we know that events will be received in order
+https://socket.io/docs/v4/delivery-guarantees
+
+
+
+
+# something about the shutdown process/side effects like
+# listeners and timeout
+
+# talk about removing ready status, just send updates for switching players and interactivty passed on client seperated
+
+
+
+
+
+
+
+
+Both player would then send a confirmation to the server to trigger a player switch
+
+
+
+
+
+
+
 
 
 
