@@ -50,11 +50,14 @@ class piece{
         return out
         }
 
-    checkRing(){
-            this.getNeighbors()
-        
+    checkRing(opp=false){
+            this.getNeighbors()  
             if(this.owner==null){
+                if(!opp)
                 return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner=="mine").length==8
+                else
+                return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner=="opponent").length==8
+
             }
             return false
         }
@@ -63,12 +66,13 @@ class piece{
     
 }
 
-
+//outside blocks are set to false
 class board{
-    constructor(pieces,rings,opponent,number){
+    constructor(pieces,opponent,rings,oppRings,number){
         this.myPieces=new Set(pieces)
         this.opponentPieces=new Set(opponent)
         this.rings=new Set(rings)
+        this.opponentRings=new Set(oppRings)
         this.board=[]
         this.createBoard()
         this.addPieces()
@@ -93,12 +97,51 @@ class board{
     //rings
 
     
+    checkLose(index){
+        let rings=this.updateRings(index)
+        if(rings.size==0&&this.number==1) return {"player1Rings":[],"winner":"Player2"}
+        else if(this.number==1) return {"player1Rings":Array.from(rings)}
+        else if(rings.size==0&&this.number==2) return {"player2Rings":[],"winner":"Player1"}
+        else if(this.number==2) return {"player2Rings":Array.from(rings)}
+    }
+
+
+    checkWin(index){
+        let rings=this.updateOpponentRings(index)
+        if(rings.size==0&&this.number==1) return {"player2Rings":[],"winner":"Player1"}
+        else if(this.number==1) return {"player2Rings":Array.from(rings)}
+        else if(rings.size==0&&this.number==2) return {"player1Rings":[],"winner":"Player2"}
+        else if(this.number==2) return {"player1Rings":Array.from(rings)}
+    }
     
     updateRings(index){
-        let rings=[...this.rings,...input].filter((e)=>e=!null)
-        this.rings=new Set(rings.filter(e=>e.checkRing()==true))
-        return this.ring
+        let potentialRings=[...Array.from(this.rings),...this.getRingNeighbors(index)]
+        this.rings=new Set( potentialRings.map(e=>this.getPiece(e)).filter(e=>e!=null&&e!=false &&e.checkRing()==true).
+        map(e=>e.index))
+        return this.rings
+
       }
+
+
+
+      updateOpponentRings(index){
+        let potentialRings=[...Array.from(this.opponentRings),...this.getRingNeighbors(index)]  
+        this.opponentRings=new Set( potentialRings.map(e=>this.getPiece(e)).filter(e=>e!=null&&e!=false &&e.checkRing(true)==true).
+        map(e=>e.index))
+        return this.opponentRings
+
+      }
+
+
+      getRingNeighbors(index){
+        let piece=this.getPiece(index)
+        piece.getNeighbors()
+        return Object.keys(piece.neighbors).filter(ele=>ele!=0).reduce((accumulator, currentValue)=>{
+            accumulator.push(piece.neighbors[currentValue].index)
+            piece.neighbors[currentValue].getNeighbors()
+            return accumulator
+        },[piece.index])
+    }
 
     addPieces(){
         let i=0
@@ -185,9 +228,12 @@ class board{
     }
 //update
     updateBoard(start,end){
-        let update=this.updateSets(start,end)
+        let set=this.updateSets(start,end)
         this.updatePieces(start,end)
-        return update
+        let lost=this.checkLose(end)
+        let win=this.checkWin(end)
+        //win should overwrite lost
+        return {...lost,...win,...set}
     }
 
     updatePieces(start,end){

@@ -10,6 +10,8 @@ Which mainly leave the issue of data synconization
 
 Which redis is able to solve, as soon as valid move is sent redis is updated. This also serves as the sourch of truth for a game, and is not something the end user can modfiy. If a user disconnects and has to rejoin the game, this is where they will pull information about what the board looks like, and which player is current.
 
+It also makes for much easier development as I can mostly work in one window for a lot of developement
+
 ## Issue
 I've realized though that if a player disconnects then they would not receive the latest board until the reload the page, a better experience would be to implement some message guarnatee from the server. So that it will retry to send the data about the changes until the client accepts it. 
 

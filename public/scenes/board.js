@@ -52,8 +52,13 @@ create() {
 
     //check if player should have control
     this.events.once('preupdate', function() {
-        emit("toggleinteractive")
+        emit("gamestate")
     });
+
+socket.on("winner", (player) => {
+    document.querySelector("#alertBar").textContent=`${player} has won the game`
+})
+
     
 
     socket.on("sendalert", (message) => {
@@ -66,8 +71,8 @@ socket.on("sendmove", (startdex,endex,test=true) => {
     this.gessBoard.scene=this
    this.gessBoard.movePieceAuto(startdex,endex)
    if (test){
-    emit("toggleinteractive")
-    emit("check rings",endex)
+    emit("gamestate")
+    emit("checkrings",endex)
    }
 })
 

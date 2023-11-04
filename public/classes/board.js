@@ -26,7 +26,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     create(){
         this.createBoard()
         this.upDateGameBlocks()
-        this.firstRing()
         this.scene.add.existing(this);
     }
 

@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
         "player1":socket.id
       })
       socket.board=new board(socket.usersByRoom["player1Pieces"],
-      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],1)
+      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],socket.usersByRoom["player2Rings"],1)
     
     }
     else if(socket.userRoom['player2']==socket.id){
@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
         "player2":socket.id
       })
       socket.board=new board(socket.usersByRoom["player2Pieces"],
-      socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Rings"],2)
+      socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Rings"],socket.usersByRoom["player1Rings"],2)
 
     }
 
@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
       }
       )
       socket.board=new board(socket.usersByRoom["player1Pieces"],
-      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],1)
+      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],socket.usersByRoom["player2Rings"],1)
 
     }
   
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
     }
     )
     socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],
-    socket.usersByRoom["player2Rings"],2)
+    socket.usersByRoom["player2Rings"],socket.usersByRoom["player1Rings"],2)
 
     } 
     else{
@@ -170,7 +170,9 @@ io.on('connection', (socket) => {
       endex= socket.board.getMaxMovement(startdex,endex)
       let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateBoard(startdex,endex)}
       socket.usersRoom=await updateGame(socket.room,update)
-      io.to(socket.room).emit("sendmove",startdex,endex)
+      //winner needs to be picked based on current user
+      if(socket.userRoom["winner"]!=null) io.to(socket.room).emit("winner",socket.userRoom["winner"])
+      else io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
       });    
@@ -205,14 +207,8 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on("checkrinf", async(callback) => {
-
-
-  
-
-  })
  
-  socket.on("toggleinteractive", async(callback) => {
+  socket.on("gamestate", async(callback) => {
     console.log(["ready to set interactive",socket.room,socket.userRoom!=null])
     let sockets=await io.in(socket.room).fetchSockets()
     if(!socket.userRoom){
@@ -222,11 +218,12 @@ io.on('connection', (socket) => {
        return
     
     }
-  
+
      
       let game=await getGame(socket.room)
       if (game["winner"]!=null){
-        console.log("winner has been picked")
+        io.to(socket.room).emit("winner",game["winner"])
+        return  
       }
       
       //switch player
