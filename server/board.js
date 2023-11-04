@@ -1,5 +1,4 @@
 const {BoardMax,squaresCount,sideborder}=require("../res/player.js")
-const {updateGame} = require("./redis.js")
 class block
 { 
     
@@ -42,6 +41,7 @@ class piece{
 
     getNeighbors(){
         let out={}
+        if (this.neighbors) return  this.neighbors
         for (const ele of this.neighborsDexes){
             let piece=this.board.getPiece(this.index+ele)
             out[ele]=piece   
@@ -127,6 +127,40 @@ class board{
     return true
     }
 
+    updateBoard(start,end){
+        let update=this.updateSets(start,end)
+        this.updatePieces(start,end)
+        return update
+    }
+
+    updatePieces(start,end){
+        let startblock=this.getBlock(start)
+        let endblock=this.getBlock(end)
+
+        let colordict={}
+
+        //save info
+        for(const key of Object.keys(startblock.piece.getNeighbors())){
+            colordict[key]=startblock.piece.neighbors[key].owner
+        }
+        //clear board
+        for(const val of Object.values(startblock.piece.getNeighbors())){
+            val.owner=null
+        }
+
+        for(const val of Object.values(endblock.piece.getNeighbors()).filter(e=>e.owner=="opponent")){
+            val.owner=null
+        }
+
+        Object.keys(colordict).filter(key=>colordict[key]!=null).forEach(key=>{
+            let piece= this.getPiece(end+parseInt(key))
+            if(piece)piece.owner=colordict[key]
+        }
+            
+    )
+        
+
+    }
 
     updateSets(start,end){
         let startblock=this.getBlock(start)

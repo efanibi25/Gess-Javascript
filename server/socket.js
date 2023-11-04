@@ -170,7 +170,7 @@ io.on('connection', (socket) => {
     else{
       let game=await getGame(socket.room)
       endex= socket.board.getMaxMovement(startdex,endex)
-      let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateSets(startdex,endex)}
+      let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateBoard(startdex,endex)}
       socket.usersRoom=await updateGame(socket.room,update)
       io.to(socket.room).emit("sendmove",startdex,endex,false)
       callback({
