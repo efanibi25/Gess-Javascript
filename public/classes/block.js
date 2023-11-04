@@ -39,6 +39,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
     }
   
+    //modifcaiton
     addBlockColor(){
         if(!showblockColor){
             return
@@ -51,10 +52,6 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
             this.setFillStyle(color)
 
         }
-    }
-    addExtra(){
-        this.addZone()
-        this.addText()
     }
 
 
@@ -75,19 +72,20 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }
+
+    makeinvisible(){
+        this.setFillStyle(0xffffff,0)
+    }
     
 
-  
 
-
+    //helpers
     initPiece(){
         this.piece=new boardPiece(this.scene,0,0,this.width/5,this.index,this)
         this.piece.alignCenter()
         return this.piece
     }
-    makeinvisible(){
-        this.setFillStyle(0xffffff,0)
-    }
+  
 
     getNeighbors(){
         let out=[]
