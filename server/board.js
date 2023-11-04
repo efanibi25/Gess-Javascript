@@ -101,10 +101,38 @@ class board{
         return true
     }
 
+    validateMove(start,end){
+    let dir=this.getDir(start,end)
+    let startblock=this.getBlock(start)
+    if (dir==0){
+        console.log("You must Move at least 1 block")  
+        return false
+    }
+    else if (dir==null){
+        console.log("invalid movemeent")
+        return false
+    }
+    else if (startblock.piece.neighbors[dir].owner==null ){
+        console.log("The Given Direction does not have a piece")
+        return false
+    }
+
+    else if (startblock.piece.neighbors[dir].owner=="opponent" ){
+        console.log("The Given Direction has the opponent piece")
+        return false
+    }
+    else if(startblock.piece.neighbors[dir].owner==null && Math.abs((start-end)/dir)>3){
+        return false;    
+    }
+    return true
+
+    }
+
 
     updateSets(start,end){
         let startblock=this.getBlock(start)
         let endblock=this.getBlock(end)
+        
         startblock.piece.getNeighbors()
         endblock.piece.getNeighbors()
         let colordict={}
@@ -155,7 +183,9 @@ class board{
 
 
 
-    getDir(startblock,endblock){
+    getDir(start,end){
+        let startblock=this.getBlock(start)
+        let endblock=this.getBlock(end)
         let rowchange=endblock.row-startblock.row
         let colchange=endblock.col-startblock.col
         if(colchange==0 && rowchange==0){
@@ -263,9 +293,9 @@ class board{
     }
     return block
 }
-}
-    
 
+    
+}
 
 
 

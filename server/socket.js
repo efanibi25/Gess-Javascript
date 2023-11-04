@@ -144,9 +144,28 @@ io.on('connection', (socket) => {
     callback({
       response: "ok"
     });
+
+    
+
+    
     io.to(socket.id).emit("enableinteractive")
 
     }
+
+
+    else if(!socket.board.validateMove(startdex,endex)){
+      io.to(socket.id).emit("sendmove",startdex,startdex,false);
+      io.to(socket.id).emit("sendalert","The Given Move is not valid");
+      callback({
+        response: "ok"
+      });
+  
+      
+  
+      
+      io.to(socket.id).emit("enableinteractive")
+  
+      }
 
 
 

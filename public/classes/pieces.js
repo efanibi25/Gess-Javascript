@@ -188,32 +188,7 @@ revertNeighbors(){
         if(!checkValidMove){
             return valid
         }
-        if (dir==0){
-            document.querySelector("#alertBar").textContent="You must Move at least 1 block"
-            valid=false
-            setTimeout(()=>data["currentplayer"], alertTimeout);     
-        }
-        else if (dir==null){
-            document.querySelector("#alertBar").textContent="The Given Move is not valid"
-            valid=false
-            setTimeout(()=> data["currentplayer"], alertTimeout);  
-        }
-        else if (this.neighbors[dir].owner==null ){
-            document.querySelector("#alertBar").textContent="The Given Direction does not have a piece"
-            valid=false
-            setTimeout(()=> data["currentplayer"], alertTimeout); 
-        }
-
-        else if (this.neighbors[dir].owner!=this.block.board.color ){
-            document.querySelector("#alertBar").textContent="The Given Direction has the opponent piece"
-            valid=false
-            setTimeout(()=> data["currentplayer"] ,alertTimeout); 
-        }
-        else if(this.owner==null && Math.abs((this.newBlock.index-this.block.index)/dir)>3){
-            document.querySelector("#alertBar").textContent="You can only move 3 blocks in a direction without a center piece"
-            valid=false
-            setTimeout(()=> data["currentplayer"], alertTimeout);    
-        }
+        
         return valid
 
 
