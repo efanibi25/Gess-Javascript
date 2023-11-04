@@ -173,6 +173,7 @@ io.on('connection', (socket) => {
     }
    
   })
+  io.to(socket.id).emit("enableinteractive")
 
 
 

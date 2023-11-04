@@ -2,8 +2,40 @@
 
 This files list previous limitations/issues fixes to this problems
 
+# Handling Player Switch
+
+Previously after the current player made a move. The game would set the current player to null, and the server would send the move to the other player. At one point the current player switch was handled by switching that value with a otherplayer value. So at that point having the the switch happen only once was very important as to not switch back to the same player. This was simplified to be controlled by the a move counter
+
+Which mainly leave the issue of data synconization 
+
+Which redis is able to solve, as soon as valid move is sent redis is updated. This also serves as the sourch of truth for a game, and is not something the end user can modfiy. If a user disconnects and has to rejoin the game, this is where they will pull information about what the board looks like, and which player is current.
+
+## Issue
+I've realized though that if a player disconnects then they would not receive the latest board until the reload the page, a better experience would be to implement some message guarnatee from the server. So that it will retry to send the data about the changes until the client accepts it. 
+
+I believe socket.io loses messages from client to server on disconnect, so this would have to be implemented manually
+
+
+
+
+
+
+
 # something about the shutdown process/side effects like
 # listeners and timeout
+
+# talk about removing ready status, just send updates for switching players and interactivty passed on client seperated
+
+
+
+
+
+
+
+
+Both player would then send a confirmation to the server to trigger a player switch
+
+
 
 # Server support
 Handling more clients could be improved by using cluster support
