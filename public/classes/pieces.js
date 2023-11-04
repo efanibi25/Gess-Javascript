@@ -66,10 +66,6 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             Phaser.Display.Align.In.Center(this,this.block)
         }    
 
-        setNewBlock(block){
-            this.newBlock=block
-        }
-
 
         alignCenter(){
             Phaser.Display.Align.In.Center(this,this.block)
@@ -182,17 +178,6 @@ revertNeighbors(){
     
 
 
-    testValidBlockMove(){
-        let valid=true
-        let dir=this.getDir()
-        if(!checkValidMove){
-            return valid
-        }
-        
-        return valid
-
-
-    }
 
  
 
@@ -358,9 +343,6 @@ handlePointerDown(){
         }
         target.removeZoneLine()
     }
-
-
-  
 
 }
 
