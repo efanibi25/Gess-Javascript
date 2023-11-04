@@ -60,7 +60,8 @@ io.on('connection', (socket) => {
       socket.usersByRoom=await updateGame(room,{
         "player1":socket.id
       })
-      socket.board=new board(socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Pieces"],1)
+      socket.board=new board(socket.usersByRoom["player1Pieces"],
+      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],1)
     
     }
     else if(socket.userRoom['player2']==socket.id){
@@ -71,7 +72,8 @@ io.on('connection', (socket) => {
       socket.usersByRoom=await updateGame(room,  {
         "player2":socket.id
       })
-      socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],2)
+      socket.board=new board(socket.usersByRoom["player2Pieces"],
+      socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Rings"],2)
 
     }
 
@@ -86,7 +88,8 @@ io.on('connection', (socket) => {
         "player1":socket.id
       }
       )
-      socket.board=new board(socket.usersByRoom["player1Pieces"],socket.usersByRoom["player2Pieces"],1)
+      socket.board=new board(socket.usersByRoom["player1Pieces"],
+      socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Rings"],1)
 
     }
   
@@ -101,7 +104,8 @@ io.on('connection', (socket) => {
       "player2":socket.id
     }
     )
-    socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],2)
+    socket.board=new board(socket.usersByRoom["player2Pieces"],socket.usersByRoom["player1Pieces"],
+    socket.usersByRoom["player2Rings"],2)
 
     } 
     else{
@@ -169,7 +173,8 @@ io.on('connection', (socket) => {
       io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
-      });
+      });      io.to(socket.id).emit("enableinteractive")
+
     }
    
   })

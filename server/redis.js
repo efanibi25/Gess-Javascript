@@ -1,5 +1,5 @@
 const redis = require('redis');
-const {PLAYER1_PIECES,PLAYER2_PIECES}=require("../res/player.js")
+const {PLAYER1_PIECES,PLAYER2_PIECES,PLAYER2_RINGS,PLAYER1_RINGS}=require("../res/player.js")
 
 const client = redis.createClient({socket: {
     connectTimeout:500
@@ -19,8 +19,11 @@ async function addGameList(key){
                   "player2":null,
                   "player1Pieces":(Array.from(PLAYER1_PIECES)),
                   "player2Pieces":(Array.from(PLAYER2_PIECES)),
+                  "player1Rings":(Array.from(PLAYER1_RINGS)),
+                  "player2Rings":(Array.from(PLAYER2_RINGS)),
                   "currentplayer":null,
                   "moves":0,
+                  "winner":null
 
             }))
     }

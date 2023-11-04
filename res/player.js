@@ -7,8 +7,12 @@ const PLAYER2_PIECES=new Set([309, 312, 315, 318, 321, 324,
     327, 378, 380, 382, 383, 384, 385, 386, 387, 387, 388, 389, 391, 393, 
     399, 400, 401, 403, 405, 406, 407, 408, 410, 412, 414, 415, 416, 422, 
     424, 426, 427, 428, 429, 430, 431, 432, 433, 435, 437, 439])
+
+const PLAYER1_RINGS=new Set([79])
+const PLAYER2_RINGS=new Set([409])
+
  const BoardMax=484
 const squaresCount=18
 const sideborder=4
 
-module.exports={PLAYER1_PIECES,PLAYER2_PIECES,BoardMax,squaresCount,sideborder}
+module.exports={PLAYER1_PIECES,PLAYER2_PIECES,PLAYER1_RINGS,PLAYER2_RINGS,BoardMax,squaresCount,sideborder}

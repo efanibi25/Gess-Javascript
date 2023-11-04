@@ -50,15 +50,25 @@ class piece{
         return out
         }
 
+    checkRing(){
+            this.getNeighbors()
+        
+            if(this.owner==null){
+                return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner=="mine").length==8
+            }
+            return false
+        }
+
    
     
 }
 
 
 class board{
-    constructor(pieces,opponent,number){
+    constructor(pieces,rings,opponent,number){
         this.myPieces=new Set(pieces)
         this.opponentPieces=new Set(opponent)
+        this.rings=new Set(rings)
         this.board=[]
         this.createBoard()
         this.addPieces()
@@ -80,6 +90,15 @@ class board{
         }
     }
 
+    //rings
+
+    
+    
+    updateRings(index){
+        let rings=[...this.rings,...input].filter((e)=>e=!null)
+        this.rings=new Set(rings.filter(e=>e.checkRing()==true))
+        return this.ring
+      }
 
     addPieces(){
         let i=0

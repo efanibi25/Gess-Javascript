@@ -201,24 +201,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
   
-      firstRing(){
-        if(this.player==1){
-            this.rings.push(this.getPiece(79))
-        }
-        else{
-            this.rings.push(this.getPiece(409))
-        }
-      }
-      checkRings(input=null){
-        if(input==null){
-            input=[]
-        }
-        this.rings=[...this.rings,...input].filter((e)=>e=!null)
-        console.log(this.rings)
-        this.rings=this.rings.filter(e=>e.checkRing()==true)
-        console.log(["rings check",this.rings])
-        return this.rings
-      }
+ 
+    
 
 
 

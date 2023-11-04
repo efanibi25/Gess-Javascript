@@ -108,14 +108,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
 //checkers
 
-checkRing(){
-    this.getNeighbors()
 
-    if(this.owner==null){
-        return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner==this.block.board.color).length==8
-    }
-    return false
-}
 
 checkDraggable(){
     let col=this.block.col
