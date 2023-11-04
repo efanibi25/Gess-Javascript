@@ -173,12 +173,11 @@ io.on('connection', (socket) => {
       io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
-      });      io.to(socket.id).emit("enableinteractive")
+      });    
 
     }
    
   })
-  io.to(socket.id).emit("enableinteractive")
 
 
 
