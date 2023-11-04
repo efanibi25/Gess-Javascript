@@ -9,7 +9,7 @@ export const socket = io(`http://localhost:${server}`,{
       }
   });
 
-
+//local storage
 export function getSocketID(){
     return localStorage.getItem(`socketid_${gameID}`);
 }
@@ -23,15 +23,19 @@ export function getPlayerNumber(){
     return localStorage.getItem(`player_${gameID}`);
 }
 
-export async function getCurrentPlayer(){
-  let player=await emitPromise(socket,"getcurrentplayer")
+export function setPlayerNumber(num){
+  (num!=null && num!=undefined) ? localStorage.setItem(`player_${gameID}`,num) : null
+}
+
+// server retrival
+export async function getCurrentPlayer(forced){
+  let player=await emitPromise(socket,"getcurrentplayer",forced)
   data["currentplayer"]=player
   return player
 
-
 }
 export async function setCurrentPlayerIndicator(){
-  let player=await getCurrentPlayer()
+  let player=await getCurrentPlayer(true)
     if(player==null){
       player="waiting on server"
       data["playerstatus"]=player
@@ -44,9 +48,6 @@ export async function setCurrentPlayerIndicator(){
     }
 }
 
-export function setPlayerNumber(num){
-    (num!=null && num!=undefined) ? localStorage.setItem(`player_${gameID}`,num) : null
-}
 
 
 export function setGameData(key,value){
@@ -54,7 +55,7 @@ export function setGameData(key,value){
 }
 
 
-
+//emit
 
 export function emit(event, ...args) {
     socket.timeout(TIMEOUT).emit(event, ...args, (socket_err,input) => {

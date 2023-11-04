@@ -64,6 +64,44 @@ class board{
         this.addPieces()
         this.number=number
     }
+    //action
+    createBoard(){
+        let i=0
+        let k=0
+        let count=0
+        while ( i< squaresCount+sideborder) {
+            k=0
+            while ( k< squaresCount+sideborder) {
+                this.board.push(new block(count,i,k,this))
+                count=count+1
+                k=k+1
+            }
+            i=i+1
+        }
+    }
+
+
+    addPieces(){
+        let i=0
+        while ( i< Math.pow(squaresCount+sideborder,2)) { 
+            let block=this.board[i]
+            if(block.checkGamePiece()){
+                block.piece= new piece(block.index,block.row,block.col,this)
+                if(this.myPieces.has(i+1)){
+                    block.piece.owner="mine"
+                }
+                else if(this.opponentPieces.has(i+1)){
+                    block.piece.owner="opponent"
+                }
+            
+            }
+            i=i+1
+
+
+        }    
+                
+            }
+    //validation
 
     validatePiece(start){
         let startblock=this.getBlock(start)
@@ -126,7 +164,7 @@ class board{
     }
     return true
     }
-
+//update
     updateBoard(start,end){
         let update=this.updateSets(start,end)
         this.updatePieces(start,end)
@@ -203,6 +241,7 @@ class board{
         
     
     }
+    //position
 
     getMaxMovement(start,end){
         let positions=this.getMovementsHelper(start,end)
@@ -229,8 +268,6 @@ class board{
       }
     
 
-        
-    
 
 
 getMovementsHelper(start,end){
@@ -252,8 +289,6 @@ if(dir>0){
   return positions
 
 }
-
-
 
     getDir(start,end){
         let startblock=this.getBlock(start)
@@ -303,55 +338,7 @@ if(dir>0){
     }
 
     
-    createBoard(){
-        let i=0
-        let k=0
-        let count=0
-        while ( i< squaresCount+sideborder) {
-            k=0
-            while ( k< squaresCount+sideborder) {
-                this.board.push(new block(count,i,k,this))
-                count=count+1
-                k=k+1
-            }
-            i=i+1
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-    addPieces(){
-        let i=0
-        while ( i< Math.pow(squaresCount+sideborder,2)) { 
-            let block=this.board[i]
-            if(block.checkGamePiece()){
-                block.piece= new piece(block.index,block.row,block.col,this)
-                if(this.myPieces.has(i+1)){
-                    block.piece.owner="mine"
-                }
-                else if(this.opponentPieces.has(i+1)){
-                    block.piece.owner="opponent"
-                }
-            
-            }
-            i=i+1
-
-
-        }    
-                
-            }
-
-        
-    
-
-
+//data
     getBlock(index){
         if (index<0) return 
         else if (index>=BoardMax) return 

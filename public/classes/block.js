@@ -9,6 +9,7 @@ const showblockColor=true
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
+
     constructor(scene,x=0,y=0,width,height,row,col,index,board){
         super(scene, x, y,width,height)
         this.row=row+1
@@ -77,6 +78,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.setFillStyle(0xffffff,0)
     }
     
+   
 
 
     //helpers

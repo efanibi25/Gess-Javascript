@@ -29,8 +29,6 @@ io.engine.generateId = req => {
   return base64id.generateId()
 }
 
-
-
 io.use((socket, next) => {
   socket.id = socket.conn.id
   next();
@@ -48,7 +46,6 @@ io.on('connection', (socket) => {
     let userRoom=await getGame(room)
     socket.room=room;
     socket.userRoom=userRoom;
-    socket.ready=false
   });
 
 //join game
@@ -128,7 +125,6 @@ io.on('connection', (socket) => {
   })
 
 
-
   socket.on("sendmove", async (startdex,endex,callback) => {
     console.log(["sending move",socket.id,socket.userRoom["currentid"]])
     if(socket.id!=socket.userRoom["currentid"]){
@@ -139,7 +135,7 @@ io.on('connection', (socket) => {
       });
     }
     else if(!socket.board.validatePiece(startdex)){
-    io.to(socket.id).emit("sendmove",startdex,startdex);
+    io.to(socket.id).emit("sendmove",startdex,startdex,false);
     io.to(socket.id).emit("sendalert","The Piece is Not valid");
     callback({
       response: "ok"
@@ -158,9 +154,7 @@ io.on('connection', (socket) => {
         response: "ok"
       });
   
-      
-  
-      
+    
       io.to(socket.id).emit("enableinteractive")
   
       }
@@ -172,25 +166,27 @@ io.on('connection', (socket) => {
       endex= socket.board.getMaxMovement(startdex,endex)
       let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateBoard(startdex,endex)}
       socket.usersRoom=await updateGame(socket.room,update)
-      io.to(socket.room).emit("sendmove",startdex,endex,false)
+      io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
       });
-      io.to(socket.id).emit("enableinteractive")
-
     }
    
   })
 
 
 
-
-
-
-  socket.on("getcurrentplayer", (callback) => {
+  socket.on("getcurrentplayer", async(forced,callback) => {
     console.log(`getting player`)
 
-    if(!socket.userRoom){
+    if (forced){
+      let player=(await getGame(socket.room))["currentplayer"]
+      callback({
+        response:player
+      });
+
+    }
+    else if(!socket.userRoom){
       callback({'error': 'retry getting player'});
 
     }
@@ -207,8 +203,6 @@ io.on('connection', (socket) => {
 
  
   socket.on("toggleinteractive", async(callback) => {
-
-    socket.ready=true
     console.log(["ready to set interactive",socket.room,socket.userRoom!=null])
     let sockets=await io.in(socket.room).fetchSockets()
     if(!socket.userRoom){
@@ -218,46 +212,36 @@ io.on('connection', (socket) => {
        return
     
     }
-    else if(sockets.filter(e=>e.ready==true).length!=2){
-      callback({
-        response: "ok"
-       });
-       return
-    }
-
-
-    else{
+  
       //switch player
       let game=await getGame(socket.room)
       if (game["moves"]==0){
         socket.userRoom=await updateGame(socket.room,{"currentplayer":"player1","currentid":game["player1"],"otherplayer":"player2","otherid":game["player2"]})
-
       }
       else if(game["moves"]%2==0){
         socket.userRoom=await updateGame(socket.room,{"currentplayer":"player1","currentid":game["player1"],"otherplayer":"player2","otherid":game["player2"]})
        }
        else{     
         socket.userRoom=await updateGame(socket.room,{"currentplayer":"player2","currentid":game["player2"],"otherplayer":"player1","otherid":game["player1"]})
-
        }
 
       console.log(["setting interactive/player switched",socket.userRoom])
 
       //toggle interactive
-      io.to(socket.userRoom["currentid"]).emit("enableinteractive");
-      io.to(socket.userRoom["otherid"]).emit("disableinteractive");
+      if (socket.id==socket.userRoom["currentid"])io.to(socket.userRoom["currentid"]).emit("enableinteractive");
+      else if (socket.id==socket.userRoom["otherid"])io.to(socket.userRoom["otherid"]).emit("disableinteractive");
+      
       //send player indicator
       sockets.forEach(e=>e.emit("setplayerindicator",socket.userRoom["currentplayer"]))
       callback({
         response: "ok"
        });
-       sockets.forEach(e=>e.ready=false)
     }
   
 
 
 
-  })
+  )
 
 
 
@@ -277,12 +261,6 @@ io.on('connection', (socket) => {
 // io.of("/").adapter.on("join-room", (room, id) => {
 //   console.log(`socket ${id} has joined room ${room}`);1,; c
 // });
-
-
-
-
-
-
 
 
 const port= process.env.SERVER_PORT

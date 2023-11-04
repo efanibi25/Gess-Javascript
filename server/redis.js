@@ -1,7 +1,9 @@
 const redis = require('redis');
 const {PLAYER1_PIECES,PLAYER2_PIECES}=require("../res/player.js")
 
-const client = redis.createClient();
+const client = redis.createClient({socket: {
+    connectTimeout:500
+    },});
 
 
 client.on('error', err => console.log('Redis Client Error', err));

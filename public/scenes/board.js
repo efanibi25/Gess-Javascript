@@ -50,7 +50,7 @@ create() {
     this.input.dragTimeThreshold = 100;
     this.gameHeight=85
 
-
+    //check if player should have control
     this.events.once('preupdate', function() {
         emit("toggleinteractive")
     });
@@ -69,14 +69,6 @@ socket.on("sendmove", (startdex,endex,test=true) => {
     emit("toggleinteractive")
 
    }
-})
-
-socket.on("restartboard", () => {
-    if(this.gessBoard){
-        this.gessBoard.destroy()
-    }
-    this.gessBoard.create()
-    
 })
 
 
@@ -119,7 +111,7 @@ this.input.addListener('drag',dragfunct)
     )
 
 
-        let currentplayer=await getCurrentPlayer()
+        let currentplayer=await getCurrentPlayer(true)
         let playeNumber=getPlayerNumber()
         
         if(currentplayer!=playeNumber){
@@ -137,35 +129,16 @@ this.input.addListener('drag',dragfunct)
             this.input.addListener("drag",dragfunct)
 
         }
+        else{
+            emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
+
+            this.gessBoard.movePieceAuto(gameObject.index,gameObject.index)
+            gameObject.hideNeighbors() 
+            this.events.emit('updatePiece');
+    
+        }
         
-        emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
 
-        this.gessBoard.movePieceAuto(gameObject.index,gameObject.index)
-        gameObject.hideNeighbors() 
-        this.events.emit('updatePiece');
-
-
-        // else if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
-
-        //     gameObject.revertNeighbors()
-        //     gameObject.hideNeighbors()
-        //     this.input.addListener("drag",dragfunct)
-
-
-        // }
-        
-        // else{
-
-       
-        //     this.gessBoard.checkRings(gameObject.getRingNeighbors())
-        //     gameObject.hideNeighbors()
-        //     emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
-        //     emit("toggleinteractive")
-
-
-
-
-        // }
         gameObject.normalSize()
         gameObject.block.zone.removeZoneLine()
 

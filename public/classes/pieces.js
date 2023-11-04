@@ -102,6 +102,10 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
 
     }
 
+    setNewBlock(block){
+        this.newBlock=block
+    }
+
 //checkers
 
 checkRing(){
