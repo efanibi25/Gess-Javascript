@@ -139,7 +139,7 @@ io.on('connection', (socket) => {
       });
     }
     else if(!socket.board.validatePiece(startdex)){
-    io.to(socket.id).emit("sendmove",startdex,startdex,false);
+    io.to(socket.id).emit("sendmove",startdex,startdex);
     io.to(socket.id).emit("sendalert","The Piece is Not valid");
     callback({
       response: "ok"
@@ -147,8 +147,6 @@ io.on('connection', (socket) => {
 
     
 
-    
-    io.to(socket.id).emit("enableinteractive")
 
     }
 
@@ -171,12 +169,15 @@ io.on('connection', (socket) => {
 
     else{
       let game=await getGame(socket.room)
+      endex= socket.board.getMaxMovement(startdex,endex)
       let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateSets(startdex,endex)}
       socket.usersRoom=await updateGame(socket.room,update)
-      io.to(socket.room).emit("sendmove",startdex,endex)
+      io.to(socket.room).emit("sendmove",startdex,endex,false)
       callback({
         response: "ok"
       });
+      io.to(socket.id).emit("enableinteractive")
+
     }
    
   })

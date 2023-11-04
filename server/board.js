@@ -125,7 +125,6 @@ class board{
         return false;    
     }
     return true
-
     }
 
 
@@ -168,18 +167,57 @@ class board{
 
         }
         
-        
-        
-   
-
-
-
-
+    
     }
 
+    getMaxMovement(start,end){
+        let positions=this.getMovementsHelper(start,end)
+        let startpiece=this.getPiece(start)
+        let excluded_indexes=new Set(Object.values(startpiece.neighbors).map(e=>e.index))
+        startpiece.getNeighbors()
+  
+        for(let current of positions){
+            for(let key of  Object.keys(startpiece.neighbors))
+
+            {
+                if(startpiece.neighbors[key].owner==null) continue
+                else if (excluded_indexes.has(current+parseInt(key))) continue
+                else if (this.myPieces.has(current+parseInt(key)||this.opponentPieces.has(current+parseInt(key)))) return current
+            }
+           
+    
+        }
+           
+
+        return end  
+        
+
+      }
+    
+
+        
+    
 
 
+getMovementsHelper(start,end){
+    let dir=this.getDir(start,end)
+    let positions=[]
 
+if(dir>0){
+    for(let current=start+dir;current<end;current=current+dir){
+        positions.push(current)
+
+      }
+  }
+  else{
+    for(let current=start+dir;current>end;current=current+dir){
+        positions.push(current)
+
+      }
+  }
+  return positions
+
+}
 
 
 

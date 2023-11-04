@@ -249,44 +249,22 @@ getDir(){
 
 
     movePiece(){
+        
     let dir=this.getDir()
-    if(dir>0) this.movePiecePos(dir)
-    else if(dir==0) { 
-    this.newBlock=this.block
-    this.swapNeighbors(this.index,0)
-    }
-    else this.movePieceNeg(dir)
-    }
-
-    movePiecePos(dir){
-        console.log(["t",this.block,this.index,this.newBlock.index])
-        for(let i=this.block.index;i<this.newBlock.index;i=i+dir){
-
-            if(this.swapNeighbors(i,dir)==false){
-                this.newBlock=this.block.board.getBlock(i+dir)
-                break
-            }
+    if(dir==0) { 
+        this.newBlock=this.block
+        this.swapNeighbors(this.index,this.index)
         }
-        }
-    
+   else  this.swapNeighbors(this.index,this.newBlock.index)
+    }
 
-        movePieceNeg(dir){
-            for(let i=this.block.index;i>this.newBlock.index;i=i+dir){
-                if(this.swapNeighbors(i,dir)==false){
-                    this.newBlock=this.block.board.getBlock(i+dir)
-                    break
-                }
-            }
-            }
 
-            swapNeighbors(index,dir){
+            swapNeighbors(index,newIndex){
                 let colorDict={}
-                let target=this.block.board.getPiece(index+dir)
+                let target=this.block.board.getPiece(newIndex)
                 let start=this.block.board.getPiece(index)
                 target.getNeighbors()
                 start.getNeighbors()
-                let noOverlap=true
-        
         
                 
                 for(const key of Object.keys(start.neighbors)){
@@ -302,16 +280,13 @@ getDir(){
         
                     else if(target.block.piece.neighbors[key].block.row>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
                     target.block.piece.neighbors[key].block.row<data["sideborder"]/2+1) continue
-        
-                    //other test
-                    if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
+                    
                     //merge blocks
                     if (target.block.piece.neighbors[key].owner==this.block.board.color) continue
         
                     target.block.piece.neighbors[key].owner=colorDict[key]
         
                 }
-                return noOverlap
                 
         
                 }
