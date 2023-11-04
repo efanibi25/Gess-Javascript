@@ -67,7 +67,7 @@ socket.on("sendmove", (startdex,endex,test=true) => {
    this.gessBoard.movePieceAuto(startdex,endex)
    if (test){
     emit("toggleinteractive")
-
+    emit("check rings",endex)
    }
 })
 

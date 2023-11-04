@@ -205,7 +205,12 @@ io.on('connection', (socket) => {
   });
 
 
+  socket.on("checkrinf", async(callback) => {
 
+
+  
+
+  })
  
   socket.on("toggleinteractive", async(callback) => {
     console.log(["ready to set interactive",socket.room,socket.userRoom!=null])
@@ -218,8 +223,13 @@ io.on('connection', (socket) => {
     
     }
   
-      //switch player
+     
       let game=await getGame(socket.room)
+      if (game["winner"]!=null){
+        console.log("winner has been picked")
+      }
+      
+      //switch player
       if (game["moves"]==0){
         socket.userRoom=await updateGame(socket.room,{"currentplayer":"player1","currentid":game["player1"],"otherplayer":"player2","otherid":game["player2"]})
       }
