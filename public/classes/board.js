@@ -21,6 +21,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.rings=[]
     
     }
+
+    //actions
     create(){
         this.createBoard()
         this.upDateGameBlocks()
@@ -45,6 +47,46 @@ export default class gessBoard extends Phaser.GameObjects.Container {
           
       });
     }
+
+       
+    extendBoardArray(){
+        let i=0
+        let k=0
+        let count=0
+        while (i <data["squaresCount"]+data["sideborder"]){
+            k=0
+            while (k <data["squaresCount"]+data["sideborder"]){
+                //full board has invisible pieces
+                let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,count,this)
+                count=count+1
+                if ((i<(data["sideborder"]/2) || k<(data["sideborder"]/2) || i>=data["squaresCount"]+(data["sideborder"]/2) || k>=data["squaresCount"]+(data["sideborder"]/2))==false){
+                    this.board.push(rect)
+                    this.add(rect)
+                
+                    if(showStroke) rect.setStrokeStyle(stroke, 0x000000);
+
+                }
+                else{
+                    this.board.push(rect)
+                    this.add(rect)
+                    rect.makeinvisible()
+                    if(showStroke) rect.setStrokeStyle(stroke, 0x0000FF);
+
+                }
+                k=k+1
+             
+    
+            }
+            i=i+1
+            
+        
+           
+        }
+      }
+
+
+
+    //modifiers
     setColor(){
         if(this.player=="player1"){
             this.color="white"
@@ -56,31 +98,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             this.otherColor="white" 
         }
     }
-    getOtherPlayerPieces(){
-        if(this.player=="player1"){
-            return data["PLAYER2_PIECES"]
-        }
-        else{
-            return data["PLAYER1_PIECES"]
-        }
-    }
-    getMyPieces(){
-        if(this.player=="player1"){
-            return data["PLAYER1_PIECES"]
-        }
-        else{
-            return data["PLAYER2_PIECES"]
-        }
-    }
-
-    movePieceAuto(startdex,endex){
-        let block=this.getPiece(startdex)
-        block.newBlock=this.getBlock(endex)
-        block.movePiece()
-        this.scene.events.emit('updatePiece');
-
-    }
-
+    
     upDateGameBlocks(){
         let otherPlayerPieces=this.getOtherPlayerPieces()
         let myPieces=this.getMyPieces()
@@ -133,16 +151,34 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
         }
 
-        
-
-  
-        
-        
-       
-
-
+        movePieceAuto(startdex,endex){
+            let block=this.getPiece(startdex)
+            block.newBlock=this.getBlock(endex)
+            block.movePiece()
+            this.scene.events.emit('updatePiece');
     
+        }
     
+
+
+    //data
+    getOtherPlayerPieces(){
+        if(this.player=="player1"){
+            return data["PLAYER2_PIECES"]
+        }
+        else{
+            return data["PLAYER1_PIECES"]
+        }
+    }
+    getMyPieces(){
+        if(this.player=="player1"){
+            return data["PLAYER1_PIECES"]
+        }
+        else{
+            return data["PLAYER2_PIECES"]
+        }
+    }
+
 
     getDraggablePieces(){
         return this.board.map(e=>e.piece).filter(e=>e.gamePiece && (e.owner==null ||this.color==e.owner)).filter(e=>e.checkDraggable())
@@ -164,41 +200,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     }
 
 
-     
-    extendBoardArray(){
-        let i=0
-        let k=0
-        let count=0
-        while (i <data["squaresCount"]+data["sideborder"]){
-            k=0
-            while (k <data["squaresCount"]+data["sideborder"]){
-                //full board has invisible pieces
-                let rect = new boardBlock(this.scene,0, 0, this.squareSize,this.squareSize,i,k,count,this)
-                count=count+1
-                if ((i<(data["sideborder"]/2) || k<(data["sideborder"]/2) || i>=data["squaresCount"]+(data["sideborder"]/2) || k>=data["squaresCount"]+(data["sideborder"]/2))==false){
-                    this.board.push(rect)
-                    this.add(rect)
-                
-                    if(showStroke) rect.setStrokeStyle(stroke, 0x000000);
-
-                }
-                else{
-                    this.board.push(rect)
-                    this.add(rect)
-                    rect.makeinvisible()
-                    if(showStroke) rect.setStrokeStyle(stroke, 0x0000FF);
-
-                }
-                k=k+1
-             
-    
-            }
-            i=i+1
-            
-        
-           
-        }
-      }
+  
       firstRing(){
         if(this.player==1){
             this.rings.push(this.getPiece(79))
