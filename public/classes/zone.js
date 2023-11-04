@@ -12,11 +12,9 @@ export default class Zone extends Phaser.GameObjects.Zone {
         this.setRectangleDropZone(this.width*zoneMulti, this.width*zoneMulti) 
 
 
-        
-
-
 
     }
+    //modifiers
     addGraphics(){
         if(this.graphics==null){
             this.graphics=this.scene.add.graphics();
