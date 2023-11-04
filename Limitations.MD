@@ -2,6 +2,9 @@
 
 This files list previous limitations/issues fixes to this problems
 
+# something about the shutdown process/side effects like
+# listeners and timeout
+
 # Server support
 Handling more clients could be improved by using cluster support
 

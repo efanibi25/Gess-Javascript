@@ -33,7 +33,7 @@ return true
 }
 
 async function updateGame(key,dict){
-    current={...await getGame(key),...dict}
+   let  current={...await getGame(key),...dict}
     await client.set(key,JSON.stringify(current))
     return current
 }

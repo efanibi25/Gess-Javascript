@@ -23,7 +23,6 @@ let game =null;
 
   emit("creategame",gameID);
     document.querySelector("#alertBar").textContent="waiting on other player"
-    //remove listeners because scene variable in event function is set to null on remove+ gameobject persis
 
   }
   

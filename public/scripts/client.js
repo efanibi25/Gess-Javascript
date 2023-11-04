@@ -1,6 +1,8 @@
   
+const TIMEOUT=5000000
+const RETRY=false
 export const gameID=window.location.pathname.split("/").pop()
-export const data={"currentplayer":"waiting on server"}
+export const data={"currentplayer":null,"playerstatus":"waiting on server"}
 export const socket = io(`http://localhost:${server}`,{
     query: {
         socketId: getSocketID() || ''
@@ -22,19 +24,24 @@ export function getPlayerNumber(){
 }
 
 export async function getCurrentPlayer(){
-  return await emitPromise(socket,"getcurrentplayer")
+  let player=await emitPromise(socket,"getcurrentplayer")
+  data["currentplayer"]=player
+  return player
+
 
 }
 export async function setCurrentPlayerIndicator(){
   let player=await getCurrentPlayer()
     if(player==null){
       player="waiting on server"
+      data["playerstatus"]=player
       document.querySelector("#alertBar").textContent=player
     }
     else{
-      document.querySelector("#alertBar").textContent=`It is currently ${player} turn`
+      player=`It is currently ${player} turn`
+      data["playerstatus"]=player
+      document.querySelector("#alertBar").textContent=player
     }
-    data["currentplayer"]=player
 }
 
 export function setPlayerNumber(num){
@@ -50,7 +57,7 @@ export function setGameData(key,value){
 
 
 export function emit(event, ...args) {
-    socket.timeout(5000).emit(event, ...args, (socket_err,input) => {
+    socket.timeout(TIMEOUT).emit(event, ...args, (socket_err,input) => {
       
       let {error,response}=input || {}
       if (socket_err ||error) {
@@ -69,7 +76,7 @@ export function emit(event, ...args) {
     return new Promise(function(resolve, reject) {
       socket.timeout(5000).emit(event, ...args, (socket_err,input) => {
         let {error,response}=input || {}
-        if (socket_err ||error) {
+        if (RETRY&&(socket_err ||error)) {
           // no ack from the server, let's retry
           emit(socket, event, ...args);
         }

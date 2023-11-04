@@ -85,7 +85,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         let otherPlayerPieces=this.getOtherPlayerPieces()
         let myPieces=this.getMyPieces()
         let i=0
-        let k=0
 
         while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
             let row=this.board[i].row
@@ -110,22 +109,22 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             i=i+1
         }
         i=0
+        let k=0
+
         while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
                 let piece=this.board[i].piece
                 if(piece.gamePiece){
-                let index=k+1
                 //use raw index
                 let piece=this.board[i].piece
                 this.board[i].addZone()
-                if (myPieces.has(index)==true){
+                if (myPieces.has(i)==true){
                     piece.owner=this.color   
                 } 
                 //just show other player pieces
-                else if (otherPlayerPieces.has(index)==true){
+                else if (otherPlayerPieces.has(i)==true){
                     piece.owner=this.otherColor  
                 } 
             
-                k=k+1
             }
 
             i=i+1

@@ -1,7 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
-import { getPlayerNumber ,getCurrentPlayer,emit,socket} from "../scripts/client.js";
+import { getPlayerNumber ,getCurrentPlayer,emit,socket,data} from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -56,11 +56,19 @@ create() {
     });
     
 
-socket.on("sendmove", (startdex,endex) => {
+    socket.on("sendalert", (message) => {
+        document.querySelector("#alertBar").textContent=message
+        setTimeout(async()=>document.querySelector("#alertBar").textContent= document.querySelector("#alertBar").textContent=data["playerstatus"], 4000);  
+       
+    })
+socket.on("sendmove", (startdex,endex,test=true) => {
     //scene resets
     this.gessBoard.scene=this
    this.gessBoard.movePieceAuto(startdex,endex)
-   emit("toggleinteractive")
+   if (test){
+    emit("toggleinteractive")
+
+   }
 })
 
 socket.on("restartboard", () => {
@@ -102,7 +110,15 @@ this.input.addListener('drag',dragfunct)
     this.input.addListener('dragend', async(pointer, gameObject, dropped) =>
     {
 
+        //disable listeners
         this.input.removeListener("drag")
+        this.input.removeListener("dragend")
+        this.input.removeListener("drop")
+        this.gessBoard.getDraggablePieces().forEach(
+            e=>e.allowDraggable()
+    )
+
+
         let currentplayer=await getCurrentPlayer()
         let playeNumber=getPlayerNumber()
         
@@ -110,7 +126,7 @@ this.input.addListener('drag',dragfunct)
             gameObject.revertNeighbors()
             gameObject.hideNeighbors() 
             document.querySelector("#alertBar").textContent=`It is not ${playeNumber}'s turn`
-            setTimeout(async()=>document.querySelector("#alertBar").textContent=data["currentplayer"], 4000);  
+            setTimeout(async()=>document.querySelector("#alertBar").textContent=data["playerstatus"], 4000);  
         }
         
         else if (!dropped)
@@ -121,28 +137,35 @@ this.input.addListener('drag',dragfunct)
             this.input.addListener("drag",dragfunct)
 
         }
-        else if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
-
-            gameObject.revertNeighbors()
-            gameObject.hideNeighbors()
-            this.input.addListener("drag",dragfunct)
-
-
-        }
         
-        else{
+        emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
 
-            gameObject.movePiece()
-            this.events.emit('updatePiece');
-            this.gessBoard.checkRings(gameObject.getRingNeighbors())
-            gameObject.hideNeighbors()
-            emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
-            emit("toggleinteractive")
+        this.gessBoard.movePieceAuto(gameObject.index,gameObject.index)
+        gameObject.hideNeighbors() 
+        this.events.emit('updatePiece');
 
 
+        // else if ( gameObject.testValidBlock()==false || gameObject.testValidBlockMove()==false){
+
+        //     gameObject.revertNeighbors()
+        //     gameObject.hideNeighbors()
+        //     this.input.addListener("drag",dragfunct)
 
 
-        }
+        // }
+        
+        // else{
+
+       
+        //     this.gessBoard.checkRings(gameObject.getRingNeighbors())
+        //     gameObject.hideNeighbors()
+        //     emit("sendmove",gameObject.block.index,gameObject.newBlock.index)
+        //     emit("toggleinteractive")
+
+
+
+
+        // }
         gameObject.normalSize()
         gameObject.block.zone.removeZoneLine()
 
@@ -192,20 +215,9 @@ document.querySelector("#plus-button").addEventListener("click", this.handleplus
 
 document.querySelector("#minus-button").addEventListener("click", this.handleminus);
 
-
-// this.events.addListener("destroy",()=>{
-
-//     console.log("remaking game")
-//     emit("creategame",gameID);
-//     document.querySelector("#alertBar").textContent="created game"
-//     Array.from(document.querySelector("#game").children).forEach(e=>{e.remove()})
     
-// })
+ 
 
-    
-    
-
-;
 
 
 

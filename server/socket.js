@@ -11,6 +11,7 @@ const base64id = require('base64id');
 
 
 
+
 const io = new Server(httpServer, {
   cors: {
     origin:/\.*/,
@@ -109,9 +110,9 @@ io.on('connection', (socket) => {
     else{
       return
     }
-    socket.board.validate(70,114)
+    // socket.board.validate(70,114)
 
-    // socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
+    socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
 
     console.log([player,socket.id,"has joined",room])
 
@@ -132,14 +133,30 @@ io.on('connection', (socket) => {
   socket.on("sendmove", async (startdex,endex,callback) => {
     console.log(["sending move",socket.id,socket.userRoom["currentid"]])
     if(socket.id!=socket.userRoom["currentid"]){
+      io.to(socket.id).emit("sendmove",startdex,startdex,false);
+      io.to(socket.id).emit("sendalert","You are not the current player");
       callback({
         response: "ok"
       });
     }
+    else if(!socket.board.validatePiece(startdex)){
+    io.to(socket.id).emit("sendmove",startdex,startdex,false);
+    io.to(socket.id).emit("sendalert","The Piece is Not valid");
+    callback({
+      response: "ok"
+    });
+    io.to(socket.id).emit("enableinteractive")
+
+    }
+
+
+
     else{
       let game=await getGame(socket.room)
-      socket.userRoom=await updateGame(socket.room,{"moves":game["moves"]+1,"currentplayer":null,"currentid":null})
-      io.to(socket.userRoom[socket.otherplayer]).emit("sendmove",startdex,endex);
+      let update={...{"moves":game["moves"]+1,"currentplayer":null,"currentid":null},...socket.board.updateSets(startdex,endex)}
+      socket.usersRoom=await updateGame(socket.room,update)
+
+      io.to(socket.room).emit("sendmove",startdex,endex)
       callback({
         response: "ok"
       });

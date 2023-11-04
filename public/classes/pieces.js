@@ -179,42 +179,9 @@ revertNeighbors(){
 
 //tester
     
-    testValidBlock(){
-        let valid=true
-        if(!checkValidBlock){
-            return valid
-        }
-
-        if(Object.values(this.neighbors)
-            .filter(ele=>ele.owner==this.block.board.otherColor).length>0){
-            document.querySelector("#alertBar").textContent="Can't Move Block With Opponent Pieces"
-            valid=false
-            setTimeout(()=> data["currentplayer"], alertTimeout);
-        }
-
-        else if(Object.values(this.neighbors)
-        .filter(ele=>ele.owner!="out").length!=9){
-        document.querySelector("#alertBar").textContent="Block Must Have 9 Pieces"
-        valid=false
-        setTimeout(()=> data["currentplayer"], alertTimeout);
-    }
-
-        else if(Object.values(this.neighbors).filter(ele=>ele.owner==this.block.board.color).length==0){
-            document.querySelector("#alertBar").textContent="Can't Move Block With No Pieces"
-            valid=false
-            setTimeout(()=> data["currentplayer"], alertTimeout);
-        }
-
-        return valid
-    }
-
-
-
     
-    
-    
-    
-    
+
+
     testValidBlockMove(){
         let valid=true
         let dir=this.getDir()
@@ -309,6 +276,10 @@ getDir(){
     movePiece(){
     let dir=this.getDir()
     if(dir>0) this.movePiecePos(dir)
+    else if(dir==0) { 
+    this.newBlock=this.block
+    this.swapNeighbors(this.index,0)
+    }
     else this.movePieceNeg(dir)
     }
 
@@ -349,7 +320,6 @@ getDir(){
                     start.block.piece.neighbors[key].owner=null
                     start.block.piece.neighbors[key].alignCenter()
                 }
-                console.log(colorDict)
                 for(const key of Object.keys(this.neighbors)){
                     //out of bounds
                     if(target.block.piece.neighbors[key].block.col>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
@@ -360,7 +330,8 @@ getDir(){
         
                     //other test
                     if(target.block.piece.neighbors[key].owner!=null) noOverlap=false
-                    if(colorDict[key]==null) continue
+                    //merge blocks
+                    if (target.block.piece.neighbors[key].owner==this.block.board.color) continue
         
                     target.block.piece.neighbors[key].owner=colorDict[key]
         
