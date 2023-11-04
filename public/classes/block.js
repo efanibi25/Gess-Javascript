@@ -67,12 +67,19 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     
 
     }
-    addText(num){
-
+    addNum(num){
         this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-data["sideborder"]/2+1,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }
+
+
+    addText(num){
+    if(num<=data["sideborder"]/2||num>(data["sideborder"]/2)+data["squaresCount"]) this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, "*",{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+    else this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, String.fromCharCode(63+num-data["sideborder"]/2+1),{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+    this.scene.add.existing(this.text)
+    Phaser.Display.Align.In.Center(this.text,this) 
+}
 
     makeinvisible(){
         this.setFillStyle(0xffffff,0)

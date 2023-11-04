@@ -108,13 +108,14 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             let col=this.board[i].col
             this.board[i].index=i+1
             this.add(this.board[i].initPiece())
+            if (col==data["sideborder"]/2){
+                this.board[i].addNum(row)
+            }
 
-            if (row==data["sideborder"]/2){
+            else if (row==data["sideborder"]/2){
                 this.board[i].addText(col)
             }
-            else if (col==data["sideborder"]/2){
-                this.board[i].addText(row)
-            }
+           
         
             i=i+1
         
