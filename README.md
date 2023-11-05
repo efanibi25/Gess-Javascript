@@ -10,9 +10,9 @@ Phaser also handles the front-end so the challenge is figuring out how to integr
 ## 1 Get redis
 ```
 You'll need an instance of redis on the server/local machine 
+If you have docker installed on your system, then the easiest way to run the program would be to start the start.sh script
 
-Easiest way to do this is to install via docker
-
+With that method getting redis seperately won't be required
 ```
 
 ## 2 install modules
@@ -30,7 +30,17 @@ npm install -g concurrently
 
 ```
 
-## 4 run script 
+
+
+## 4 Update .env
+
+
+```
+You can change the .env file to better match with your system
+
+```
+
+## 5 run script 
 ```
 run ./start.sh
 Note: You can use the second line instead if your using a non docker version of redis

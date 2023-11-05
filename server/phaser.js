@@ -35,7 +35,7 @@ app.get('/full', function (req, res) {
 
 
 app.get('/create', function (req, res) {
-  key={"server":process.env.CLIENT_PORT}
+  key={"server":process.env.CLIENT_PORT,"host":process.env.CLIENT_HOST}
   res.render('create_game',key);
 })
 
@@ -46,7 +46,7 @@ app.get('/create_game', function (req, res) {
 
 
 app.get('/join/', function (req, res) {
-  key={"server":process.env.CLIENT_PORT}
+  key={"server":process.env.CLIENT_PORT,"host":process.env.CLIENT_HOST}
   res.render('join_game',key)
 })
 
@@ -58,7 +58,7 @@ app.post('/check_game', async function (req, res) {
 
 
 app.get('/game/:key', function (req, res) {
-  key={"key":req.params.key,"server":process.env.SERVER_PORT}
+  key={"key":req.params.key,"server":process.env.SERVER_PORT,"host":process.env.SERVER_HOST}
   res.render('game',key)
 })
 
