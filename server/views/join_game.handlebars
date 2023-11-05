@@ -2,12 +2,16 @@
 <head>
     <meta charset="utf-8">
     <title>Phaser Join Game</title>
+  <script type="module" src="/scripts/join.js"></script> 
+    <script type="text/javascript">
+    let server={{server}};
+  </script>
 </head>
 <body>
   {{#if msg}}
   {{msg}}
   {{/if}}
-  <form method="post" action="/join_game" novalidate>
+  <form id="joingame">
     <div class="form-field">
       <label for="key">Game Key</label>
       <input type="text" name="key" id="key">

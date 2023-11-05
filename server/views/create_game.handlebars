@@ -2,12 +2,16 @@
 <head>
     <meta charset="utf-8">
     <title>Phaser New Game</title>
+      <script type="module" src="/scripts/create.js"></script> 
+    <script type="text/javascript">
+    let server={{server}};
+  </script>
 </head>
 <body>
   {{#if msg}}
   {{msg}}
   {{/if}}
-  <form method="post" action="/create_game" novalidate>
+  <form id="creategame">
     <button class="btn" type="submit">Create Game</button>
   </form>
 

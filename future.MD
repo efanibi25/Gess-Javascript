@@ -9,3 +9,5 @@
 - show last move or array of last moves
 - provide sessions for saving games
 - implement threading or multiprocessor for improve performance
+- add indication of player status
+- password protected rooms

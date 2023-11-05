@@ -109,13 +109,12 @@ io.on('connection', (socket) => {
 
     } 
     else{
-      return
+      socket.emit("full")
     }
 
     socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
 
     console.log([player,socket.id,"has joined",room])
-
 
 
   })

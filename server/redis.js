@@ -12,7 +12,7 @@ client.on('error', err => console.log('Redis Client Error', err));
 
 })();
 async function addGameList(key){
-    if(!await checkGame(key)){
+    if(!await checkGameExists(key)){
         await client.sAdd('games',key) 
         await client.set(key,JSON.stringify({
                   "player1":null,
@@ -29,7 +29,17 @@ async function addGameList(key){
     }
 }
 
-async function checkGame(key){
+async function checkGameFree(key){
+    if(await checkGameExists(key)){
+      let game=await getGame(key)
+      return game["player1"]==null || game["player2"]==null
+    }
+    else{
+        return true 
+    }
+}
+
+async function checkGameExists(key){
     if(await client.sIsMember('games',key)==1){
 return true
     }
@@ -48,5 +58,5 @@ async function getGame(key){
 }
 
 
-module.exports={client,checkGame,addGameList,updateGame,getGame}
+module.exports={client,checkGameExists,checkGameFree,addGameList,updateGame,getGame}
 

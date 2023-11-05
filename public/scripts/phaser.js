@@ -1,5 +1,5 @@
 
-import { socket,emit,gameID,getPlayerNumber, setPlayerNumber, setGameData,setSocketID} from "./client.js";
+import { socket,emit,gameID, setPlayerNumber, setGameData,setSocketID} from "./client.js";
 import preload from "../scenes/board.js";
 
 let game =null;
@@ -11,12 +11,19 @@ let game =null;
     setSocketID(socket.id)
   emit("creategame",gameID);
     document.querySelector("#alertBar").textContent="waiting on other player"
-
-
   }
+
   
   );
 
+
+  socket.on("full", () => {
+  window.location.href = `/full`;
+
+  }
+
+  
+  );
 
   socket.on("creategame", () => {
     console.log("creategame")
