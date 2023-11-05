@@ -1,3 +1,10 @@
+
+# Future Updates
+The UI is very simple at the moment
+
+I would like to upgrade it to a more modern look with react or another front-end frame work
+Phaser also handles the front-end so the challenge is figuring out how to integrate it
+
 # Running/Install
 
 ## 1 Get redis
