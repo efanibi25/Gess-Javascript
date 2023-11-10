@@ -39,7 +39,7 @@ Redis offers the option of write-behind cache
 Write-behind is a caching strategy in which the cache layer itself connects to the backing database. This means that your applications need only ever connect to your cache layer, and the cache then reads from or updates the backing database as needed"
 
 ## Queue 
-I think another option might be to use a queue, and to have that handle updates to the database
+I think another option might be to use a queue, and have that handle updates to the database
 There are various queues  like RabbitMQ/bull
 
 Redis can also be used as a message queue, so maybe it could also be used to serve a dual purpose here. 
@@ -112,15 +112,15 @@ This could also allow for the game to show the previous moves that had been made
 
 # Blocking Bots
 Truly being effective against the use of bots or AI, would require some sort of heuristics to detect non-human behavior.
-This is more of an advanced topic for me at the moment, but some of the more simpler methods of prevention could simply be providing obstacles to less experienced users
+This is more of an advanced topic for me at the moment, but some of the simpler methods of prevention could simply be providing obstacles to less experienced users
 
 
 ## Code Obfuscation
-One idea would be simply to run a tool like javascript-obfuscator as a webpack plugin. This could be a good way to validate the move as long as the code was unable to be decryper by the user. It would also serve to make using a bot to send inputs harder
+One idea would be simply to run a tool like javascript-obfuscator as a webpack plugin. This could be a good way to validate the move as long as the code was unable to be decrypter by the user. It would also serve to make using a bot to send inputs harder
 
 Another benefit is that this method is very easy to implement
 
-Some downsides are that the size of the would increases, and a knowledgeable user can reverse engineer the code
+Some downsides are that the size of the code would increase, and a knowledgeable user can reverse engineer the code
 It might also make debugging harder 
 
 
@@ -128,7 +128,7 @@ It might also make debugging harder
 https://incolumitas.com/2014/01/26/the-art-of-cheating-making-a-chess-com-chess-bot-using-a-unusual-approach/
 
 This would be like code obfuscation, but it would instead target bots and cheaters at the point of entry
-Without the ability to send moves, they lose almost all there efficiency
+Without the ability to send moves, they lose almost all their efficiency
 
 Based on the article above, there is also nothing stopping this method from being combined with code obfuscation, as an additional barrier
 Though based on the contents of the article it may not be much of a barrier for someone determined
