@@ -50,7 +50,7 @@ Redis can also be used as a message queue, so maybe it could also be used to ser
 This seems to be what this repo is doing partly 
 According to this image
 
-![Alt text](screens/image-2.png)
+![Alt text](../screens/image-2.png)
 
 The server writes to a pub/sup to handle scaling, and also a main.db which is MongoDB
 
