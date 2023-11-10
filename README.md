@@ -14,7 +14,7 @@ See: Documentation/future.MD
 You'll need an instance of Redis on the server/local machine 
 If you have docker installed on your system, then the easiest way to run the program would be to start the start.sh script
 
-With that method getting Redis seperately won't be required
+With that method getting Redis separately won't be required
 ```
 
 ## 2 install modules
