@@ -9,7 +9,7 @@ This would also add improved support for .env variables, currently, the solution
 
 Lichess an open-source chess repo uses a pub/sub model to broadcast games to multiple clients at once with multiple servers
 
-![Alt text](screens/image-3.png)
+![Alt text](../screens/image-3.png)
 
 Implementing this natively in Redis could be done with the Redis adapter
 https://socket.io/docs/v4/redis-adapter/
