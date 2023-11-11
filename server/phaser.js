@@ -35,7 +35,7 @@ app.get('/full', function (req, res) {
 
 
 app.get('/create', function (req, res) {
-  key={"server":process.env.CLIENT_PORT,"host":process.env.CLIENT_HOST}
+  key={"server":process.env.CLIENT_URL}
   res.render('create_game',key);
 })
 
@@ -46,7 +46,7 @@ app.get('/create_game', function (req, res) {
 
 
 app.get('/join/', function (req, res) {
-  key={"server":process.env.CLIENT_PORT,"host":process.env.CLIENT_HOST}
+  key={"server":process.env.CLIENT_URL}
   res.render('join_game',key)
 })
 
@@ -58,14 +58,14 @@ app.post('/check_game', async function (req, res) {
 
 
 app.get('/game/:key', function (req, res) {
-  key={"key":req.params.key,"server":process.env.SERVER_PORT,"host":process.env.SERVER_HOST}
+  key={"key":req.params.key,"server":process.env.SOCKET_IO_URL}
   res.render('game',key)
 })
 
 
 
 
-const PORT = process.env.PORT || 8090
+const PORT = process.env.CLIENT_PORT || 8090
 app.listen(PORT, () => {
     console.log(`App listening to ${PORT}....`)
     console.log('Press Ctrl+C to quit.')

@@ -3,7 +3,7 @@ const TIMEOUT=5000000
 const RETRY=false
 export const gameID=window.location.pathname.split("/").pop()
 export const data={"currentplayer":null,"playerstatus":"waiting on server"}
-export const socket = io(`${host}:${server}`,{
+export const socket = io(`${server}`,{
     query: {
         socketId: getSocketID() || ''
       }
