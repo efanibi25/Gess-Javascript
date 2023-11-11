@@ -40,7 +40,8 @@ npm install -g concurrently
 
 
 
-## 4 Update .env
+## 4 add .env
+This should be in the root of the repo
 
 
 ### CLIENT_PORT
@@ -57,6 +58,14 @@ This is the port used to host the socket.io service, used by the backend
 ### SOCKET_IO_URL
 This is the url/domain the client uses to access the socket.io service
 
+### Example
+
+```
+CLIENT_PORT=8090
+SOCKET_IO_PORT=7500
+CLIENT_URL=http://localhost:8090
+SOCKET_IO_URL=http://localhost:7500
+```
 
 
 ```
