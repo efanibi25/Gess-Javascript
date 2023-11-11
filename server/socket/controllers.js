@@ -109,7 +109,6 @@ async function join(socket,room){
   }
   
   async function game(socket,room){
-  
     await addGameList(room)
     let userRoom=await getGame(room)
     socket.room=room;
@@ -134,23 +133,20 @@ async function join(socket,room){
     }
   }
 
-  async function checkprocessSwitch(socket,io){
-    if(!socket.userRoom){
+  async function checkprocessSwitch(socket,io,game){
+    if(!socket.userRoom,game){
        return false
     
     }
  
-      let game=await getGame(socket.room)
       if (game["winner"]!=null){
         io.to(socket.room).emit("winner",game["winner"])
         return  false
       }
   }
 
-  async function processSwitch(socket,io){
+  async function processSwitch(socket,io,game){
     let sockets=await io.in(socket.room).fetchSockets()
-          let game=await getGame(socket.room)
-
 
       //switch player
       if (game["moves"]==0){
@@ -173,7 +169,14 @@ async function join(socket,room){
       sockets.forEach(e=>e.emit("setplayerindicator",socket.userRoom["currentplayer"]))
      
   }
-module.exports={join,game,validateMove,processMove,getcurrentPlayer,checkprocessSwitch,processSwitch}
+
+  async function interactiveHelper(socket,io){
+    let game=await getGame(socket.room)
+    if(checkprocessSwitch(socket,io,game)){
+      await processSwitch(socket,io,game)
+    }
+  }
+module.exports={join,game,validateMove,processMove,getcurrentPlayer,interactiveHelper}
 
 
 

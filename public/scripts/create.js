@@ -8,9 +8,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
       let node=document.querySelector("#game")
       node.innerHTML=
      `
-     <p>join game at ${server}/game/${resp}<\p>
+     <p>join game at <a href="${server}/game/${resp}">${server}/game/${resp}</a><\p>
      <br>
-     <p>Give link to opponent so they can join<\p>
+     <p>Give link to opponent<\p>
+     <p>Or the Code: ${resp} <\p>
+     <p>So they can join<\p>
+
+
+
      `  
      node.style.display="block"
          

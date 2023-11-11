@@ -1,5 +1,5 @@
 const httpServer= require("http").createServer();
-const {game,join,validateMove,processMove,getcurrentPlayer,processSwitch,checkprocessSwitch}=require("./controllers.js")
+const {game,join,validateMove,processMove,getcurrentPlayer,interactiveHelper}=require("./controllers.js")
 require('dotenv').config(".env")
 
 const { Server } = require("socket.io");
@@ -79,9 +79,7 @@ io.on('connection', (socket) => {
 
   socket.on("gamestate", async(callback) => {
     console.log(["ready to set interactive",socket.room,socket.userRoom!=null])
-    if(checkprocessSwitch(socket)){
-      await processSwitch(socket,io,callback)
-    }
+    interactiveHelper(socket,io)
     callback({
       response: "ok"
      });
