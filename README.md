@@ -43,17 +43,24 @@ npm install -g concurrently
 ## 4 Update .env
 
 
+### CLIENT_PORT
+This refers to the port used to host the main client UI/Website
+It is used by the backend to host the express service
+
+### CLIENT_URL
+This is the url/domain the client uses to access the main client
+
+### SOCKET_IO_PORT
+This is the port used to host the socket.io service, used by the backend
+
+
+### SOCKET_IO_URL
+This is the url/domain the client uses to access the socket.io service
+
+
+
 ```
 You can change the .env file to better match your system
-
-CLIENT_PORT=8090
-SOCKET_IO=7500
-
-#Used for redirection
-CLIENT_URL=http://localhost:8090
-#Used to communicate with backend socket.io
-SOCKET_IO_URL=http://localhost:7500
-
 
 ```
 
