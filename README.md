@@ -6,6 +6,12 @@ I would like to upgrade it to a more modern look with React or another front-end
 Phaser also handles the front end so the challenge is figuring out how to integrate it
 See: Documentation/future.MD
 
+# Accessing 
+
+Main website is hosted on localhost:8090, unless you change the .env variables#
+
+
+
 
 # Running/Install
 
