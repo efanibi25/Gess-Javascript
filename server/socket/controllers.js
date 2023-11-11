@@ -5,7 +5,11 @@ const {BoardMax,squaresCount,sideborder}=require("../../res/player.js")
 
  function validateMove(socket,startdex,endex){
   console.log(["sending move",socket.id,socket.userRoom["currentid"]])
-    if(socket.id!=socket.userRoom["currentid"]){
+  if(!socket.board || !socket.userRoom){
+    return false
+  }
+  
+  else if(socket.id!=socket.userRoom["currentid"]){
       io.to(socket.id).emit("sendmove",startdex,startdex,false);
       io.to(socket.id).emit("sendalert","You are not the current player");
     }
@@ -15,7 +19,6 @@ const {BoardMax,squaresCount,sideborder}=require("../../res/player.js")
    return false
   
     }
-
 
     else if(!socket.board.validateMove(startdex,endex)){
       io.to(socket.id).emit("sendmove",startdex,startdex,false);
@@ -41,9 +44,12 @@ async function processMove(socket,io,startdex,endex){
 
 async function join(socket,room){
     let player=null
+    
   
+
       if(socket.userRoom['player1']==socket.id){
         player="player1"
+        socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
         socket.join(room);
         socket.playerID=socket.id
         socket.otherplayer="player2"
@@ -56,6 +62,7 @@ async function join(socket,room){
       }
       else if(socket.userRoom['player2']==socket.id){
         player="player2"
+        socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
         socket.join(room);
         socket.playerID=socket.id
         socket.otherplayer="player1"
@@ -70,6 +77,7 @@ async function join(socket,room){
     
       else if(! socket.userRoom["player1"]){
         player="player1"
+        socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
         socket.join(room);
         socket.playerID=socket.id
         socket.otherplayer="player2"
@@ -86,6 +94,7 @@ async function join(socket,room){
     
       else if(! socket.userRoom["player2"]){
         player="player2"
+        socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
         socket.join(room);
         socket.playerID=socket.id
         socket.otherplayer="player1"
@@ -98,12 +107,7 @@ async function join(socket,room){
       socket.usersByRoom["player2Rings"],socket.usersByRoom["player1Rings"],2)
   
       } 
-      else{
-        socket.emit("full")
-      }
-  
-      socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)
-  
+    
       console.log([player,socket.id,"has joined",room])
   
   }
