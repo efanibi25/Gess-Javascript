@@ -6,12 +6,8 @@ I would like to upgrade it to a more modern look with React or another front-end
 Phaser also handles the front end so the challenge is figuring out how to integrate it
 See: Documentation/future.MD
 
-# Accessing 
-
-Main website is hosted on localhost:8090, unless you change the .env variables#
-
-
-
+# Demo
+https://gess.fanibi.org/
 
 # Running/Install
 
@@ -81,3 +77,6 @@ Note: You can use the second line instead if you using a non docker version of R
 ```
 
 
+# 6 Accessing 
+
+Main website is hosted on localhost:8090, unless you change the .env variables#
