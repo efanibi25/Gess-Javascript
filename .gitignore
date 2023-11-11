@@ -15,3 +15,6 @@ dist/
 
 # database
 data
+
+#env
+.env

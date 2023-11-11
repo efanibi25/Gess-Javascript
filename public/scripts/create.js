@@ -5,15 +5,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
     
       );
       let resp=await req.json()
-      let node=document.createElement("div");
+      let node=document.querySelector("#game")
       node.innerHTML=
      `
      <p>join game at ${server}/game/${resp}<\p>
      <br>
      <p>Give link to opponent so they can join<\p>
-     `
-      document.body.appendChild(node)
-  
+     `  
+     node.style.display="block"
          
         })
   });
