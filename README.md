@@ -40,6 +40,15 @@ npm install -g concurrently
 ```
 You can change the .env file to better match your system
 
+CLIENT_PORT=8090
+SOCKET_IO=7500
+
+#Used for redirection
+CLIENT_URL=http://localhost:8090
+#Used to communicate with backend socket.io
+SOCKET_IO_URL=http://localhost:7500
+
+
 ```
 
 ## 5 run script 

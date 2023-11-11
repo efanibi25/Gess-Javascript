@@ -5,6 +5,13 @@ Using a frontend framework with Phaser is a little challenging since Phaser also
 
 This would also add improved support for .env variables, currently, the solutions are hacky for example inline dom node store with information or the use of global variables
 
+
+# Add ability to chat
+Chat is the example project given for socket.io
+https://socket.io/get-started/chat
+
+Because users can leave and enter rooms without losing game data, in the same way the chat logs should persist. This is not something covered in the socket.io example
+
 # Improved scalability
 
 Lichess an open-source chess repo uses a pub/sub model to broadcast games to multiple clients at once with multiple servers
