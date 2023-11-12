@@ -1,7 +1,7 @@
 
 
 import gessBoard from "../classes/board.js"
-import { getPlayerNumber ,getCurrentPlayer,emit,socket,data} from "../scripts/client.js";
+import { getPlayerNumber ,getCurrentPlayer,emit,socket,setCurrentPlayerIndicator} from "../scripts/client.js";
 export default class preload extends Phaser.Scene {
 
 
@@ -63,7 +63,7 @@ socket.on("winner", (player) => {
 
     socket.on("sendalert", (message) => {
         document.querySelector("#alertBar").textContent=message
-        setTimeout(async()=>document.querySelector("#alertBar").textContent= document.querySelector("#alertBar").textContent=data["playerstatus"], 4000);  
+        setTimeout(()=>{setCurrentPlayerIndicator(true,true)}, 2000) 
        
     })
 socket.on("sendmove", (startdex,endex,test=true) => {
@@ -127,7 +127,7 @@ this.input.addListener('drag',dragfunct)
             gameObject.revertNeighbors()
             gameObject.hideNeighbors() 
             document.querySelector("#alertBar").textContent=`It is not ${playeNumber}'s turn`
-            setTimeout(async()=>document.querySelector("#alertBar").textContent=data["playerstatus"], 4000);  
+            setTimeout(async()=>setCurrentPlayerIndicator(true,true), 2000);  
         }
         
         else if (!dropped)

@@ -45,8 +45,6 @@ async function processMove(socket,io,startdex,endex){
 async function join(socket,room){
     let player=null
     
-  
-
       if(socket.userRoom['player1']==socket.id){
         player="player1"
         socket.emit("setdata",player,BoardMax,socket.userRoom["player1Pieces"],socket.userRoom["player2Pieces"],squaresCount,sideborder)

@@ -1,5 +1,5 @@
 
-import { socket,emit,gameID, setPlayerNumber, setGameData,setSocketID} from "./client.js";
+import { socket,emit,gameID, setPlayerNumber, setGameData,setSocketID,setLocalPlayerStatus} from "./client.js";
 import preload from "../scenes/board.js";
 
 let game =null;
@@ -8,11 +8,16 @@ let game =null;
  
 
   socket.on("connect", () => {
-    setSocketID(socket.id)
+  setSocketID(socket.id)
   emit("creategame",gameID);
     document.querySelector("#alertBar").textContent="waiting on other player"
   }
+  
+  );
 
+  socket.on("disconnect", () => {
+    window.location.reload();
+  }
   
   );
 
@@ -57,6 +62,8 @@ let game =null;
 
   socket.on("setplayerindicator", (player) => {
     document.querySelector("#alertBar").textContent=`It is currently ${player} turn`
+    setLocalPlayerStatus(player)
+
   })
 
 async function startgame(){

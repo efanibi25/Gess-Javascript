@@ -20,7 +20,6 @@ const io = new Server(httpServer, {
 });
 
 io.engine.generateId = req => {
-
   const parsedUrl = new url.parse(req.url,true)
   const prevId = parsedUrl.query.socketId
   if (prevId.length>0) {
@@ -28,6 +27,7 @@ io.engine.generateId = req => {
   }
   return base64id.generateId()
 }
+
 
 io.use((socket, next) => {
   socket.id = socket.conn.id

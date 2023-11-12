@@ -15,7 +15,7 @@ const showHidden=false
 //alpha 0 disables interactivity
 const hiddenAlpha=.01
 const showAlpha=.5
-const alertTimeout=4000
+const alertTimeout=2000
 export default class boardPiece extends Phaser.GameObjects. Arc {
 
     constructor(scene,x=0,y=0,radius=50,index,block){

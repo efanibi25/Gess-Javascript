@@ -16,7 +16,10 @@ export function getSocketID(){
 
 
 export function setSocketID(id){
+  // fix for nodemon
+    if(!getSocketID()){
     localStorage.setItem(`socketid_${gameID}`,id);
+    }
 }
 
 export function getPlayerNumber(){
@@ -34,19 +37,35 @@ export async function getCurrentPlayer(forced){
   return player
 
 }
-export async function setCurrentPlayerIndicator(){
-  let player=await getCurrentPlayer(true)
-    if(player==null){
-      player="waiting on server"
-      data["playerstatus"]=player
-      document.querySelector("#alertBar").textContent=player
-    }
-    else{
-      player=`It is currently ${player} turn`
-      data["playerstatus"]=player
-      document.querySelector("#alertBar").textContent=player
-    }
+export async function setCurrentPlayerIndicator(forced=true,local=false){
+  let player=null
+  if(!local){
+  player=await getCurrentPlayer(forced)
+  }
+  else{
+    player= data["player"]
+  }
+  setLocalPlayerStatus(player)
+  document.querySelector("#alertBar").textContent=data["playerstatus"]
+
+  
 }
+export function setLocalPlayerStatus(player){
+  if(player==null){
+    let status="waiting on server"
+    data["playerstatus"]=status
+    data["player"]=player
+
+  }
+  else{
+    let status=`It is currently ${player} turn`
+    data["playerstatus"]=status
+    data["player"]=player
+  }
+}
+
+
+
 
 
 

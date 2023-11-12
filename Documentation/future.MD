@@ -160,3 +160,4 @@ Since most likely these machines would try to input directly into socket functio
 - implement threading or multiprocessor to improve performance
 - add an indication of player status
 - Password-protected rooms
+- Make going through create game a requirement for starting a new game
