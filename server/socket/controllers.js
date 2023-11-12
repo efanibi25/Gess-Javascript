@@ -3,7 +3,7 @@ const { addGameList,getGame,updateGame } = require("../redis.js");
 const {board}=require("../board.js")
 const {BoardMax,squaresCount,sideborder}=require("../../res/player.js")
 
- function validateMove(socket,startdex,endex){
+ function validateMove(socket,io,startdex,endex){
   console.log(["sending move",socket.id,socket.userRoom["currentid"]])
   if(!socket.board || !socket.userRoom){
     return false
@@ -107,6 +107,10 @@ async function join(socket,room){
       socket.usersByRoom["player2Rings"],socket.usersByRoom["player1Rings"],2)
   
       } 
+      else{
+        socket.emit("full")
+      }
+    
     
       console.log([player,socket.id,"has joined",room])
   

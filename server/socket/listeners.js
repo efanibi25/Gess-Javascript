@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
 
 
   socket.on("sendmove", async (startdex,endex,callback) => {
-    if (!validateMove(socket,startdex,endex)){
+    if (!validateMove(socket,io,startdex,endex)){
       callback({
         response: "ok"
       });
