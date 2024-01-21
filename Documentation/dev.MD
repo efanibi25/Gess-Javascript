@@ -49,7 +49,7 @@ The new system is more secure, but the downside of this new system is that once 
 
 
 
-# Dropzone modifcation
+# Dropzone modification
 
 One of my favorite moments of this project was figuring out a way to have the board handle moves
 The process is 
