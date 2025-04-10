@@ -1,81 +1,62 @@
 
 # Future Updates
-The UI is very simple at the moment
+The current UI is minimalistic.
 
-I would like to upgrade it to a more modern look with React or another front-end framework
-Phaser also handles the front end so the challenge is figuring out how to integrate it
-See: Documentation/future.MD
+Planned improvements:
+- Modernize the interface using React or another front-end framework
+- Integrate Phaser (which currently handles front-end rendering) with the new framework
+- See detailed plans in: Documentation/future.md
 
-# Demo
+# Live Demo
 https://gess.fanibi.org/
 
-# Running/Install
+# Installation & Setup
 
-## 1 Get Redis
+## 1. Redis Setup
+You'll need a Redis instance running locally or on your server.
+
+**Simplest method (using Docker):**
+```bash
+./start.sh  # This handles Redis setup automatically
 ```
-You'll need an instance of Redis on the server/local machine 
-If you have docker installed on your system, then the easiest way to run the program would be to start the start.sh script
 
-With that method getting Redis separately won't be required
-```
-
-## 2 install modules
-
-
-```
+## 2. Install Dependencies
+```bash
 npm install
-```
-
-## 3 install concurrently globally
-
-
-```
 npm install -g concurrently
-
+npm instlal -g nodemon
 ```
 
+## 3. Environment Configuration
+Copy `.env.example` to `.env` in the root directory and update these values:
 
+### Required Environment Variables
+- `CLIENT_PORT`: Port for the main client UI/website (hosted by backend)
+- `CLIENT_URL`: Domain/URL for client access
+- `SOCKET_IO_PORT`: Port for Socket.IO service
+- `SOCKET_IO_URL`: Domain/URL for Socket.IO access
 
-## 4 add .env
-This should be in the root of the repo
+### Optional Environment Variables
+If not used socket.io will failback to http
+- `PRIVATE_KEY`: SSL private key (generated via certbot or manually)
+- `CERT_KEY`: SSL certificate key (generated via certbot or manually)
 
-### Values
-#### V CLIENT_PORT
-This refers to the port used to host the main client UI/Website
-It is used by the backend to host the express service
-
-#### V CLIENT_URL
-This is the url/domain the client uses to access the main client
-
-#### V SOCKET_IO_PORT
-This is the port used to host the socket.io service, used by the backend
-
-
-#### V SOCKET_IO_URL
-This is the url/domain the client uses to access the socket.io service
-
-### env
-copy .env.example to .env
-
-You can then change the .env file values to better match your system
-
-### Tips
-- When using Nginx with Certbot for SSL/TLS and a Socket.IO backend, the configuration can vary depending on how your Socket.IO server is set up to handle connections.
-
-  **Option 1: Socket.IO backend serves HTTPS directly on a non-standard port (e.g., 7500)**
-  In this case, your client-side application might need to connect to the Socket.IO server by specifying the full URL including the port. For example, you might have an environment variable or a configuration setting like:
-  SOCKET_IO_URL=https://yourdomain.com:7500  
-
-## 5 run script 
+## 4. Launch Application
+```bash
+./start.sh
 ```
-run ./start.sh
-Note: You can use the second line instead if you using a non docker version of Redis
+*For non-Docker Redis setups, modify the script as needed.*
 
+## 5. Access the Application
+The main website will be available at `localhost:8090` by default (port configurable in `.env`).
 ```
 
-
-# 6 Accessing 
-
-Main website is hosted on localhost:8090, unless you change the .env variables#
-
+Key improvements:
+1. Better organized sections
+2. Consistent formatting for commands/code
+3. More concise wording
+4. Fixed grammatical issues
+5. Added markdown formatting for better readability
+6. Clarified some instructions
+7. Removed redundant information
 
