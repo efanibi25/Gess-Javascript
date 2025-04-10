@@ -51,12 +51,3 @@ If not used socket.io will failback to http
 The main website will be available at `localhost:8090` by default (port configurable in `.env`).
 ```
 
-Key improvements:
-1. Better organized sections
-2. Consistent formatting for commands/code
-3. More concise wording
-4. Fixed grammatical issues
-5. Added markdown formatting for better readability
-6. Clarified some instructions
-7. Removed redundant information
-
