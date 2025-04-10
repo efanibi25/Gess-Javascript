@@ -1,4 +1,3 @@
-
 # Future Updates
 The current UI is minimalistic.
 
@@ -23,12 +22,11 @@ You'll need a Redis instance running locally or on your server.
 ## 2. Install Dependencies
 ```bash
 npm install
-npm install -g concurrently
-npm instlal -g nodemon
+npm install -g concurrently nodemon
 ```
 
 ## 3. Environment Configuration
-Copy `.env.example` to `.env` in the root directory and update these values:
+Copy `conf/.env.example` to `.env` in the root directory and update these values:
 
 ### Required Environment Variables
 - `CLIENT_PORT`: Port for the main client UI/website (hosted by backend)
@@ -36,18 +34,21 @@ Copy `.env.example` to `.env` in the root directory and update these values:
 - `SOCKET_IO_PORT`: Port for Socket.IO service
 - `SOCKET_IO_URL`: Domain/URL for Socket.IO access
 
-### Optional Environment Variables
-If not used socket.io will failback to http
+### Optional SSL Configuration
+Socket.IO will fall back to HTTP if these are not provided:
 - `PRIVATE_KEY`: SSL private key (generated via certbot or manually)
 - `CERT_KEY`: SSL certificate key (generated via certbot or manually)
+
+### Nginx Configuration Examples
+- `conf/gess.certbot.conf`: Example configuration for Certbot setup
+- `conf/gess.conf`: Plain HTTP connection configuration
 
 ## 4. Launch Application
 ```bash
 ./start.sh
 ```
-*For non-Docker Redis setups, modify the script as needed.*
+*Note: For non-Docker Redis setups, modify the script as needed.*
 
 ## 5. Access the Application
 The main website will be available at `localhost:8090` by default (port configurable in `.env`).
-```
 
