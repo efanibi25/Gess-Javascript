@@ -3,18 +3,25 @@ const TIMEOUT=5000000
 const RETRY=false
 export const gameID=window.location.pathname.split("/").pop()
 export const data={"currentplayer":null,"playerstatus":"waiting on server"}
-export const socket = io(`${server}`,{
+export const socket = io(`${server}`, {
+  // Connection options
+  transports: ['websocket', 'polling'],
+  path: "/socket.io/",
+  upgrade: true,
+  // Query parameters (sent during initial handshake)
   query: {
-      socketId: getSocketID() || ''
-    },
-    path: "/socket.io/"
-    transports:
-    ['websocket','polling'] }, { 'force new connection': true
-},
-reconnection: true,
-reconnectionAttempts: Infinity,
-reconnectionDelay: 1000,
-randomizationFactor: 0.5,);
+    socketId: getSocketID() || ''
+  },
+  // Reconnection settings
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  randomizationFactor: 0.5,
+  // Advanced options
+  forceNew: true,  // Correct placement for forcing new connection
+  timeout: 20000   // Connection timeout (ms)
+});
 
 //local storage
 export function getSocketID(){
