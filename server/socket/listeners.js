@@ -1,20 +1,33 @@
-const httpServer= require("http").createServer();
-const {game,join,validateMove,processMove,getcurrentPlayer,interactiveHelper}=require("./controllers.js")
-require('dotenv').config(".env")
+const http = require("http");
+const https = require("https");
+const fs = require("fs");
+const { game, join, validateMove, processMove, getCurrentPlayer, interactiveHelper } = require("./controllers.js");
+require('dotenv').config(".env");
 
 const { Server } = require("socket.io");
-const url = require('url')
+const url = require('url');
 const base64id = require('base64id');
-const e = require("express");
 
+const privateKeyEnv = process.env.PRIVATE_KEY;
+const certificateEnv = process.env.CERT_KEY;
 
+let server;
 
+if (privateKeyEnv && certificateEnv) {
+  const credentials = {
+    key: privateKeyEnv,
+    cert: certificateEnv
+  };
+  server = https.createServer(credentials);
+  console.log("Starting secure Socket.IO server (HTTPS)");
+} else {
+  server = http.createServer();
+  console.log("Starting insecure Socket.IO server (HTTP)");
+}
 
-
-
-const io = new Server(httpServer, {
+const io = new Server(server, {
   cors: {
-    origin:/\.*/,
+    origin: /.*/,
     methods: ["GET", "POST"],
   }
 });
@@ -111,8 +124,8 @@ io.on('connection', (socket) => {
 // });
 
 
-const port= process.env.SOCKET_IO_PORT
+const port= process.env.SOCKET_IO_PORT || 7500
 
-httpServer.listen(port, function () {
+server.listen(port, function () {
     console.log('Socket.io Server started! on port',port)
 });
