@@ -4,10 +4,12 @@ const RETRY=false
 export const gameID=window.location.pathname.split("/").pop()
 export const data={"currentplayer":null,"playerstatus":"waiting on server"}
 export const socket = io(`${server}`,{
-    query: {
-        socketId: getSocketID() || ''
-      }
-  });
+  query: {
+      socketId: getSocketID() || ''
+    },
+    transports:
+    ['websocket'] }, { 'force new connection': true
+});
 
 //local storage
 export function getSocketID(){
