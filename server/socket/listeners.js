@@ -15,8 +15,8 @@ let server;
 
 if (privateKeyEnv && certificateEnv) {
   const credentials = {
-    key: privateKeyEnv,
-    cert: certificateEnv
+    key: fs.readFileSync(privateKeyEnv),
+    cert: fs.readFileSync(certificateEnv)
   };
   server = https.createServer(credentials);
   console.log("Starting secure Socket.IO server (HTTPS)");
@@ -37,7 +37,6 @@ const io = new Server(server, {
     maxDisconnectionDuration: 60*15*1000
   }
 });
-
 
 io.engine.generateId = req => {
   const parsedUrl = new url.parse(req.url,true)
