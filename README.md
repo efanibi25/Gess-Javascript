@@ -54,20 +54,10 @@ This is the port used to host the socket.io service, used by the backend
 ### SOCKET_IO_URL
 This is the url/domain the client uses to access the socket.io service
 
-### Example
+### env
+copy .env.example to .env
 
-```
-CLIENT_PORT=8090
-SOCKET_IO_PORT=7500
-CLIENT_URL=http://localhost:8090
-SOCKET_IO_URL=http://localhost:7500
-```
-
-
-```
-You can change the .env file to better match your system
-
-```
+You can then change the .env file values to better match your system
 
 ## 5 run script 
 ```
