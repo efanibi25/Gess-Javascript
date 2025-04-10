@@ -62,9 +62,9 @@ You can then change the .env file values to better match your system
 ### Tips
 - When using Nginx with Certbot for SSL/TLS and a Socket.IO backend, the configuration can vary depending on how your Socket.IO server is set up to handle connections.
 
-  **Scenario 1: Socket.IO backend serves HTTPS directly on a non-standard port (e.g., 7500)**
+  **Option 1: Socket.IO backend serves HTTPS directly on a non-standard port (e.g., 7500)**
   In this case, your client-side application might need to connect to the Socket.IO server by specifying the full URL including the port. For example, you might have an environment variable or a configuration setting like:
-  SOCKET_IO_URL=https://yourdomain.com:7500
+  SOCKET_IO_URL=https://yourdomain.com:7500  
 
 ## 5 run script 
 ```

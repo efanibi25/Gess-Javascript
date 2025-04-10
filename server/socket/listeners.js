@@ -27,9 +27,10 @@ if (privateKeyEnv && certificateEnv) {
 
 const io = new Server(server, {
   cors: {
-    origin: /.*/,
+    origin: '*',
     methods: ["GET", "POST"],
-  }
+  },
+  path: "/socket.io/"
 });
 io.set('transports', ['websocket']);
 

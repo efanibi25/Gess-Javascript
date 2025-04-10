@@ -7,8 +7,9 @@ export const socket = io(`${server}`,{
   query: {
       socketId: getSocketID() || ''
     },
+    path: "/socket.io/"
     transports:
-    ['websocket'] }, { 'force new connection': true
+    ['websocket','polling'] }, { 'force new connection': true
 });
 
 //local storage
