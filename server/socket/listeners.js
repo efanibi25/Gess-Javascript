@@ -30,9 +30,14 @@ const io = new Server(server, {
     origin: '*',
     methods: ["GET", "POST"],
   },
-  path: "/socket.io/"
+  path: "/socket.io/",
+  pingInterval: 60000,    // 1 minute pings
+  pingTimeout: 300000,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 60*15*1000
+  }
 });
-io.set('transports', ['websocket']);
+
 
 io.engine.generateId = req => {
   const parsedUrl = new url.parse(req.url,true)

@@ -10,7 +10,11 @@ export const socket = io(`${server}`,{
     path: "/socket.io/"
     transports:
     ['websocket','polling'] }, { 'force new connection': true
-});
+},
+reconnection: true,
+reconnectionAttempts: Infinity,
+reconnectionDelay: 1000,
+randomizationFactor: 0.5,);
 
 //local storage
 export function getSocketID(){
