@@ -182,7 +182,7 @@ async function join(socket,room){
       await processSwitch(socket,io,game)
     }
   }
-module.exports={join,game,validateMove,processMove,getcurrentPlayer,interactiveHelper}
+module.exports={join,game,validateMove,processMove,getcurrentPlayer ,interactiveHelper}
 
 
 

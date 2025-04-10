@@ -1,7 +1,7 @@
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
-const { game, join, validateMove, processMove, getCurrentPlayer, interactiveHelper } = require("./controllers.js");
+const { game, join, validateMove, processMove,  getcurrentPlayer, interactiveHelper } = require("./controllers.js");
 require('dotenv').config(".env");
 
 const { Server } = require("socket.io");
@@ -31,6 +31,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   }
 });
+io.set('transports', ['websocket']);
 
 io.engine.generateId = req => {
   const parsedUrl = new url.parse(req.url,true)

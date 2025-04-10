@@ -39,25 +39,32 @@ npm install -g concurrently
 ## 4 add .env
 This should be in the root of the repo
 
-
-### CLIENT_PORT
+### Values
+#### V CLIENT_PORT
 This refers to the port used to host the main client UI/Website
 It is used by the backend to host the express service
 
-### CLIENT_URL
+#### V CLIENT_URL
 This is the url/domain the client uses to access the main client
 
-### SOCKET_IO_PORT
+#### V SOCKET_IO_PORT
 This is the port used to host the socket.io service, used by the backend
 
 
-### SOCKET_IO_URL
+#### V SOCKET_IO_URL
 This is the url/domain the client uses to access the socket.io service
 
 ### env
 copy .env.example to .env
 
 You can then change the .env file values to better match your system
+
+### Tips
+- When using Nginx with Certbot for SSL/TLS and a Socket.IO backend, the configuration can vary depending on how your Socket.IO server is set up to handle connections.
+
+  **Scenario 1: Socket.IO backend serves HTTPS directly on a non-standard port (e.g., 7500)**
+  In this case, your client-side application might need to connect to the Socket.IO server by specifying the full URL including the port. For example, you might have an environment variable or a configuration setting like:
+  SOCKET_IO_URL=https://yourdomain.com:7500
 
 ## 5 run script 
 ```
@@ -70,3 +77,5 @@ Note: You can use the second line instead if you using a non docker version of R
 # 6 Accessing 
 
 Main website is hosted on localhost:8090, unless you change the .env variables#
+
+
