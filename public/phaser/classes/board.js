@@ -1,5 +1,5 @@
 import boardBlock from "./block.js";
-import { data } from "../scripts/client.js";
+import { data } from "../../scripts/lib/network.js";
 const stroke=8
 const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {

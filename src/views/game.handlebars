@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gess Game</title>
+    
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+    <style>
+        /* Basic reset for the page */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: sans-serif;
+            background-color: #333;
+            color: white;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        /* Main container for the entire application */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* The top bar holding all UI elements */
+        #ui-container {
+            display: flex;
+            align-items: center; /* Vertically center items */
+            padding: 8px;
+            background-color: #2a2a2a;
+            border-bottom: 2px solid #555;
+            flex-shrink: 0; /* Prevents this bar from shrinking */
+        }
+
+        #alertBar {
+            flex-grow: 1; /* Allows it to take up the most space */
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 10px;
+            border: 2px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            margin-right: 10px;
+        }
+
+        #playerindicator {
+            width: 200px;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            margin-right: 10px;
+        }
+
+        .button {
+            width: 45px;
+            height: 45px;
+            font-size: 1.5em;
+            cursor: pointer;
+            background-color: #555;
+            color: white;
+            border: 1px solid #777;
+            border-radius: 5px;
+        }
+        
+        /* The container where the Phaser game canvas lives */
+        #game {
+            flex-grow: 1; /* Allows it to fill the remaining vertical space */
+            position: relative; /* Important for Phaser canvas positioning */
+        }
+    </style>
+
+    <script type="text/javascript">
+      let key = "{{key}}";
+      let server = "{{server}}";
+    </script>
+
+    <script type="module" src="/scripts/game.js"></script>
+</head>
+
+<body>
+    <div id="app-container">
+        <div id="ui-container">
+            <div id="alertBar">Connecting...</div>
+            <div id="playerindicator">
+                <div>Player: -</div>
+                <div>Color: -</div>
+            </div>
+            <div id="button-container">
+                <button id="plus-button" class="button">+</button>
+                <button id="minus-button" class="button">-</button>
+            </div>
+        </div>
+
+        <div id="game"></div>
+    </div>
+</body>
+</html>

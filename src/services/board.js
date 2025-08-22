@@ -1,4 +1,4 @@
-const {BoardMax,squaresCount,sideborder}=require("../res/player.js")
+const {BoardMax,squaresCount,sideborder}=require("../shared/player.js")
 class block
 { 
     

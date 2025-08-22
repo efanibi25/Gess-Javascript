@@ -1,5 +1,5 @@
 import boardPiece from "./pieces.js";
-import { data } from "../scripts/client.js";
+import { data } from "../../scripts/lib/network.js";
 import Zone from "./zone.js";
 
 const color=0xadd8e6

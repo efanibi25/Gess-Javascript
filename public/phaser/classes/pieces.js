@@ -4,7 +4,7 @@ Piece Libary
 Note: Piece never change location only attributes based on grab events and validation of moves
 
 */
-import { data } from "../scripts/client.js"
+import { data } from "../../scripts/lib/network.js"
 
 
 const lineThick=3

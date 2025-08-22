@@ -31,8 +31,6 @@ Copy `conf/.env.example` to `.env` in the root directory and update these values
 ### Required Environment Variables
 - `CLIENT_PORT`: Port for the main client UI/website (hosted by backend)
 - `CLIENT_URL`: Domain/URL for client access
-- `SOCKET_IO_PORT`: Port for Socket.IO service
-- `SOCKET_IO_URL`: Domain/URL for Socket.IO access
 
 ### Optional SSL Configuration
 Socket.IO will fall back to HTTP if these are not provided:

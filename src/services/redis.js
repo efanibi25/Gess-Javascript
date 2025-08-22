@@ -1,5 +1,5 @@
 const redis = require('redis');
-const {PLAYER1_PIECES,PLAYER2_PIECES,PLAYER2_RINGS,PLAYER1_RINGS}=require("../res/player.js")
+const {PLAYER1_PIECES,PLAYER2_PIECES,PLAYER2_RINGS,PLAYER1_RINGS}=require("../shared/player.js")
 
 const client = redis.createClient({socket: {
     connectTimeout:500
