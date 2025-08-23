@@ -57,20 +57,8 @@ export default class BoardScene extends Phaser.Scene {
                 }
             }
         });
-
-        socket.on("enableinteractive", () => {
-            if (this.gessBoard) {
-                this.gessBoard.getDraggablePieces().forEach(e => e.allowDraggable());
-            }
-
-        
-});
-        
-        socket.on("disableinteractive", () => {
-            if (this.gessBoard) {
-                this.gessBoard.getDraggablePieces().forEach(e => e.disableDraggable());
-            }
-        });
+        socket.on("enableinteractive", () => this._setPiecesInteractive(true));
+        socket.on("disableinteractive", () => this._setPiecesInteractive(false));
     }
 
     processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) {
@@ -149,6 +137,21 @@ export default class BoardScene extends Phaser.Scene {
                 gameObject.revertNeighbors();
             }
         });
+    }
+
+
+    _setPiecesInteractive(isInteractive) {
+        if (!this.gessBoard) return;
+
+        const draggablePieces = this.gessBoard.getDraggablePieces();
+        
+        if (isInteractive) {
+            console.log("CLIENT: Enabling player interaction.");
+            draggablePieces.forEach(e => e.allowDraggable());
+        } else {
+            console.log("CLIENT: Disabling player interaction.");
+            draggablePieces.forEach(e => e.disableDraggable());
+        }
     }
 
     _handleDragStart(pointer, gameObject) {
