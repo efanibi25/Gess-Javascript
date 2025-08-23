@@ -77,7 +77,29 @@ export default class BoardScene extends Phaser.Scene {
             if (this.gessBoard) {
                 this.gessBoard.getDraggablePieces().forEach(e => e.allowDraggable());
             }
-        });
+
+            const dragfunct= (event, gameObject) =>
+{
+
+
+    let difX=event.position.x-gameObject.x
+    let difY=event.position.y-gameObject.y
+    gameObject.getNeighbors()
+    Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
+        ele.x = ele.x+difX;
+        ele.y = ele.y+difY;
+    })
+
+
+}
+
+
+this.input.addListener('drag',dragfunct)
+
+        
+
+
+});
         
         socket.on("disableinteractive", () => {
             if (this.gessBoard) {

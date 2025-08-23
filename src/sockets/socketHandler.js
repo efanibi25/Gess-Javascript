@@ -4,7 +4,6 @@ import { getGame, updateGame, addGameList } from '../services/redis.js';
 import { board as Board } from '../services/board.js';
 import { BoardMax, squaresCount, sideborder } from '../shared/player.js';
 
-// This main function sets up all the socket event listeners
 export default function initializeSockets(io) {
 
     io.engine.generateId = (req) => {
@@ -22,18 +21,15 @@ export default function initializeSockets(io) {
     io.on('connection', (socket) => {
         console.log(`SERVER: 🟢 User connected with socket ID: ${socket.id}`);
 
-        // Handle the game creation or joining from the client
         socket.on("creategame", async (room) => {
             console.log(`SERVER: ➡️ Received 'creategame' event for room: ${room}`);
             await createOrJoinGame(socket, room, io);
         });
 
-        // The rest of your listeners...
-        socket.on("sendmove", async (startdex, endex, callback) => {
+        socket.on("sendmove", async (startdex, endex) => {
             if (validateMove(socket, io, startdex, endex)) {
                 await processMove(socket, io, startdex, endex);
             }
-            if (callback) callback({ response: "ok" });
         });
 
         socket.on("getcurrentplayer", async (forced, callback) => {
@@ -41,10 +37,9 @@ export default function initializeSockets(io) {
             if (callback) callback({ response: player });
         });
 
-        socket.on("gamestate", async (callback) => {
-            console.log(`SERVER: ➡️ Received 'gamestate' event from client.`);
+        socket.on("gamestate", async () => {
+            console.log(`SERVER: ➡️ Received 'gamestate' from client ${socket.id}. Checking turns.`);
             await interactiveHelper(socket, io);
-            if (callback) callback({ response: "ok" });
         });
 
         socket.on('disconnect', async () => {
@@ -56,7 +51,7 @@ export default function initializeSockets(io) {
     });
 }
 
-// --- Helper Functions (Game Logic) ---
+// --- Helper Functions ---
 
 async function createOrJoinGame(socket, room, io) {
     console.log(`SERVER: Running createOrJoinGame for socket ${socket.id}`);
@@ -83,14 +78,13 @@ async function createOrJoinGame(socket, room, io) {
         updates.player2 = socket.id;
     } else {
         socket.emit("full");
-        console.log(`SERVER: ➡️ Emitted 'full' to client ${socket.id}`);
         return;
     }
 
     await updateGame(room, updates);
     const finalGameData = await getGame(room);
 
-    socket.join(room);
+    await socket.join(room);
     socket.userRoom = finalGameData;
 
     if (playerNumber === 1) {
@@ -99,15 +93,76 @@ async function createOrJoinGame(socket, room, io) {
         socket.board = new Board(finalGameData.player2Pieces, finalGameData.player1Pieces, finalGameData.player2Rings, finalGameData.player1Rings, 2);
     }
     
-    // The key change: Emit 'setdata' from here
     console.log(`SERVER: ➡️ Emitting 'setdata' to client ${socket.id}`);
     socket.emit("setdata", player, BoardMax, finalGameData.player1Pieces, finalGameData.player2Pieces, squaresCount, sideborder);
     console.log(`SERVER: ✅ ${player} (${socket.id}) has successfully joined ${room}`);
 
-    // Call interactiveHelper ONCE here to handle initial turn setup
-    interactiveHelper(socket, io);
+    if (finalGameData.player1 || finalGameData.player2) {
+        await interactiveHelper(socket, io);
+    }
 }
 
+async function interactiveHelper(socket, io) {
+    console.log(`SERVER: Running interactiveHelper for room: ${socket.room}`);
+    if (!socket.room) return;
+    
+    const gameData = await getGame(socket.room);
+    // Exit if the game itself doesn't exist.
+    if (!gameData) return;
+
+    // --- FIX: Allow the game to proceed with one player for testing ---
+    let player1 = gameData.player1;
+    let player2 = gameData.player2;
+
+    if (gameData.winner) {
+        io.to(socket.room).emit("winner", gameData.winner);
+        return;
+    }
+
+    let nextPlayer, nextPlayerId;
+    if (gameData.moves % 2 === 0) {
+        nextPlayer = "player1";
+        nextPlayerId = player1;
+    } else {
+        nextPlayer = "player2";
+        nextPlayerId = player2;
+    }
+
+    const updatedGameData = await updateGame(socket.room, {
+        "currentplayer": nextPlayer,
+        "currentid": nextPlayerId
+    });
+    
+    socket.userRoom = updatedGameData;
+    const socketsInRoom = await io.in(socket.room).fetchSockets();
+    socketsInRoom.forEach(s => {
+        s.emit("setplayerindicator", updatedGameData.currentplayer);
+        if (updatedGameData.currentid && s.id === updatedGameData.currentid) {
+            console.log(`SERVER: ➡️ Emitting 'enableinteractive' to player ${s.id}`);
+            s.emit("enableinteractive");
+        } else  {
+            s.emit("disableinteractive");
+        }
+    });
+    console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
+}
+
+async function processMove(socket, io, startdex, endex) {
+    const gameData = await getGame(socket.room);
+    endex = socket.board.getMaxMovement(startdex, endex);
+    const update = {
+        ...{ "moves": gameData.moves + 1, "currentplayer": null, "currentid": null },
+        ...socket.board.updateBoard(startdex, endex)
+    };
+    socket.userRoom = await updateGame(socket.room, update);
+    if (socket.userRoom.winner) {
+        io.to(socket.room).emit("winner", socket.userRoom.winner);
+    } else {
+        io.to(socket.room).emit("sendmove", startdex, endex);
+    }
+
+    await interactiveHelper(socket, io);
+}
 
 function validateMove(socket, io, startdex, endex) {
     if (!socket.board || !socket.userRoom) {
@@ -132,68 +187,10 @@ function validateMove(socket, io, startdex, endex) {
     return true;
 }
 
-async function processMove(socket, io, startdex, endex) {
-    const gameData = await getGame(socket.room);
-    endex = socket.board.getMaxMovement(startdex, endex);
-    const update = {
-        ...{ "moves": gameData.moves + 1, "currentplayer": null, "currentid": null },
-        ...socket.board.updateBoard(startdex, endex)
-    };
-    socket.userRoom = await updateGame(socket.room, update);
-    if (socket.userRoom.winner) {
-        io.to(socket.room).emit("winner", socket.userRoom.winner);
-    } else {
-        io.to(socket.room).emit("sendmove", startdex, endex);
-    }
-
-    // Call interactiveHelper here to manage the next turn
-    interactiveHelper(socket, io);
-}
-
 async function getcurrentPlayer(socket, forced) {
-    if (forced) {
-        return (await getGame(socket.room)).currentplayer;
+    if (forced && socket.room) {
+        const gameData = await getGame(socket.room);
+        return gameData ? gameData.currentplayer : null;
     }
     return socket.userRoom ? socket.userRoom.currentplayer : null;
-}
-
-async function interactiveHelper(socket, io) {
-    console.log(`SERVER: Running interactiveHelper for room: ${socket.room}`);
-    const gameData = await getGame(socket.room);
-    if (!socket.userRoom || !gameData) {
-        console.warn(`SERVER: ⚠️ interactiveHelper failed. Missing socket.userRoom or gameData.`);
-        return;
-    }
-
-    if (gameData.winner) {
-        io.to(socket.room).emit("winner", gameData.winner);
-        return;
-    }
-
-    let nextPlayer, nextPlayerId;
-    if (gameData.moves % 2 === 0) {
-        nextPlayer = "player1";
-        nextPlayerId = gameData.player1;
-    } else {
-        nextPlayer = "player2";
-        nextPlayerId = gameData.player2;
-    }
-
-    const updatedGameData = await updateGame(socket.room, {
-        "currentplayer": nextPlayer,
-        "currentid": nextPlayerId
-    });
-    
-    const socketsInRoom = await io.in(socket.room).fetchSockets();
-    socketsInRoom.forEach(s => {
-        s.userRoom = updatedGameData;
-        s.emit("setplayerindicator", updatedGameData.currentplayer);
-        if (s.id === updatedGameData.currentid) {
-            console.log(`SERVER: ➡️ Emitting 'enableinteractive' to player ${s.id}`);
-            s.emit("enableinteractive");
-        } else {
-            s.emit("disableinteractive");
-        }
-    });
-    console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
 }
