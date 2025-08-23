@@ -1,0 +1,14 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    "node_modules",
+    "public",
+    "client",
+    "*.log"
+  ],
+  "watch": [
+    "server.js",
+    "src"
+  ],
+  "ext": "js,mjs,json"
+}

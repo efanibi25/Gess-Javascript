@@ -1,10 +1,14 @@
 const redis = require('redis');
 const {PLAYER1_PIECES,PLAYER2_PIECES,PLAYER2_RINGS,PLAYER1_RINGS}=require("../shared/player.js")
 
-const client = redis.createClient({socket: {
-    connectTimeout:500
-    },});
+const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`;
 
+const client = redis.createClient({
+    url: redisUrl,
+    socket: {
+        connectTimeout: 500
+    }
+});
 
 client.on('error', err => console.log('Redis Client Error', err));
 (async()=>{
