@@ -93,11 +93,11 @@ async function createOrJoinGame(socket, room, io) {
         socket.board = new Board(finalGameData.player2Pieces, finalGameData.player1Pieces, finalGameData.player2Rings, finalGameData.player1Rings, 2);
     }
     
-    console.log(`SERVER: ➡️ Emitting 'setdata' to client ${socket.id}`);
     socket.emit("setdata", player, BoardMax, finalGameData.player1Pieces, finalGameData.player2Pieces, squaresCount, sideborder);
     console.log(`SERVER: ✅ ${player} (${socket.id}) has successfully joined ${room}`);
 
-    if (finalGameData.player1 || finalGameData.player2) {
+    // If this is the first player to join, immediately set their turn.
+    if (player === "player1" && !finalGameData.player2) {
         await interactiveHelper(socket, io);
     }
 }
@@ -107,12 +107,7 @@ async function interactiveHelper(socket, io) {
     if (!socket.room) return;
     
     const gameData = await getGame(socket.room);
-    // Exit if the game itself doesn't exist.
     if (!gameData) return;
-
-    // --- FIX: Allow the game to proceed with one player for testing ---
-    let player1 = gameData.player1;
-    let player2 = gameData.player2;
 
     if (gameData.winner) {
         io.to(socket.room).emit("winner", gameData.winner);
@@ -122,31 +117,39 @@ async function interactiveHelper(socket, io) {
     let nextPlayer, nextPlayerId;
     if (gameData.moves % 2 === 0) {
         nextPlayer = "player1";
-        nextPlayerId = player1;
+        nextPlayerId = gameData.player1;
     } else {
         nextPlayer = "player2";
-        nextPlayerId = player2;
+        nextPlayerId = gameData.player2;
     }
 
+    // If the next player doesn't exist yet (i.e., we are waiting for player 2),
+    // disable interactivity for everyone and wait.
+    if (!nextPlayerId) {
+        console.log(`SERVER: ⏳ Waiting for ${nextPlayer} to join. Pausing turns.`);
+        io.to(socket.room).emit("disableinteractive");
+        io.to(socket.room).emit("setplayerindicator", `Waiting for ${nextPlayer}...`);
+        return;
+    }
+
+    // If the next player exists, proceed as normal.
     const updatedGameData = await updateGame(socket.room, {
         "currentplayer": nextPlayer,
         "currentid": nextPlayerId
     });
     
-    socket.userRoom = updatedGameData;
     const socketsInRoom = await io.in(socket.room).fetchSockets();
     socketsInRoom.forEach(s => {
+        s.userRoom = updatedGameData; // Keep all sockets' local state in sync
         s.emit("setplayerindicator", updatedGameData.currentplayer);
-        if (updatedGameData.currentid && s.id === updatedGameData.currentid) {
-            console.log(`SERVER: ➡️ Emitting 'enableinteractive' to player ${s.id}`);
+        if (s.id === updatedGameData.currentid) {
             s.emit("enableinteractive");
-        } else  {
+        } else {
             s.emit("disableinteractive");
         }
     });
     console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
 }
-
 async function processMove(socket, io, startdex, endex) {
     const gameData = await getGame(socket.room);
     endex = socket.board.getMaxMovement(startdex, endex);

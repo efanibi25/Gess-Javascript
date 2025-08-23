@@ -78,27 +78,7 @@ export default class BoardScene extends Phaser.Scene {
                 this.gessBoard.getDraggablePieces().forEach(e => e.allowDraggable());
             }
 
-            const dragfunct= (event, gameObject) =>
-{
-
-
-    let difX=event.position.x-gameObject.x
-    let difY=event.position.y-gameObject.y
-    gameObject.getNeighbors()
-    Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
-        ele.x = ele.x+difX;
-        ele.y = ele.y+difY;
-    })
-
-
-}
-
-
-this.input.addListener('drag',dragfunct)
-
         
-
-
 });
         
         socket.on("disableinteractive", () => {
@@ -144,7 +124,12 @@ this.input.addListener('drag',dragfunct)
     }
 
     setupInputListeners() {
-        this.input.on('drop', (pointer, gameObject, dropZone) => {
+    // // FIX 1: Add a listener for the 'dragstart' event.
+    this.input.on('dragstart', this._handleDragStart, this);
+
+    // // This listener is now set up just one time.
+    this.input.on('drag', this._handleDrag, this);        
+    this.input.on('drop', (pointer, gameObject, dropZone) => {
             if (!this.gessBoard) return;
             
             gameObject.x = dropZone.x;
@@ -180,4 +165,31 @@ this.input.addListener('drag',dragfunct)
             }
         });
     }
+
+    _handleDragStart(pointer, gameObject) {
+    // Store the starting position of the main piece.
+    gameObject.x_initial = gameObject.x;
+    gameObject.y_initial = gameObject.y;
+
+    // Also store the starting position of all its neighbors.
+    if (gameObject.neighbors) {
+        Object.values(gameObject.neighbors).filter(n => n != null).forEach(neighbor => {
+            neighbor.x_initial = neighbor.x;
+            neighbor.y_initial = neighbor.y;
+        });
+    }
 }
+
+    _handleDrag(event, gameObject) {
+         let difX=event.position.x-gameObject.x
+    let difY=event.position.y-gameObject.y
+    gameObject.getNeighbors()
+    Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
+        ele.x = ele.x+difX;
+        ele.y = ele.y+difY;
+    })
+    }
+}
+
+
+
