@@ -40,16 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const gameContainer = document.querySelector('#game');
 
-        const config = {
-            type: Phaser.AUTO,
-            width: 1600,
-            height: 720,
-            parent: 'game',
-            transparent: true,
-            scene: [ BoardScene ]
-        };
+        // const config = {
+        //     type: Phaser.AUTO,
+        //     width: 1600,
+        //     height: 720,
+        //     parent: 'game',
+        //     transparent: true,
+        //     scene: [ BoardScene ]
+        // };
+          const config = {
+        type: Phaser.AUTO,
+        
+        // Use the container's actual width and height
+        width: 1600,
+        height: 900,
+        minWidth: 800,
+        minHeight: 600,
+        maxWidth:2560,
+        maxHeight:1600,
+        parent: 'game',
+        transparent: true,
+        
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        
+        scene: [ BoardScene ]
+    };
 
         phaserGame = new Phaser.Game(config);
         
