@@ -36,28 +36,13 @@ export default class BoardScene extends Phaser.Scene {
             console.log("CLIENT: ✅ Received 'setdata' event. Starting data processing and board creation.");
             
             this.processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder);
-            
-            if (!this.gessBoard) {
-                console.log("CLIENT: Initializing board for the first time.");
-                this.initializeBoard();
+            this.initializeBoard();
+        
                 if (this.loadingText) {
                     this.loadingText.destroy();
                     this.loadingText = null;
                 }
-            } else {
-                console.log("CLIENT: Board already exists. Updating existing board with new data.");
-                this.gessBoard.upDateGameBlocks();
-            }
-        });
-        
-        socket.on("creategame", (gameId) => {
-            console.log("CLIENT: ✅ Received 'creategame' event from server. Emitting 'gamestate' now.");
-            this.network.emit("gamestate");
-        });
-        
-        socket.on("joingame", (gameId) => {
-            console.log("CLIENT: ✅ Received 'joingame' event from server. Emitting 'gamestate' now.");
-            this.network.emit("gamestate");
+
         });
         
         socket.on("winner", (player) => this.ui.setAlert(`${player} has won the game`));
