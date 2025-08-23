@@ -77,8 +77,17 @@
         
         /* The container where the Phaser game canvas lives */
         #game {
-            flex-grow: 1; /* Allows it to fill the remaining vertical space */
+            {{!-- flex-grow: 1; /* Allows it to fill the remaining vertical space */ --}}
             position: relative; /* Important for Phaser canvas positioning */
+                /* Set the size of the viewing window */
+                width: 100%;
+                height: 90vh; /* Example: 85% of the viewport height */
+
+                /* This is the crucial part that adds scrollbars when needed */
+                overflow: auto;
+                
+                position: relative;
+                border: 2px solid grey;
         }
     </style>
 

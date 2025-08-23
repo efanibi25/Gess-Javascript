@@ -1,3 +1,4 @@
+// BoardScene.js
 import GessBoard from "../classes/board.js";
 
 export default class BoardScene extends Phaser.Scene {
@@ -5,116 +6,156 @@ export default class BoardScene extends Phaser.Scene {
         super('BoardScene');
     }
 
-    // The 'network' and 'ui' managers are received here from game.js
     init(data) {
         this.network = data.network;
         this.ui = data.ui;
+        this.gessBoard = null;
     }
-
+    
     preload() {
         this.load.image('background', '../assets/wood.jpg');
     }
 
     create() {
-        // --- Setup Scene ---
         this.add.image(0, 0, 'background').setOrigin(0);
-        
-        const playerNumber = this.network.getPlayerNumber();
-        this.gessBoard = new GessBoard(this, playerNumber);
-        this.gessBoard.create();
-        
-        // Update the UI using the UIManager
-        this.ui.setPlayerIndicator(playerNumber, this.gessBoard.color);
-        
-        // --- Setup Socket Listeners for THIS Scene ---
         this.setupSocketListeners();
-
-        // --- Setup Phaser Input Listeners for THIS Scene ---
         this.setupInputListeners();
-        
-        // Let the server know the scene is ready
-        this.network.emit("gamestate");
+
+        this.loadingText = this.add.text(
+            this.cameras.main.width / 2, 
+            this.cameras.main.height / 2, 
+            'Waiting for game data...', 
+            { font: '24px Arial', fill: '#ffffff' }
+        ).setOrigin(0.5);
     }
 
     setupSocketListeners() {
-        const socket = this.network.socket; // Get the socket instance from the manager
+        const socket = this.network.socket;
 
-        socket.on("winner", (player) => {
-            this.ui.setAlert(`${player} has won the game`);
+        socket.on("setdata", (playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) => {
+            console.log("CLIENT: ✅ Received 'setdata' event. Starting data processing and board creation.");
+            
+            this.processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder);
+            
+            if (!this.gessBoard) {
+                console.log("CLIENT: Initializing board for the first time.");
+                this.initializeBoard();
+                if (this.loadingText) {
+                    this.loadingText.destroy();
+                    this.loadingText = null;
+                }
+            } else {
+                console.log("CLIENT: Board already exists. Updating existing board with new data.");
+                this.gessBoard.upDateGameBlocks();
+            }
         });
-
-        socket.on("sendalert", (message) => {
-            this.ui.setAlert(message);
+        
+        socket.on("creategame", (gameId) => {
+            console.log("CLIENT: ✅ Received 'creategame' event from server. Emitting 'gamestate' now.");
+            this.network.emit("gamestate");
         });
+        
+        socket.on("joingame", (gameId) => {
+            console.log("CLIENT: ✅ Received 'joingame' event from server. Emitting 'gamestate' now.");
+            this.network.emit("gamestate");
+        });
+        
+        socket.on("winner", (player) => this.ui.setAlert(`${player} has won the game`));
+        socket.on("sendalert", (message) => this.ui.setAlert(message));
 
         socket.on("sendmove", (startdex, endex, test = true) => {
-            this.gessBoard.movePieceAuto(startdex, endex);
-            if (test) {
-                this.network.emit("gamestate");
-                this.network.emit("checkrings", endex);
+            if (this.gessBoard) {
+                this.gessBoard.movePieceAuto(startdex, endex);
+                if (test) {
+                    this.network.emit("gamestate");
+                    this.network.emit("checkrings", endex);
+                }
             }
         });
 
         socket.on("enableinteractive", () => {
-            this.gessBoard.getDraggablePieces().forEach(e => e.allowDraggable());
+            if (this.gessBoard) {
+                this.gessBoard.getDraggablePieces().forEach(e => e.allowDraggable());
+            }
         });
-
+        
         socket.on("disableinteractive", () => {
-            this.gessBoard.getDraggablePieces().forEach(e => e.disableDraggable());
+            if (this.gessBoard) {
+                this.gessBoard.getDraggablePieces().forEach(e => e.disableDraggable());
+            }
         });
     }
 
-    // This method belongs inside your BoardScene class in public/phaser/scenes/board.js
+    processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) {
+        this.network.setPlayerNumber(playerNum);
+        this.network.setGameData("BoardMax", boardMax);
+        this.network.setGameData("PLAYER1_PIECES", new Set(p1Pieces));
+        this.network.setGameData("PLAYER2_PIECES", new Set(p2Pieces));
+        this.network.setGameData("squaresCount", squaresCount);
+        this.network.setGameData("sideborder", sideborder);
+    }
 
-setupInputListeners() {
-    this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-        // This logic handles moving the piece and its neighbors while dragging
-        let difX = dragX - gameObject.x;
-        let difY = dragY - gameObject.y;
-        
-        // Ensure neighbors are calculated
-        if (!gameObject.neighbors) {
-            gameObject.getNeighbors();
+    initializeBoard() {
+        if (!this.gessBoard) {
+            const playerNumber = this.network.getPlayerNumber();
+            const gameData = this.network.data;
+            
+            if (!gameData || isNaN(gameData.squaresCount) || isNaN(gameData.sideborder)) {
+                console.error("Critical error: Game data is invalid or not yet received.");
+                return;
+            }
+
+            try {
+                this.gessBoard = new GessBoard(this, playerNumber, gameData);
+                this.gessBoard.create();
+                this.ui.setPlayerIndicator(playerNumber, this.gessBoard.color);
+            } catch (error) {
+                console.error("Error initializing board:", error);
+                this.add.text(
+                    this.cameras.main.width / 2, 
+                    this.cameras.main.height / 2, 
+                    'Error initializing game board', 
+                    { font: '24px Arial', fill: '#ff0000' }
+                ).setOrigin(0.5);
+            }
         }
-        
-        Object.values(gameObject.neighbors).filter(e => e != null).forEach(neighbor => {
-            neighbor.x += difX;
-            neighbor.y += difY;
+    }
+
+    setupInputListeners() {
+        this.input.on('drop', (pointer, gameObject, dropZone) => {
+            if (!this.gessBoard) return;
+            
+            gameObject.x = dropZone.x;
+            gameObject.y = dropZone.y;
+            gameObject.setNewBlock(dropZone.block);
+            dropZone.removeZoneLine();
         });
-    });
+        
+        this.input.on('dragend', async (pointer, gameObject, dropped) => {
+            if (!this.gessBoard) return;
+            
+            gameObject.normalSize();
+            if (gameObject.block?.zone) {
+                gameObject.block.zone.removeZoneLine();
+            }
 
-    this.input.on('drop', (pointer, gameObject, dropZone) => {
-        // Snap the piece to the center of the drop zone
-        gameObject.x = dropZone.x;
-        gameObject.y = dropZone.y;
-        gameObject.setNewBlock(dropZone.block);
+            try {
+                const currentPlayer = await this.network.getCurrentPlayer(true);
+                const playerNumber = this.network.getPlayerNumber();
 
-        // FIX: Explicitly remove the highlight from the zone it was dropped on.
-        dropZone.removeZoneLine();
-    });
-    
-    this.input.on('dragend', async (pointer, gameObject, dropped) => {
-        // FIX: Reset the piece's size regardless of the outcome.
-        gameObject.normalSize();
-
-        // FIX: Remove the green highlight from the starting block's zone.
-        if (gameObject.block && gameObject.block.zone) {
-            gameObject.block.zone.removeZoneLine();
-        }
-
-        const currentPlayer = await this.network.getCurrentPlayer(true);
-        const playerNumber = this.network.getPlayerNumber();
-
-        if (currentPlayer !== playerNumber) {
-            this.ui.setAlert(`It is not your turn`);
-            gameObject.revertNeighbors(); // This function should reset the piece's position
-        } else if (!dropped) {
-            // If not dropped on a valid zone, revert position.
-            gameObject.revertNeighbors();
-        } else {
-            // If successfully dropped, emit the move to the server.
-            this.network.emit("sendmove", gameObject.block.index, gameObject.newBlock.index);
-        }
-    });
-}
+                if (currentPlayer !== playerNumber) {
+                    this.ui.setAlert(`It is not your turn`);
+                    gameObject.revertNeighbors();
+                } else if (!dropped) {
+                    gameObject.revertNeighbors();
+                } else {
+                    this.network.emit("sendmove", gameObject.block.index, gameObject.newBlock.index);
+                }
+            } catch (error) {
+                console.error("Error in dragend handler:", error);
+                this.ui.setAlert("Error processing move");
+                gameObject.revertNeighbors();
+            }
+        });
+    }
 }

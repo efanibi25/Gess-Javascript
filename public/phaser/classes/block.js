@@ -27,6 +27,9 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         data["squaresCount"]+data["sideborder"]-1,-data["squaresCount"]-
         data["sideborder"]+1]
         this.addBlockColor()
+        this.fontSize="20px"
+        this.fontFamily='Georgia, "Goudy Bookletter 1911", Times, serif'
+        this.fontStyle='bold'
 
         
 
@@ -68,15 +71,15 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
     }
     addNum(num){
-        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-data["sideborder"]/2+1,{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+        this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-data["sideborder"]/2+1,{ fontFamily: this.fontFamily,fontSize:this.fontSize ,fontStyle:this.fontStyle})
         this.scene.add.existing(this.text)
         Phaser.Display.Align.In.Center(this.text,this) 
     }
 
 
     addText(num){
-    if(num<=data["sideborder"]/2||num>(data["sideborder"]/2)+data["squaresCount"]) this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, "*",{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
-    else this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, String.fromCharCode(63+num-data["sideborder"]/2+1),{ fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',fontSize:"40px" ,fontStyle:"bold"})
+    if(num<=data["sideborder"]/2||num>(data["sideborder"]/2)+data["squaresCount"]) this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, "*",{ fontFamily: this.fontFamily,fontSize:this.fontSize ,fontStyle:this.fontStyle})
+    else this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, String.fromCharCode(63+num-data["sideborder"]/2+1),{ fontFamily: this.fontFamily,fontSize:this.fontSize ,fontStyle:this.fontStyle})
     this.scene.add.existing(this.text)
     Phaser.Display.Align.In.Center(this.text,this) 
 }
