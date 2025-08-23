@@ -5,7 +5,7 @@ import Zone from "./gessZone.js";
 const color=0xadd8e6
 const altColor=0xD6D6B3
 const showblockColor=true
-
+const showZoneLine=false
 
 export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
@@ -59,17 +59,24 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
     }
 
 
-    addZone(){
-    if(!this.neighbors){
-        this.getNeighbors()
+addZone() {
+    if (!this.neighbors) {
+        this.getNeighbors();
     }
-    if(Object.values(this.neighbors).filter(e=>e!=null).length==9){
-        this.zone= new Zone(this.scene, 0,0, this.width, this.height,this)
-        this.zone.setZoneCenter()
-    }
-    
 
+    // Check if the block is surrounded and thus a valid drop target
+    if (Object.values(this.neighbors).filter(e => e != null).length === 9) {
+        this.zone = new Zone(this.scene, this.x, this.y, this.width, this.height, this);
+        
+        // The alignment logic from setZoneCenter is now here
+        Phaser.Display.Align.In.Center(this.zone, this);
+        
+        // Optional: Draw a debug highlight if your flag is on
+        if (showZoneLine) {
+            this.scene._drawHighlight(this.zone, zoneColor, zoneLineThick);
+        }
     }
+}
     addNum(num){
         this.text=new Phaser.GameObjects.Text(this.scene, 0, 0, num-data["sideborder"]/2+1,{ fontFamily: this.fontFamily,fontSize:this.fontSize ,fontStyle:this.fontStyle})
         this.scene.add.existing(this.text)

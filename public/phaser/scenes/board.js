@@ -18,6 +18,8 @@ export default class BoardScene extends Phaser.Scene {
 
     create() {
         this.add.image(0, 0, 'background').setOrigin(0);
+        this.graphics = this.add.graphics();
+        this.graphics.setDepth(5); 
         this.setupSocketListeners();
         this.setupInputListeners();
 
@@ -27,6 +29,8 @@ export default class BoardScene extends Phaser.Scene {
             'Waiting for game data...', 
             { font: '24px Arial', fill: '#ffffff' }
         ).setOrigin(0.5);
+
+        
     }
 
     setupSocketListeners() {
@@ -108,16 +112,14 @@ export default class BoardScene extends Phaser.Scene {
             gameObject.x = dropZone.x;
             gameObject.y = dropZone.y;
             gameObject.setNewBlock(dropZone.block);
-            dropZone.removeZoneLine();
+            this._clearHighlights();
         });
         
         this.input.on('dragend', async (pointer, gameObject, dropped) => {
             if (!this.gessBoard) return;
             
             gameObject.normalSize();
-            if (gameObject.block?.zone) {
-                gameObject.block.zone.removeZoneLine();
-            }
+            this._clearHighlights();
 
             try {
                 const currentPlayer = await this.network.getCurrentPlayer(true);
@@ -177,7 +179,35 @@ export default class BoardScene extends Phaser.Scene {
         ele.y = ele.y+difY;
     })
     }
+
+      _clearHighlights() {
+        this.graphics.clear();
+    }
+
+
+    // _removeZoneHighlight(zone) {
+    //     // this.graphics.clear()
+    //     this.graphics.commandBuffer.length = 1;
+    //     // this.graphics.lineStyle(this.graphics.defaultStrokeWidth, this.graphics.defaultStrokeColor, this.graphics.defaultStrokeAlpha);
+    //     // this.graphics.fillStyle(this.graphics.defaultFillColor, this.graphics.defaultFillAlpha);
+
+    //     // let thickness=-1
+    //     // let color = 0xffff00
+    //     // this.graphics.lineStyle(thickness, color);
+    //     // this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
+
+    // }
+
+
+
+    // Helper method to draw highlights
+    _drawHighlight(zone, color = 0xffff00, thickness = 12) {
+        this.graphics.lineStyle(thickness, color);
+        let test=this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
+        console.log(test)
+    }
 }
+
 
 
 
