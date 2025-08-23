@@ -1,6 +1,6 @@
-import boardPiece from "./pieces.js";
+import boardPiece from "./gessPiece.js";
 import { data } from "../../scripts/lib/network.js";
-import Zone from "./zone.js";
+import Zone from "./gessZone.js";
 
 const color=0xadd8e6
 const altColor=0xD6D6B3

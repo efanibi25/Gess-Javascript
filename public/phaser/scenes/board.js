@@ -1,5 +1,5 @@
 // BoardScene.js
-import GessBoard from "../classes/board.js";
+import GessBoard from "../classes/gessBoard.js";
 
 export default class BoardScene extends Phaser.Scene {
     constructor() {

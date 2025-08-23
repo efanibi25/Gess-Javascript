@@ -1,4 +1,4 @@
-import boardBlock from "./block.js";
+import boardBlock from "./gessBlock.js";
 import { data } from "../../scripts/lib/network.js";
 const stroke=8
 const showStroke=true
