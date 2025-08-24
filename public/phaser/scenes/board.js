@@ -101,7 +101,6 @@ export default class BoardScene extends Phaser.Scene {
     }
 
     setupInputListeners() {
-    // // FIX 1: Add a listener for the 'dragstart' event.
     this.input.on('dragstart', this._handleDragStart, this);
 
     // // This listener is now set up just one time.
@@ -173,7 +172,7 @@ export default class BoardScene extends Phaser.Scene {
     _handleDrag(event, gameObject) {
          let difX=event.position.x-gameObject.x
     let difY=event.position.y-gameObject.y
-    gameObject.getNeighbors()
+    this.board.getNeighborsOfPiece(gameObject)
     Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
         ele.x = ele.x+difX;
         ele.y = ele.y+difY;
@@ -183,20 +182,6 @@ export default class BoardScene extends Phaser.Scene {
       _clearHighlights() {
         this.graphics.clear();
     }
-
-
-    // _removeZoneHighlight(zone) {
-    //     // this.graphics.clear()
-    //     this.graphics.commandBuffer.length = 1;
-    //     // this.graphics.lineStyle(this.graphics.defaultStrokeWidth, this.graphics.defaultStrokeColor, this.graphics.defaultStrokeAlpha);
-    //     // this.graphics.fillStyle(this.graphics.defaultFillColor, this.graphics.defaultFillAlpha);
-
-    //     // let thickness=-1
-    //     // let color = 0xffff00
-    //     // this.graphics.lineStyle(thickness, color);
-    //     // this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
-
-    // }
 
 
 

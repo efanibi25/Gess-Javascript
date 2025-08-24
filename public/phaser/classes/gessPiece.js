@@ -51,7 +51,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         this.setInteractive( new Phaser.Geom.Rectangle(0 ,0, this.block.width*.8, this.block.height*.8), Phaser.Geom.Rectangle.Contains)
         // this.setInteractive();
         this.scene.input.setDraggable([this], true)
-        this.alignCenter()
+        Phaser.Display.Align.In.Center(this,this.block)
         this.draggable=true
     
         }
@@ -67,9 +67,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
         }    
 
 
-        alignCenter(){
-            Phaser.Display.Align.In.Center(this,this.block)
-            }
+  
             updatePiece(){
                 if(this.owner==null){
                     this.setFillStyle(0xeb3434)
@@ -130,35 +128,7 @@ checkGamePiece(){
 }
 
 
-//neighors
-
-    getNeighbors(){
-    let out={}
-    for (const ele of this.neighborsDexes){
-        let piece=this.block.board.getPiece(this.index+ele)
-        out[ele]=piece   
-    }
-    this.neighbors=out
-    return out
-    }
-
-
-
-getRingNeighbors(){
-    let piece=this.newBlock.piece
-
-    piece.getNeighbors()
-    return Object.keys(this.neighbors).filter(ele=>ele!=0).reduce((accumulator, currentValue)=>{
-        accumulator.push(piece.neighbors[currentValue])
-        piece.neighbors[currentValue].getNeighbors()
-        accumulator.push(piece.neighbors[currentValue].neighbors[currentValue])
-        return accumulator
-    },[this.newBlock.piece])
-
-
-
-}
-revertNeighbors(){
+vertNeighbors(){
     for(const ele of Object.values(this.neighbors).filter(ele=>ele.owner!="out")){
             ele.revertPiece()
         }

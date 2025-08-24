@@ -200,6 +200,43 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     }
 
 
+    getNeighborsOfPiece(piece) {
+        const out = {};
+        const neighborsDexes = [
+            0, -1, 1, -this.gameData.squaresCount - this.gameData.sideborder,
+            this.gameData.squaresCount + this.gameData.sideborder,
+            // ... and so on
+        ];
+
+        for (const offset of neighborsDexes) {
+            out[offset] = this.getPiece(piece.index + offset);
+        }
+        return out;
+    }
+
+
+
+    getRingNeighborsOfPiece(centerPiece) {
+    if (!centerPiece) return [];
+
+    const directNeighbors = Object.values(this.getNeighborsOfPiece(centerPiece));
+    const allRingPieces = new Set([centerPiece, ...directNeighbors]);
+
+    // Iterate through the direct neighbors to get their neighbors
+    directNeighbors.forEach(neighbor => {
+        if (neighbor) {
+            const neighborsOfNeighbor = Object.values(this.getNeighborsOfPiece(neighbor));
+            neighborsOfNeighbor.forEach(p => {
+                if (p) allRingPieces.add(p);
+            });
+        }
+    });
+
+    // Return a simple array of the unique pieces in the ring
+    return Array.from(allRingPieces);
+}
+
+
   
  
     
