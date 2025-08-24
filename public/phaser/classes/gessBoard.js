@@ -2,7 +2,8 @@ import boardBlock from "./gessBlock.js";
 import { data } from "../../scripts/lib/network.js";
 const stroke=8
 const showStroke=true
-import { getOtherPlayerPieces, getMyPieces } from "../utils/gameUtils.js";
+import { getOtherPlayerPieces, getMyPieces} from "../utils/gameUtils.js";
+import { getBlock, getPiece,getDirection } from "../utils/boardUtils.js";
 
 export default class gessBoard extends Phaser.GameObjects.Container {
 
@@ -155,33 +156,16 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     
 
 
-    //data
-
-    getPiece(index){
-        let block=this.getBlock(index)
-        if(block){
-            return block.piece
-        }
-        return block
-    }
-
-    getBlock(index){
-        if (index<0) return 
-        else if (index>=data["BoardMax"]) return 
-        return this.board[index-1]
-    }
-
 
     getNeighborsOfPiece(piece) {
         const out = {};
         const neighborsDexes = [
             0, -1, 1, -this.gameData.squaresCount - this.gameData.sideborder,
             this.gameData.squaresCount + this.gameData.sideborder,
-            // ... and so on
         ];
 
         for (const offset of neighborsDexes) {
-            out[offset] = this.getPiece(piece.index + offset);
+            out[offset] =getPiece(this.board,piece.index + offset);
         }
         return out;
     }
@@ -214,8 +198,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
      swapPieces(startIndex, targetIndex) {
-        const startPiece = this.getPiece(startIndex);
-        const targetPiece = this.getPiece(targetIndex);
+        const startPiece = getPiece(this.board,startIndex);
+        const targetPiece = getPiece(this.board,targetIndex);
 
         if (!startPiece || !targetPiece) return;
 
@@ -248,30 +232,6 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 
 
 
-/**
- * Calculates the direction between two blocks on the board.
- * @param {Block} startBlock The starting block.
- * @param {Block} endBlock The ending block.
- * @returns {number|undefined} The direction offset, or undefined if the move is not a straight line.
- */
-getDirection(startBlock, endBlock) {
-    const rowChange = endBlock.row - startBlock.row;
-    const colChange = endBlock.col - startBlock.col;
-    const gridSize = this.gameData.squaresCount + this.gameData.sideborder;
-
-    if (colChange === 0 && rowChange === 0) return 0;
-    if (colChange === 0 && rowChange >= 1) return gridSize;
-    if (colChange === 0 && rowChange < 0) return -gridSize;
-    if (rowChange === 0 && colChange >= 1) return 1;
-    if (rowChange === 0 && colChange < 0) return -1;
-    if (Math.abs(rowChange) !== Math.abs(colChange)) return undefined; // Not a straight diagonal
-    if (rowChange < 0 && colChange < 0) return -gridSize - 1;
-    if (rowChange < 0 && colChange > 0) return -gridSize + 1;
-    if (rowChange > 0 && colChange < 0) return gridSize - 1;
-    if (rowChange > 0 && colChange > 0) return gridSize + 1;
-}
-
-
 
 
 /**
@@ -280,12 +240,12 @@ getDirection(startBlock, endBlock) {
  * @param {number} targetIndex The target index of the move.
  */
 movePiece(startIndex, targetIndex) {
-    const startBlock = this.getBlock(startIndex);
-    const targetBlock = this.getBlock(targetIndex);
+    const startBlock = getBlock(this.board,startIndex);
+    const targetBlock = getBlock(this.board,targetIndex);
 
     if (!startBlock || !targetBlock) return;
 
-    const direction = this.getDirection(startBlock, targetBlock);
+    const direction = getDirection(startBlock, targetBlock, this.gameData);
     if (direction === 0) {
         this.swapPieces(startIndex, startIndex);
     } else if (direction !== undefined) {
@@ -293,11 +253,10 @@ movePiece(startIndex, targetIndex) {
     }
     this.scene.events.emit('updatePiece');
 
+
+ 
+
 }
-
-
-
-
 
 
 

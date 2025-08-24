@@ -1,7 +1,7 @@
 import boardPiece from "./gessPiece.js";
 import { data } from "../../scripts/lib/network.js";
 import Zone from "./gessZone.js";
-import { getOtherPlayerPieces, getMyPieces } from "../utils/gameUtils.js";
+import { getBlock } from "../utils/boardUtils.js";
 const color=0xadd8e6
 const altColor=0xD6D6B3
 const showblockColor=true
@@ -16,7 +16,7 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
         this.col=col+1
         this.width=width
         this.height=height
-        this.board=board
+        this.gessBoard=board
         this.piece=null
         this.zone=null
         this.text=null
@@ -108,7 +108,7 @@ addZone() {
     getNeighbors(){
         let out=[]
         for (const ele of this.neighborsDexes){
-            let block=this.board.getBlock(this.index+ele)
+            let block=getBlock(this.gessBoard.board,this.index+ele)
             out[ele]=block
         }
         this.neighbors=out
