@@ -170,10 +170,10 @@ export default class BoardScene extends Phaser.Scene {
 }
 
     _handleDrag(event, gameObject) {
-         let difX=event.position.x-gameObject.x
+    let difX=event.position.x-gameObject.x
     let difY=event.position.y-gameObject.y
-    this.board.getNeighborsOfPiece(gameObject)
-    Object.values(gameObject.neighbors).filter(e=>e!=null).forEach(ele=>{
+ 
+    Object.values( this.gessBoard.getNeighborsOfPiece(gameObject)).filter(e=>e!=null).forEach(ele=>{
         ele.x = ele.x+difX;
         ele.y = ele.y+difY;
     })

@@ -4,7 +4,7 @@ const stroke=8
 const showStroke=true
 export default class gessBoard extends Phaser.GameObjects.Container {
 
-    constructor(scene,player){
+    constructor(scene,player,gameData){
         super(scene, 0, 0);
         this.chessboardOffsetX =10
         this.chessboardOffsetY=10
@@ -16,7 +16,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     
         this.player=player
         this.setColor()
-       
+       this.gameData=gameData
 
         this.rings=[]
     
@@ -237,8 +237,38 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 }
 
 
-  
- 
+     swapPieces(startIndex, targetIndex) {
+        const startPiece = this.getPiece(startIndex);
+        const targetPiece = this.getPiece(targetIndex);
+
+        if (!startPiece || !targetPiece) return;
+
+        const startNeighbors = this.getNeighborsOfPiece(startPiece);
+        const targetNeighbors = this.getNeighborsOfPiece(targetPiece);
+        
+        const colorCache = {};
+
+        // Store the owner of each piece in the starting 3x3 grid
+        for (const key in startNeighbors) {
+            const piece = startNeighbors[key];
+            if (piece) {
+                colorCache[key] = piece.owner;
+                piece.updateOwner(null); // Clear the original position
+            }
+        }
+        
+        // Apply the stored owners to the new, target 3x3 grid
+        for (const key in targetNeighbors) {
+            const piece = targetNeighbors[key];
+            if (piece && colorCache[key]) {
+                // Don't overwrite a piece with the same color
+                if (piece.owner !== this.color) {
+                    piece.updateOwner(colorCache[key]);
+                }
+            }
+        }
+    }
+
     
 
 

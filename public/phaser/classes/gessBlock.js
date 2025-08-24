@@ -61,6 +61,9 @@ export default class boardBlock extends Phaser.GameObjects. Rectangle {
 
 addZone() {
     // Check if the block is surrounded and thus a valid drop target
+    if (!this.neighbors) {
+        this.getNeighbors();
+    }
     if (Object.values(this.neighbors).filter(e => e != null).length === 9) {
         this.zone = new Zone(this.scene, this.x, this.y, this.width, this.height, this);
         

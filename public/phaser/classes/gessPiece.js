@@ -205,52 +205,37 @@ getDir(){
     let dir=this.getDir()
     if(dir==0) { 
         this.newBlock=this.block
-        this.swapNeighbors(this.index,this.index)
+        this.block.board.swapPieces(this.index,this.index)
         }
-   else  this.swapNeighbors(this.index,this.newBlock.index)
+   else  this.block.board.swapPieces(this.index,this.newBlock.index)
     }
 
+    updateOwner(owner) {
+    this.owner = owner;
 
-            swapNeighbors(index,newIndex){
-                let colorDict={}
-                let target=this.block.board.getPiece(newIndex)
-                let start=this.block.board.getPiece(index)
-                target.getNeighbors()
-                start.getNeighbors()
-        
-                
-                for(const key of Object.keys(start.neighbors)){
-        
-                    colorDict[key]=start.block.piece.neighbors[key].owner
-                    start.block.piece.neighbors[key].owner=null
-                    start.block.piece.neighbors[key].alignCenter()
-                }
-                for(const key of Object.keys(this.neighbors)){
-                    //out of bounds
-                    if(target.block.piece.neighbors[key].block.col>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
-                    target.block.piece.neighbors[key].block.col<data["sideborder"]/2+1) continue
-        
-                    else if(target.block.piece.neighbors[key].block.row>=data["squaresCount"]+(data["sideborder"]/2)+1 || 
-                    target.block.piece.neighbors[key].block.row<data["sideborder"]/2+1) continue
-                    
-                    //merge blocks
-                    if (target.block.piece.neighbors[key].owner==this.block.board.color) continue
-        
-                    target.block.piece.neighbors[key].owner=colorDict[key]
-        
-                }
-                
-        
-                }
+    if (this.owner === null) {
+        // Style for an empty, inactive space
+        this.setFillStyle(0x1a1a1a, 0.01); // Nearly invisible
+        this.disableInteractive();
+    } else if (this.owner === "white") {
+        // Style for a white piece
+        this.setFillStyle(0xffffff);
+        this.setStrokeStyle(2, 0x000000); // Black outline
+        this.setInteractive();
+    } else if (this.owner === "black") {
+        // Style for a black piece
+        this.setFillStyle(0x000000);
+        this.setStrokeStyle(2, 0xffffff); // White outline
+        this.setInteractive();
+    }
+}
+
 
     
 //events
 
    
     startDrag(){
-        if (this.neighbors==null){
-            this.getNeighbors()
-        }
         this.addStartIndicator()
 
     }
@@ -275,15 +260,13 @@ handlePointerDown(){
 
     }
     showNeighbors(){
-        this.getNeighbors()
-        Object.values(this.neighbors).filter((e)=>e.owner==null).forEach((e)=> e.setAlpha(showAlpha)
+        Object.values( this.block.board.getNeighborsOfPiece(this)).filter((e)=>e.owner==null).forEach((e)=> e.setAlpha(showAlpha)
         )
     }
 
 
     hideNeighbors(){
-        this.getNeighbors()
-        Object.values(this.neighbors).filter((e)=>e.owner==null).forEach((e)=>e.setAlpha(showHidden?1:hiddenAlpha))
+        Object.values( this.block.board.getNeighborsOfPiece(this)).filter((e)=>e.owner==null).forEach((e)=>e.setAlpha(showHidden?1:hiddenAlpha))
     }
     handlePointerOut(){
         setTimeout(()=>{
