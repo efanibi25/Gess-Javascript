@@ -126,19 +126,33 @@ export default class BoardScene extends Phaser.Scene {
 
                 if (currentPlayer !== playerNumber) {
                     this.ui.setAlert(`It is not your turn`);
-                    gameObject.revertNeighbors();
+                     this._revertPieceAndNeighbors(gameObject);
                 } else if (!dropped) {
-                    gameObject.revertNeighbors();
+                    this._revertPieceAndNeighbors(gameObject);
                 } else {
                     this.network.emit("sendmove", gameObject.block.index, gameObject.newBlock.index);
                 }
             } catch (error) {
                 console.error("Error in dragend handler:", error);
                 this.ui.setAlert("Error processing move");
-                gameObject.revertNeighbors();
+                this._revertPieceAndNeighbors(gameObject);
             }
         });
     }
+
+     _revertPieceAndNeighbors(gameObject) {
+        // Get the neighbors from the gessBoard manager.
+        const neighbors = this.gessBoard.getNeighborsOfPiece(gameObject);
+
+        // Loop through all neighbors (and the center piece itself) to reset them.
+        for (const key in neighbors) {
+            const piece = neighbors[key];
+           if(piece){
+             Phaser.Display.Align.In.Center(piece,piece.block)
+           }
+        }
+    }
+
 
 
     _setPiecesInteractive(isInteractive) {

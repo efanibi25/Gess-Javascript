@@ -60,11 +60,7 @@ export default class boardPiece extends Phaser.GameObjects. Arc {
             this.draggable=false
 
         }
-
-        revertPiece(){
-            this.newBlock=this.block
-            Phaser.Display.Align.In.Center(this,this.block)
-        }    
+   
 
 
   
