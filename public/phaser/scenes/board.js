@@ -1,72 +1,113 @@
 import GessBoard from "../classes/gessBoard.js";
-import { getDraggablePieces } from "../utils/boardUtils.js";
+import { getDraggablePieces,getNeighborsOfPiece } from "../utils/boardUtils.js";
 import { movePiece } from "../utils/gameLogic.js";
-import { getNeighborsOfPiece } from "../utils/gameLogic.js";
+
 export default class BoardScene extends Phaser.Scene {
+    /**
+     * @param {object} config - The scene configuration.
+     */
     constructor() {
         super('BoardScene');
     }
 
+    // --- Phaser Lifecycle Methods ---
+
+    /**
+     * Initializes scene data.
+     * @param {object} data - The data passed to the scene.
+     * @param {NetworkManager} data.network - The network manager instance.
+     * @param {UIManager} data.ui - The UI manager instance.
+     */
     init(data) {
         this.network = data.network;
         this.ui = data.ui;
         this.gessBoard = null;
     }
-    
+
+    /**
+     * Preloads assets required by the scene.
+     */
     preload() {
         this.load.image('background', '../assets/wood.jpg');
     }
 
+    /**
+     * Creates the game objects and sets up listeners.
+     */
     create() {
         this.add.image(0, 0, 'background').setOrigin(0);
         this.graphics = this.add.graphics();
-        this.graphics.setDepth(5); 
+        this.graphics.setDepth(5);
         this.setupSocketListeners();
         this.setupInputListeners();
 
         this.loadingText = this.add.text(
-            this.cameras.main.width / 2, 
-            this.cameras.main.height / 2, 
-            'Waiting for game data...', 
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            'Waiting for game data...',
             { font: '24px Arial', fill: '#ffffff' }
         ).setOrigin(0.5);
-
-        
     }
 
+    // --- Socket Listeners ---
+
+    /**
+     * Sets up all socket event listeners for the game.
+     */
     setupSocketListeners() {
         const socket = this.network.socket;
 
         socket.on("setdata", (playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) => {
             console.log("CLIENT: ✅ Received 'setdata' event. Starting data processing and board creation.");
-            
+
             this.processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder);
             this.initializeBoard();
-        
-                if (this.loadingText) {
-                    this.loadingText.destroy();
-                    this.loadingText = null;
-                }
 
+            if (this.loadingText) {
+                this.loadingText.destroy();
+                this.loadingText = null;
+            }
         });
-        
+
         socket.on("winner", (player) => this.ui.setAlert(`${player} has won the game`));
-        socket.on("sendalert", (message) => this.ui.setAlert(message));
+
+        socket.on("sendalert", (message) => {
+            let oldMessage = this.ui.getAlert();
+            this.ui.setAlert(message);
+
+            if (message === "The given move is not valid" || message === "The Piece is not valid") {
+                setTimeout(() => {
+                    this.ui.setAlert(oldMessage);
+                }, 1500);
+            }
+        });
 
         socket.on("sendmove", (startdex, endex, test = true) => {
             if (this.gessBoard) {
-                            const gameData = this.network.data;
-                movePiece(this.gessBoard.board,this.gessBoard.color,this,gameData,Phaser.Display,startdex, endex);
+                const gameData = this.network.data;
+                movePiece(this.gessBoard.board, this.gessBoard.color, this, gameData, Phaser.Display, startdex, endex);
                 if (test) {
                     this.network.emit("gamestate");
                     this.network.emit("checkrings", endex);
                 }
             }
         });
+
         socket.on("enableinteractive", () => this._setPiecesInteractive(true));
         socket.on("disableinteractive", () => this._setPiecesInteractive(false));
     }
 
+    // --- Board and UI Management ---
+
+    /**
+     * Processes initial game data received from the server.
+     * @param {number} playerNum - The player's number.
+     * @param {number} boardMax - The maximum index of the board.
+     * @param {number[]} p1Pieces - The pieces for player 1.
+     * @param {number[]} p2Pieces - The pieces for player 2.
+     * @param {number} squaresCount - The number of squares on the board.
+     * @param {number} sideborder - The size of the side border.
+     */
     processGameData(playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) {
         this.network.setPlayerNumber(playerNum);
         this.network.setGameData("BoardMax", boardMax);
@@ -76,11 +117,14 @@ export default class BoardScene extends Phaser.Scene {
         this.network.setGameData("sideborder", sideborder);
     }
 
+    /**
+     * Initializes the Gess board and its pieces.
+     */
     initializeBoard() {
         if (!this.gessBoard) {
             const playerNumber = this.network.getPlayerNumber();
             const gameData = this.network.data;
-            
+
             if (!gameData || isNaN(gameData.squaresCount) || isNaN(gameData.sideborder)) {
                 console.error("Critical error: Game data is invalid or not yet received.");
                 return;
@@ -93,53 +137,53 @@ export default class BoardScene extends Phaser.Scene {
             } catch (error) {
                 console.error("Error initializing board:", error);
                 this.add.text(
-                    this.cameras.main.width / 2, 
-                    this.cameras.main.height / 2, 
-                    'Error initializing game board', 
+                    this.cameras.main.width / 2,
+                    this.cameras.main.height / 2,
+                    'Error initializing game board',
                     { font: '24px Arial', fill: '#ff0000' }
                 ).setOrigin(0.5);
             }
         }
     }
 
+    // --- Input Listeners ---
+
+    /**
+     * Sets up all input-related event listeners for drag-and-drop.
+     */
     setupInputListeners() {
-             this.input.on('show-neighbors', this._showNeighbors, this);
+        this.input.on('show-neighbors', this._showNeighbors, this);
         this.input.on('hide-neighbors', this._hideNeighbors, this);
-    this.input.on('dragstart', this._handleDragStart, this);
-    this.input.on('dragenter', (pointer, gameObject, dropZone) => {
-            this._drawHighlight(dropZone); // Yellow hover
+        this.input.on('dragstart', this._handleDragStart, this);
+        this.input.on('dragenter', (pointer, gameObject, dropZone) => {
+            this._drawHighlight(dropZone);
         });
 
         this.input.on('dragleave', (pointer, gameObject, dropZone) => {
-            // This will now clear the yellow hover but redraw the green start
             this._clearHighlights();
             this._drawHighlight(gameObject.block.zone, 0x39FF33, 15);
         });
-        
-    // // This listener is now set up just one time.
-    this.input.on('drag', this._handleDrag, this);        
-    this.input.on('drop', (pointer, gameObject, dropZone) => {
+
+        this.input.on('drag', this._handleDrag, this);
+        this.input.on('drop', (pointer, gameObject, dropZone) => {
             if (!this.gessBoard) return;
-            
             gameObject.x = dropZone.x;
             gameObject.y = dropZone.y;
             gameObject.setNewBlock(dropZone.block);
             this._clearHighlights();
         });
-        
+
         this.input.on('dragend', async (pointer, gameObject, dropped) => {
             if (!this.gessBoard) return;
-            
             gameObject.normalSize();
             this._clearHighlights();
-
             try {
                 const currentPlayer = await this.network.getCurrentPlayer(true);
                 const playerNumber = this.network.getPlayerNumber();
 
                 if (currentPlayer !== playerNumber) {
                     this.ui.setAlert(`It is not your turn`);
-                     this._revertPieceAndNeighbors(gameObject);
+                    this._revertPieceAndNeighbors(gameObject);
                 } else if (!dropped) {
                     this._revertPieceAndNeighbors(gameObject);
                 } else {
@@ -153,27 +197,32 @@ export default class BoardScene extends Phaser.Scene {
         });
     }
 
-     _revertPieceAndNeighbors(gameObject) {
-        // Get the neighbors from the gessBoard manager.
-        const gameData = this.network.data;
-        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData, gameObject);
+    // --- Private Helper Methods ---
 
-        // Loop through all neighbors (and the center piece itself) to reset them.
+    /**
+     * Reverts a piece and its neighbors to their original positions.
+     * @param {Phaser.GameObjects.GameObject} gameObject - The game object (piece) to revert.
+     */
+    _revertPieceAndNeighbors(gameObject) {
+        const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board, gameData, gameObject);
+
         for (const key in neighbors) {
             const piece = neighbors[key];
-           if(piece){
-             Phaser.Display.Align.In.Center(piece,piece.block)
-           }
+            if (piece) {
+                Phaser.Display.Align.In.Center(piece, piece.block);
+            }
         }
     }
 
-
-
+    /**
+     * Enables or disables interactivity for draggable pieces.
+     * @param {boolean} isInteractive - True to enable, false to disable.
+     */
     _setPiecesInteractive(isInteractive) {
         if (!this.gessBoard) return;
+        const draggablePieces = getDraggablePieces(this.gessBoard.board, this.gessBoard.color);
 
-    const draggablePieces = getDraggablePieces(this.gessBoard.board, this.gessBoard.color);
-        
         if (isInteractive) {
             console.log("CLIENT: Enabling player interaction.");
             draggablePieces.forEach(e => e.allowDraggable());
@@ -182,72 +231,100 @@ export default class BoardScene extends Phaser.Scene {
             draggablePieces.forEach(e => e.disableDraggable());
         }
     }
-    // New helper methods for showing/hiding neighbors
+
+    /**
+     * Temporarily shows the neighbors of a piece.
+     * @param {Phaser.GameObjects.GameObject} centerPiece - The central piece to show neighbors for.
+     */
     _showNeighbors(centerPiece) {
-         const gameData = this.network.data;
-        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData, centerPiece);
+        const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board, gameData, centerPiece);
         Object.values(neighbors)
             .filter(p => p && p.owner === null)
             .forEach(p => p.setAlpha(0.5));
     }
 
+    /**
+     * Hides the neighbors of a piece.
+     * @param {Phaser.GameObjects.GameObject} centerPiece - The central piece to hide neighbors for.
+     */
     _hideNeighbors(centerPiece) {
-         const gameData = this.network.data;
-        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData,centerPiece);
+        const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board, gameData, centerPiece);
         Object.values(neighbors)
             .filter(p => p && p.owner === null)
             .forEach(p => p.setAlpha(0.01));
     }
 
-    _highLightDragStart(pointer, gameObject){
-    this._clearHighlights();
-    if (gameObject.block && gameObject.block.zone) {
-            this._drawHighlight(gameObject.block.zone, 0x39FF33, 15); // Green start highlight
-    }
+    /**
+     * Highlights the starting zone of a piece during a drag.
+     * @param {Phaser.Input.Pointer} pointer - The input pointer.
+     * @param {Phaser.GameObjects.GameObject} gameObject - The game object being dragged.
+     */
+    _highLightDragStart(pointer, gameObject) {
+        this._clearHighlights();
+        if (gameObject.block && gameObject.block.zone) {
+            this._drawHighlight(gameObject.block.zone, 0x39FF33, 15);
+        }
     }
 
+    /**
+     * Handles the start of a drag operation.
+     * @param {Phaser.Input.Pointer} pointer - The input pointer.
+     * @param {Phaser.GameObjects.GameObject} gameObject - The game object being dragged.
+     */
     _handleDragStart(pointer, gameObject) {
-        this._getStartPositions(pointer, gameObject)
-        this._highLightDragStart(pointer, gameObject)
-    
-}
+        this._getStartPositions(pointer, gameObject);
+        this._highLightDragStart(pointer, gameObject);
+    }
 
-_getStartPositions(pointer, gameObject){
-// Store the starting position of the main piece.
-    gameObject.x_initial = gameObject.x;
-    gameObject.y_initial = gameObject.y;
+    /**
+     * Stores the initial positions of a piece and its neighbors.
+     * @param {Phaser.Input.Pointer} pointer - The input pointer.
+     * @param {Phaser.GameObjects.GameObject} gameObject - The game object being dragged.
+     */
+    _getStartPositions(pointer, gameObject) {
+        gameObject.x_initial = gameObject.x;
+        gameObject.y_initial = gameObject.y;
 
-    // Also store the starting position of all its neighbors.
-    if (gameObject.neighbors) {
-        Object.values(gameObject.neighbors).filter(n => n != null).forEach(neighbor => {
-            neighbor.x_initial = neighbor.x;
-            neighbor.y_initial = neighbor.y;
+        if (gameObject.neighbors) {
+            Object.values(gameObject.neighbors).filter(n => n != null).forEach(neighbor => {
+                neighbor.x_initial = neighbor.x;
+                neighbor.y_initial = neighbor.y;
+            });
+        }
+    }
+
+    /**
+     * Handles the dragging of a piece and its neighbors.
+     * @param {Phaser.Input.Pointer} event - The drag event.
+     * @param {Phaser.GameObjects.GameObject} gameObject - The game object being dragged.
+     */
+    _handleDrag(event, gameObject) {
+        let difX = event.position.x - gameObject.x;
+        let difY = event.position.y - gameObject.y;
+        let neighbors = getNeighborsOfPiece(this.gessBoard.board, this.network.data, gameObject);
+        Object.values(neighbors).filter(e => e != null).forEach(ele => {
+            ele.x = ele.x + difX;
+            ele.y = ele.y + difY;
         });
     }
-}
 
-    _handleDrag(event, gameObject) {
-    let difX=event.position.x-gameObject.x
-    let difY=event.position.y-gameObject.y
-    let neighbors=getNeighborsOfPiece(this.gessBoard.board,this.network.data,gameObject)
-    Object.values(neighbors).filter(e=>e!=null).forEach(ele=>{
-        ele.x = ele.x+difX;
-        ele.y = ele.y+difY;
-    })
-    }
-
-      _clearHighlights() {
+    /**
+     * Clears all highlights from the board.
+     */
+    _clearHighlights() {
         this.graphics.clear();
     }
 
-
-    // Helper method to draw highlights
+    /**
+     * Draws a rectangular highlight around a specified zone.
+     * @param {Phaser.Geom.Rectangle} zone - The zone to highlight.
+     * @param {number} [color=0xffff00] - The color of the highlight.
+     * @param {number} [thickness=12] - The thickness of the highlight line.
+     */
     _drawHighlight(zone, color = 0xffff00, thickness = 12) {
         this.graphics.lineStyle(thickness, color);
         this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
     }
 }
-
-
-
-

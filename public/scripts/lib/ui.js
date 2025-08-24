@@ -1,8 +1,16 @@
 const UIManager = {
   // --- Properties ---
-  gameHeight: 85, // Initial height in vh units
+  /**
+   * The initial height of the game element in viewport height (vh) units.
+   * @type {number}
+   */
+  gameHeight: 85,
 
   // --- Methods ---
+  /**
+   * Initializes event listeners for the zoom buttons.
+   * @returns {void}
+   */
   initializeEventListeners() {
     const gameElement = document.querySelector("#game");
     const plusButton = document.querySelector("#plus-button");
@@ -13,7 +21,6 @@ const UIManager = {
       return;
     }
 
-    // Use arrow functions to automatically bind 'this'
     plusButton.addEventListener("click", () => {
       this.gameHeight = this.gameHeight * 1.1;
       gameElement.style.height = `${this.gameHeight}vh`;
@@ -27,16 +34,38 @@ const UIManager = {
     console.log("Zoom button listeners initialized.");
   },
 
+  /**
+   * Sets the text of the alert bar.
+   * @param {string} message The message to display.
+   * @returns {void}
+   */
   setAlert(message) {
     const alertBar = document.querySelector("#alertBar");
-    if (alertBar) alertBar.textContent = message;
+    if (alertBar) {
+      alertBar.textContent = message;
+    }
   },
 
+  /**
+   * Gets the current text from the alert bar.
+   * @returns {string | null} The alert bar text, or null if the element is not found.
+   */
+  getAlert() {
+    const alertBar = document.querySelector("#alertBar");
+    return alertBar ? alertBar.textContent : null;
+  },
+
+  /**
+   * Sets the player and color information in the player indicator element.
+   * @param {string} player The player identifier (e.g., 'player1').
+   * @param {string} color The player's color (e.g., 'white' or 'black').
+   * @returns {void}
+   */
   setPlayerIndicator(player, color) {
     const playerIndicator = document.querySelector("#playerindicator");
-    if (playerIndicator) {
-        playerIndicator.children[0].textContent = `Player: ${player}`;
-        playerIndicator.children[1].textContent = `Color: ${color || '-'}`;
+    if (playerIndicator && playerIndicator.children.length >= 2) {
+      playerIndicator.children[0].textContent = `Player: ${player}`;
+      playerIndicator.children[1].textContent = `Color: ${color || '-'}`;
     }
   }
 };
