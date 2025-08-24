@@ -3,8 +3,7 @@ import { data } from "../../scripts/lib/network.js";
 const stroke=8
 const showStroke=true
 import { getOtherPlayerPieces, getMyPieces} from "../utils/gameUtils.js";
-import { getBlock, getPiece,getDirection } from "../utils/boardUtils.js";
-
+import { getPiece} from "../utils/boardUtils.js";
 export default class gessBoard extends Phaser.GameObjects.Container {
 
     constructor(scene,player,gameData){
@@ -153,116 +152,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.scene.events.emit('updatePiece');
 
         }
-    
 
-
-
-    getNeighborsOfPiece(piece) {
-        const out = {};
-        const neighborsDexes = [
-            0, -1, 1, -this.gameData.squaresCount - this.gameData.sideborder,
-            this.gameData.squaresCount + this.gameData.sideborder,
-        ];
-
-        for (const offset of neighborsDexes) {
-            out[offset] =getPiece(this.board,piece.index + offset);
-        }
-        return out;
-    }
-
-
-
-    getRingNeighborsOfPiece(centerPiece) {
-    if (!centerPiece) return [];
-
-    const directNeighbors = Object.values(this.getNeighborsOfPiece(centerPiece));
-    const allRingPieces = new Set([centerPiece, ...directNeighbors]);
-
-    // Iterate through the direct neighbors to get their neighbors
-    directNeighbors.forEach(neighbor => {
-        if (neighbor) {
-            const neighborsOfNeighbor = Object.values(this.getNeighborsOfPiece(neighbor));
-            neighborsOfNeighbor.forEach(p => {
-                if (p) allRingPieces.add(p);
-            });
-        }
-    });
-
-    // Return a simple array of the unique pieces in the ring
-    return Array.from(allRingPieces);
-}
-
-
-
-
-
-
-     swapPieces(startIndex, targetIndex) {
-        const startPiece = getPiece(this.board,startIndex);
-        const targetPiece = getPiece(this.board,targetIndex);
-
-        if (!startPiece || !targetPiece) return;
-
-        const startNeighbors = this.getNeighborsOfPiece(startPiece);
-        const targetNeighbors = this.getNeighborsOfPiece(targetPiece);
-        
-        const colorCache = {};
-
-        // Store the owner of each piece in the starting 3x3 grid
-        for (const key in startNeighbors) {
-            const piece = startNeighbors[key];
-            if (piece) {
-                colorCache[key] = piece.owner;
-                piece.updateOwner(null); // Clear the original position
-                Phaser.Display.Align.In.Center(piece, piece.block);
-            }
-        }
-        
-        // Apply the stored owners to the new, target 3x3 grid
-        for (const key in targetNeighbors) {
-            const piece = targetNeighbors[key];
-            if (piece && colorCache[key]) {
-                // Don't overwrite a piece with the same color
-                if (piece.owner !== this.color) {
-                    piece.updateOwner(colorCache[key]);
-                }
-            }
-        }
-    }
-
-
-
-
-
-/**
- * Initiates the process of moving a piece group.
- * @param {number} startIndex The starting index of the move.
- * @param {number} targetIndex The target index of the move.
- */
-movePiece(startIndex, targetIndex) {
-    const startBlock = getBlock(this.board,startIndex);
-    const targetBlock = getBlock(this.board,targetIndex);
-
-    if (!startBlock || !targetBlock) return;
-
-    const direction = getDirection(startBlock, targetBlock, this.gameData);
-    if (direction === 0) {
-        this.swapPieces(startIndex, startIndex);
-    } else if (direction !== undefined) {
-        this.swapPieces(startIndex, targetIndex);
-    }
-    this.scene.events.emit('updatePiece');
-
-
- 
-
-}
-
-
-
-     
-  
-    
 
 }
 

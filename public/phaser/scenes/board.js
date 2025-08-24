@@ -1,6 +1,7 @@
-// BoardScene.js
 import GessBoard from "../classes/gessBoard.js";
 import { getDraggablePieces } from "../utils/boardUtils.js";
+import { movePiece } from "../utils/gameLogic.js";
+import { getNeighborsOfPiece } from "../utils/gameLogic.js";
 export default class BoardScene extends Phaser.Scene {
     constructor() {
         super('BoardScene');
@@ -54,7 +55,8 @@ export default class BoardScene extends Phaser.Scene {
 
         socket.on("sendmove", (startdex, endex, test = true) => {
             if (this.gessBoard) {
-                this.gessBoard.movePiece(startdex, endex);
+                            const gameData = this.network.data;
+                movePiece(this.gessBoard.board,this.gessBoard.color,this,gameData,Phaser.Display,startdex, endex);
                 if (test) {
                     this.network.emit("gamestate");
                     this.network.emit("checkrings", endex);
@@ -153,7 +155,8 @@ export default class BoardScene extends Phaser.Scene {
 
      _revertPieceAndNeighbors(gameObject) {
         // Get the neighbors from the gessBoard manager.
-        const neighbors = this.gessBoard.getNeighborsOfPiece(gameObject);
+        const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData, gameObject);
 
         // Loop through all neighbors (and the center piece itself) to reset them.
         for (const key in neighbors) {
@@ -181,14 +184,16 @@ export default class BoardScene extends Phaser.Scene {
     }
     // New helper methods for showing/hiding neighbors
     _showNeighbors(centerPiece) {
-        const neighbors = this.gessBoard.getNeighborsOfPiece(centerPiece);
+         const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData, centerPiece);
         Object.values(neighbors)
             .filter(p => p && p.owner === null)
             .forEach(p => p.setAlpha(0.5));
     }
 
     _hideNeighbors(centerPiece) {
-        const neighbors = this.gessBoard.getNeighborsOfPiece(centerPiece);
+         const gameData = this.network.data;
+        const neighbors = getNeighborsOfPiece(this.gessBoard.board,gameData,centerPiece);
         Object.values(neighbors)
             .filter(p => p && p.owner === null)
             .forEach(p => p.setAlpha(0.01));
@@ -224,8 +229,8 @@ _getStartPositions(pointer, gameObject){
     _handleDrag(event, gameObject) {
     let difX=event.position.x-gameObject.x
     let difY=event.position.y-gameObject.y
- 
-    Object.values( this.gessBoard.getNeighborsOfPiece(gameObject)).filter(e=>e!=null).forEach(ele=>{
+    let neighbors=getNeighborsOfPiece(this.gessBoard.board,this.network.data,gameObject)
+    Object.values(neighbors).filter(e=>e!=null).forEach(ele=>{
         ele.x = ele.x+difX;
         ele.y = ele.y+difY;
     })
