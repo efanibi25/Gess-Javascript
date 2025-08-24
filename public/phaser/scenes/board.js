@@ -56,6 +56,11 @@ export default class BoardScene extends Phaser.Scene {
      */
     setupSocketListeners() {
         const socket = this.network.socket;
+        socket.on("setplayerturntopic", (fullMessage) => {
+    // This line correctly passes the full message as-is
+    this.ui.setAlert(fullMessage);
+});
+
 
         socket.on("setdata", (playerNum, boardMax, p1Pieces, p2Pieces, squaresCount, sideborder) => {
             console.log("CLIENT: ✅ Received 'setdata' event. Starting data processing and board creation.");
@@ -95,6 +100,13 @@ export default class BoardScene extends Phaser.Scene {
 
         socket.on("enableinteractive", () => this._setPiecesInteractive(true));
         socket.on("disableinteractive", () => this._setPiecesInteractive(false));
+       socket.on("playerstatus", (playerStatuses) => {
+            if (playerStatuses && playerStatuses.length === 2) {
+                const player1Status = playerStatuses[0].connected;
+                const player2Status = playerStatuses[1].connected;
+                this.ui.setPlayerStatus(player1Status, player2Status);
+            }
+        });
     }
 
     // --- Board and UI Management ---
@@ -181,14 +193,13 @@ export default class BoardScene extends Phaser.Scene {
                 const currentPlayer = await this.network.getCurrentPlayer(true);
                 const playerNumber = this.network.getPlayerNumber();
 
-                if (currentPlayer !== playerNumber) {
-                    this.ui.setAlert(`It is not your turn`);
-                    this._revertPieceAndNeighbors(gameObject);
-                } else if (!dropped) {
-                    this._revertPieceAndNeighbors(gameObject);
-                } else {
-                    this.network.emit("sendmove", gameObject.block.index, gameObject.newBlock.index);
-                }
+                if (!dropped) {
+        // Revert if the piece was not dropped on a valid zone
+        this._revertPieceAndNeighbors(gameObject);
+    } else {
+        // Always send the move to the server for validation
+        this.network.emit("sendmove", gameObject.block.index, gameObject.newBlock.index);
+    }
             } catch (error) {
                 console.error("Error in dragend handler:", error);
                 this.ui.setAlert("Error processing move");

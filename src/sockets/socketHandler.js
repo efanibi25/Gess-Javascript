@@ -21,10 +21,12 @@ export default function initializeSockets(io) {
     io.on('connection', (socket) => {
         console.log(`SERVER: 🟢 User connected with socket ID: ${socket.id}`);
 
-        socket.on("creategame", async (room) => {
-            console.log(`SERVER: ➡️ Received 'creategame' event for room: ${room}`);
-            await createOrJoinGame(socket, room, io);
-        });
+     socket.on("creategame", async (room) => {
+        await createOrJoinGame(socket, room, io);
+        // Call the new helper function after a player joins
+        await updatePlayerStatus(io, socket.room);
+    });
+
 
         socket.on("sendmove", async (startdex, endex) => {
             if (validateMove(socket, io, startdex, endex)) {
@@ -42,12 +44,20 @@ export default function initializeSockets(io) {
             await interactiveHelper(socket, io);
         });
 
-        socket.on('disconnect', async () => {
-            console.log(`SERVER: 🔴 User ${socket.id} disconnected`);
-            if (!socket.room) return;
+       socket.on('disconnect', async () => {
+        console.log(`SERVER: 🔴 User ${socket.id} disconnected`);
+        if (socket.room) {
+            // Call the new helper function after a player disconnects
+            await updatePlayerStatus(io, socket.room);
             const remainingSockets = await io.in(socket.room).fetchSockets();
             remainingSockets.forEach(s => s.emit("creategame"));
-        });
+        }
+    });
+
+        
+
+
+
     });
 }
 
@@ -95,60 +105,65 @@ async function createOrJoinGame(socket, room, io) {
     
     socket.emit("setdata", player, BoardMax, finalGameData.player1Pieces, finalGameData.player2Pieces, squaresCount, sideborder);
     console.log(`SERVER: ✅ ${player} (${socket.id}) has successfully joined ${room}`);
+    await interactiveHelper(socket, io);
 
-    // If this is the first player to join, immediately set their turn.
-    if (player === "player1" && !finalGameData.player2) {
-        await interactiveHelper(socket, io);
-    }
 }
 
 async function interactiveHelper(socket, io) {
     console.log(`SERVER: Running interactiveHelper for room: ${socket.room}`);
-    if (!socket.room) return;
-    
-    const gameData = await getGame(socket.room);
-    if (!gameData) return;
-
-    if (gameData.winner) {
-        io.to(socket.room).emit("winner", gameData.winner);
+    if (!socket.room) {
+        console.warn('SERVER: Socket has no room. Aborting interactiveHelper.');
         return;
     }
 
-    let nextPlayer, nextPlayerId;
-    if (gameData.moves % 2 === 0) {
-        nextPlayer = "player1";
-        nextPlayerId = gameData.player1;
-    } else {
-        nextPlayer = "player2";
-        nextPlayerId = gameData.player2;
-    }
-
-    // If the next player doesn't exist yet (i.e., we are waiting for player 2),
-    // disable interactivity for everyone and wait.
-    if (!nextPlayerId) {
-        console.log(`SERVER: ⏳ Waiting for ${nextPlayer} to join. Pausing turns.`);
-        io.to(socket.room).emit("disableinteractive");
-        io.to(socket.room).emit("setplayerindicator", `Waiting for ${nextPlayer}...`);
-        return;
-    }
-
-    // If the next player exists, proceed as normal.
-    const updatedGameData = await updateGame(socket.room, {
-        "currentplayer": nextPlayer,
-        "currentid": nextPlayerId
-    });
-    
-    const socketsInRoom = await io.in(socket.room).fetchSockets();
-    socketsInRoom.forEach(s => {
-        s.userRoom = updatedGameData; // Keep all sockets' local state in sync
-        s.emit("setplayerindicator", updatedGameData.currentplayer);
-        if (s.id === updatedGameData.currentid) {
-            s.emit("enableinteractive");
-        } else {
-            s.emit("disableinteractive");
+    try {
+        const gameData = await getGame(socket.room);
+        if (!gameData) {
+            console.error(`SERVER: Game data for room ${socket.room} not found.`);
+            return;
         }
-    });
-    console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
+
+        if (gameData.winner) {
+            io.to(socket.room).emit("winner", gameData.winner);
+            return;
+        }
+
+        const connectedSockets = await io.in(socket.room).fetchSockets();
+        let nextPlayer, nextPlayerId;
+        const isPlayer1Turn = gameData.moves % 2 === 0;
+
+        if (isPlayer1Turn) {
+            nextPlayer = "player1";
+            nextPlayerId = gameData.player1;
+        } else {
+            nextPlayer = "player2";
+            nextPlayerId = gameData.player2;
+        }
+
+        const turnMessage = `It is currently ${nextPlayer}'s turn`;
+
+        const updatedGameData = await updateGame(socket.room, {
+            "currentplayer": nextPlayer,
+            "currentid": nextPlayerId
+        });
+
+        // Loop through the actual connected sockets to update their state
+        connectedSockets.forEach(s => {
+            s.userRoom = updatedGameData; // Keep all sockets' local state in sync
+            s.emit("setplayerturntopic", turnMessage);
+
+            // Control interactivity based on whose turn it is
+            if (s.id === updatedGameData.currentid) {
+                s.emit("enableinteractive");
+            } else {
+                s.emit("disableinteractive");
+            }
+        });
+
+        console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
+    } catch (error) {
+        console.error('SERVER: An error occurred in interactiveHelper:', error);
+    }
 }
 async function processMove(socket, io, startdex, endex) {
     const gameData = await getGame(socket.room);
@@ -196,4 +211,34 @@ async function getcurrentPlayer(socket, forced) {
         return gameData ? gameData.currentplayer : null;
     }
     return socket.userRoom ? socket.userRoom.currentplayer : null;
+}
+
+async function updatePlayerStatus(io, room) {
+    if (!room) return;
+
+    try {
+        const connectedSockets = await io.in(room).fetchSockets();
+        const playerStatuses = [
+            { player: 'player1', connected: false },
+            { player: 'player2', connected: false }
+        ];
+
+        // Populate the status based on connected sockets
+        connectedSockets.forEach(s => {
+            const gameData = s.userRoom;
+            if (gameData) {
+                if (gameData.player1 === s.id) {
+                    playerStatuses[0].connected = true;
+                } else if (gameData.player2 === s.id) {
+                    playerStatuses[1].connected = true;
+                }
+            }
+        });
+
+        // Emit the structured status data to all clients in the room
+        io.to(room).emit('playerstatus', playerStatuses);
+
+    } catch (error) {
+        console.error('SERVER: Error updating player status:', error);
+    }
 }

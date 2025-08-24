@@ -36,6 +36,8 @@
         #ui-container {
             display: flex;
             align-items: center; /* Vertically center items */
+            justify-content: space-between; /* Distribute items with space between them */
+            flex-wrap: wrap; /* Allows items to wrap on smaller screens */
             padding: 8px;
             background-color: #2a2a2a;
             border-bottom: 2px solid #555;
@@ -53,6 +55,49 @@
             background-color: #444;
             margin-right: 10px;
         }
+        
+        /* New styling for the connection status container - no longer absolute */
+        #player-status-container {
+            display: flex;
+            flex-direction: column; /* Stacks items vertically */
+            align-items: center; /* Centers items horizontally */
+            gap: 5px; /* Space between the rows */
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #2a2a2a;
+        }
+
+        /* Container for the two players, aligned horizontally */
+        #player-icons-container {
+            display: flex;
+            gap: 20px; /* Space between the two player items */
+        }
+        
+        /* Container for each dot and its label */
+        .player-status {
+            display: flex;
+            flex-direction: column; /* Stacks dot and text vertically */
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* Styling for the connection status dots */
+        .status-dot {
+            height: 15px;
+            width: 15px;
+            background-color: gray; /* Default color: disconnected */
+            border-radius: 50%; /* Makes the element a circle */
+            border: 2px solid white;
+            margin-bottom: 5px; /* Adds space between dot and text */
+        }
+        
+        /* Specific colors for connected/disconnected states */
+        .status-dot.connected {
+            background-color: limegreen; /* Green dot for connected */
+        }
+        .status-dot.disconnected {
+            background-color: red; /* Red dot for disconnected */
+        }
 
         #playerindicator {
             width: 200px;
@@ -62,6 +107,12 @@
             border-radius: 5px;
             background-color: #444;
             margin-right: 10px;
+        }
+
+        #button-container {
+            display: flex;
+            gap: 8px; /* Space between buttons */
+            margin-left: 10px;
         }
 
         .button {
@@ -77,17 +128,12 @@
         
         /* The container where the Phaser game canvas lives */
         #game {
-            {{!-- flex-grow: 1; /* Allows it to fill the remaining vertical space */ --}}
+            flex-grow: 1; /* Allows it to fill the remaining vertical space */
             position: relative; /* Important for Phaser canvas positioning */
-                /* Set the size of the viewing window */
-                width: 100%;
-                height: 90vh; /* Example: 85% of the viewport height */
-
-                /* This is the crucial part that adds scrollbars when needed */
-                overflow: auto;
-                
-                position: relative;
-                border: 2px solid grey;
+            width: 100%;
+            height: 90vh; /* Example: 85% of the viewport height */
+            overflow: auto;
+            border: 2px solid grey;
         }
     </style>
 
@@ -107,6 +153,21 @@
                 <div>Player: -</div>
                 <div>Color: -</div>
             </div>
+            
+            <div id="player-status-container">
+                <span>Connected Status</span>
+                <div id="player-icons-container">
+                    <div class="player-status">
+                        <span id="player-status-1" class="status-dot disconnected"></span>
+                        <span>Player 1</span>
+                    </div>
+                    <div class="player-status">
+                        <span id="player-status-2" class="status-dot disconnected"></span>
+                        <span>Player 2</span>
+                    </div>
+                </div>
+            </div>
+
             <div id="button-container">
                 <button id="plus-button" class="button">+</button>
                 <button id="minus-button" class="button">-</button>

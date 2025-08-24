@@ -39,20 +39,36 @@ const UIManager = {
    * @param {string} message The message to display.
    * @returns {void}
    */
-  setAlert(message) {
+   setAlert(message) {
     const alertBar = document.querySelector("#alertBar");
     if (alertBar) {
-      alertBar.textContent = message;
+      // 1. Save the original message to a data attribute
+      alertBar.dataset.originalMessage = message;
+
+      // 2. Clear previous content
+      alertBar.innerHTML = ''; 
+      
+      // 3. Split by newline and add text nodes with <br> tags
+      const lines = message.split('\n');
+      lines.forEach((line, index) => {
+        const textNode = document.createTextNode(line);
+        alertBar.appendChild(textNode);
+        
+        if (index < lines.length - 1) {
+          const br = document.createElement('br');
+          alertBar.appendChild(br);
+        }
+      });
     }
   },
-
   /**
    * Gets the current text from the alert bar.
    * @returns {string | null} The alert bar text, or null if the element is not found.
    */
   getAlert() {
     const alertBar = document.querySelector("#alertBar");
-    return alertBar ? alertBar.textContent : null;
+    // 4. Return the original message from the data attribute
+    return alertBar ? alertBar.dataset.originalMessage : null;
   },
 
   /**
@@ -66,6 +82,24 @@ const UIManager = {
     if (playerIndicator && playerIndicator.children.length >= 2) {
       playerIndicator.children[0].textContent = `Player: ${player}`;
       playerIndicator.children[1].textContent = `Color: ${color || '-'}`;
+    }
+  },  /**
+   * Updates the connection status dots for both players.
+   * @param {boolean} player1Connected - True if Player 1 is connected.
+   * @param {boolean} player2Connected - True if Player 2 is connected.
+   */
+  setPlayerStatus(player1Connected, player2Connected) {
+    const player1Dot = document.querySelector("#player-status-1");
+    const player2Dot = document.querySelector("#player-status-2");
+
+    if (player1Dot) {
+      player1Dot.classList.toggle('connected', player1Connected);
+      player1Dot.classList.toggle('disconnected', !player1Connected);
+    }
+
+    if (player2Dot) {
+      player2Dot.classList.toggle('connected', player2Connected);
+      player2Dot.classList.toggle('disconnected', !player2Connected);
     }
   }
 };

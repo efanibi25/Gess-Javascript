@@ -27,9 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/full';
     });
     
-    network.socket.on("setplayerindicator", (player) => {
-        ui.setAlert(`It is currently ${player}'s turn`);
-    });
+
 
     // --- 3. Phaser Game Setup ---
 
