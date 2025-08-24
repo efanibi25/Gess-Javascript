@@ -1,6 +1,6 @@
 // BoardScene.js
 import GessBoard from "../classes/gessBoard.js";
-
+import { getDraggablePieces } from "../utils/boardUtils.js";
 export default class BoardScene extends Phaser.Scene {
     constructor() {
         super('BoardScene');
@@ -54,7 +54,7 @@ export default class BoardScene extends Phaser.Scene {
 
         socket.on("sendmove", (startdex, endex, test = true) => {
             if (this.gessBoard) {
-                this.gessBoard.movePieceAuto(startdex, endex);
+                this.gessBoard.movePiece(startdex, endex);
                 if (test) {
                     this.network.emit("gamestate");
                     this.network.emit("checkrings", endex);
@@ -101,8 +101,19 @@ export default class BoardScene extends Phaser.Scene {
     }
 
     setupInputListeners() {
+             this.input.on('show-neighbors', this._showNeighbors, this);
+        this.input.on('hide-neighbors', this._hideNeighbors, this);
     this.input.on('dragstart', this._handleDragStart, this);
+    this.input.on('dragenter', (pointer, gameObject, dropZone) => {
+            this._drawHighlight(dropZone); // Yellow hover
+        });
 
+        this.input.on('dragleave', (pointer, gameObject, dropZone) => {
+            // This will now clear the yellow hover but redraw the green start
+            this._clearHighlights();
+            this._drawHighlight(gameObject.block.zone, 0x39FF33, 15);
+        });
+        
     // // This listener is now set up just one time.
     this.input.on('drag', this._handleDrag, this);        
     this.input.on('drop', (pointer, gameObject, dropZone) => {
@@ -158,7 +169,7 @@ export default class BoardScene extends Phaser.Scene {
     _setPiecesInteractive(isInteractive) {
         if (!this.gessBoard) return;
 
-        const draggablePieces = this.gessBoard.getDraggablePieces();
+    const draggablePieces = getDraggablePieces(this.gessBoard.board, this.gessBoard.color);
         
         if (isInteractive) {
             console.log("CLIENT: Enabling player interaction.");
@@ -168,9 +179,36 @@ export default class BoardScene extends Phaser.Scene {
             draggablePieces.forEach(e => e.disableDraggable());
         }
     }
+    // New helper methods for showing/hiding neighbors
+    _showNeighbors(centerPiece) {
+        const neighbors = this.gessBoard.getNeighborsOfPiece(centerPiece);
+        Object.values(neighbors)
+            .filter(p => p && p.owner === null)
+            .forEach(p => p.setAlpha(0.5));
+    }
+
+    _hideNeighbors(centerPiece) {
+        const neighbors = this.gessBoard.getNeighborsOfPiece(centerPiece);
+        Object.values(neighbors)
+            .filter(p => p && p.owner === null)
+            .forEach(p => p.setAlpha(0.01));
+    }
+
+    _highLightDragStart(pointer, gameObject){
+    this._clearHighlights();
+    if (gameObject.block && gameObject.block.zone) {
+            this._drawHighlight(gameObject.block.zone, 0x39FF33, 15); // Green start highlight
+    }
+    }
 
     _handleDragStart(pointer, gameObject) {
-    // Store the starting position of the main piece.
+        this._getStartPositions(pointer, gameObject)
+        this._highLightDragStart(pointer, gameObject)
+    
+}
+
+_getStartPositions(pointer, gameObject){
+// Store the starting position of the main piece.
     gameObject.x_initial = gameObject.x;
     gameObject.y_initial = gameObject.y;
 
@@ -198,12 +236,10 @@ export default class BoardScene extends Phaser.Scene {
     }
 
 
-
     // Helper method to draw highlights
     _drawHighlight(zone, color = 0xffff00, thickness = 12) {
         this.graphics.lineStyle(thickness, color);
-        let test=this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
-        console.log(test)
+        this.graphics.strokeRect(zone.x - zone.width / 2, zone.y - zone.height / 2, zone.width, zone.height);
     }
 }
 

@@ -2,6 +2,8 @@ import boardBlock from "./gessBlock.js";
 import { data } from "../../scripts/lib/network.js";
 const stroke=8
 const showStroke=true
+import { getOtherPlayerPieces, getMyPieces } from "../utils/gameUtils.js";
+
 export default class gessBoard extends Phaser.GameObjects.Container {
 
     constructor(scene,player,gameData){
@@ -99,8 +101,8 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     }
     
     upDateGameBlocks(){
-        let otherPlayerPieces=this.getOtherPlayerPieces()
-        let myPieces=this.getMyPieces()
+        let otherPlayerPieces=getOtherPlayerPieces(this.player)
+        let myPieces=getMyPieces(this.player)
         let i=0
 
         while ( i< Math.pow(data["squaresCount"]+data["sideborder"],2)) {
@@ -150,40 +152,10 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         this.scene.events.emit('updatePiece');
 
         }
-
-        movePieceAuto(startdex,endex){
-            let block=this.getPiece(startdex)
-            block.newBlock=this.getBlock(endex)
-            block.movePiece()
-            this.scene.events.emit('updatePiece');
-    
-        }
     
 
 
     //data
-    getOtherPlayerPieces(){
-        if(this.player=="player1"){
-            return data["PLAYER2_PIECES"]
-        }
-        else{
-            return data["PLAYER1_PIECES"]
-        }
-    }
-    getMyPieces(){
-        if(this.player=="player1"){
-            return data["PLAYER1_PIECES"]
-        }
-        else{
-            return data["PLAYER2_PIECES"]
-        }
-    }
-
-
-    getDraggablePieces(){
-        return this.board.map(e=>e.piece).filter(e=>e.gamePiece && (e.owner==null ||this.color==e.owner)).filter(e=>e.checkDraggable())
-    }
-
 
     getPiece(index){
         let block=this.getBlock(index)
@@ -237,6 +209,10 @@ export default class gessBoard extends Phaser.GameObjects.Container {
 }
 
 
+
+
+
+
      swapPieces(startIndex, targetIndex) {
         const startPiece = this.getPiece(startIndex);
         const targetPiece = this.getPiece(targetIndex);
@@ -254,6 +230,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             if (piece) {
                 colorCache[key] = piece.owner;
                 piece.updateOwner(null); // Clear the original position
+                Phaser.Display.Align.In.Center(piece, piece.block);
             }
         }
         
@@ -269,7 +246,54 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         }
     }
 
-    
+
+
+/**
+ * Calculates the direction between two blocks on the board.
+ * @param {Block} startBlock The starting block.
+ * @param {Block} endBlock The ending block.
+ * @returns {number|undefined} The direction offset, or undefined if the move is not a straight line.
+ */
+getDirection(startBlock, endBlock) {
+    const rowChange = endBlock.row - startBlock.row;
+    const colChange = endBlock.col - startBlock.col;
+    const gridSize = this.gameData.squaresCount + this.gameData.sideborder;
+
+    if (colChange === 0 && rowChange === 0) return 0;
+    if (colChange === 0 && rowChange >= 1) return gridSize;
+    if (colChange === 0 && rowChange < 0) return -gridSize;
+    if (rowChange === 0 && colChange >= 1) return 1;
+    if (rowChange === 0 && colChange < 0) return -1;
+    if (Math.abs(rowChange) !== Math.abs(colChange)) return undefined; // Not a straight diagonal
+    if (rowChange < 0 && colChange < 0) return -gridSize - 1;
+    if (rowChange < 0 && colChange > 0) return -gridSize + 1;
+    if (rowChange > 0 && colChange < 0) return gridSize - 1;
+    if (rowChange > 0 && colChange > 0) return gridSize + 1;
+}
+
+
+
+
+/**
+ * Initiates the process of moving a piece group.
+ * @param {number} startIndex The starting index of the move.
+ * @param {number} targetIndex The target index of the move.
+ */
+movePiece(startIndex, targetIndex) {
+    const startBlock = this.getBlock(startIndex);
+    const targetBlock = this.getBlock(targetIndex);
+
+    if (!startBlock || !targetBlock) return;
+
+    const direction = this.getDirection(startBlock, targetBlock);
+    if (direction === 0) {
+        this.swapPieces(startIndex, startIndex);
+    } else if (direction !== undefined) {
+        this.swapPieces(startIndex, targetIndex);
+    }
+    this.scene.events.emit('updatePiece');
+
+}
 
 
 
