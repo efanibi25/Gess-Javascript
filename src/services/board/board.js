@@ -1,73 +1,13 @@
-const {BoardMax,squaresCount,sideborder}=require("../shared/player.js")
-class block
-{ 
-    
-constructor(index,row,col,board){
-    this.index=index+1
-    this.row=row+1
-    this.col=col+1
-    this.board=board
-    this.piece=null
+// board.js
+// This file contains the main Board class, which manages the game state.
 
-    
-}
+// Require the Block and Piece classes from their respective files.
+const {BoardMax,squaresCount,sideborder}=require("../../shared/player.js")
+const { Block } = require("./block.js");
+const { Piece } = require("./piece.js");
 
-checkGamePiece(){
-    let col=this.col
-    let row=this.row
-    if(this.piece==false){
-        return false
-    }
-    if ((row>sideborder/2 && col>sideborder/2 && col<squaresCount+(sideborder/2)+1 && row<squaresCount+(sideborder/2)+1)==true) null
-    else this.piece=false
-    return this.piece!=false
-}
-
-}
-
-class piece{
-    constructor(index,row,col,board){
-        this.index=index
-        this.row=row+1
-        this.col=col+1
-        this.neighborsDexes=[0,-1,1,-squaresCount-sideborder,
-        squaresCount+sideborder,squaresCount+
-        sideborder+1,-squaresCount-sideborder-1,
-        squaresCount+sideborder-1,-squaresCount-
-        sideborder+1]
-        this.owner=null
-        this.board=board
-    } 
-
-    getNeighbors(){
-        let out={}
-        if (this.neighbors) return  this.neighbors
-        for (const ele of this.neighborsDexes){
-            let piece=this.board.getPiece(this.index+ele)
-            out[ele]=piece   
-        }
-        this.neighbors=out
-        return out
-        }
-
-    checkRing(opp=false){
-            this.getNeighbors()  
-            if(this.owner==null){
-                if(!opp)
-                return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner=="mine").length==8
-                else
-                return Object.values(this.neighbors).filter( ele=>ele!=null&&ele.index!=this.index && ele.owner=="opponent").length==8
-
-            }
-            return false
-        }
-
-   
-    
-}
-
-//outside blocks are set to false
-class board{
+// The Board class manages all game logic, including piece placement, movement validation, and win/loss conditions.
+class Board{
     constructor(pieces,opponent,rings,oppRings,number){
         this.myPieces=new Set(pieces)
         this.opponentPieces=new Set(opponent)
@@ -86,7 +26,7 @@ class board{
         while ( i< squaresCount+sideborder) {
             k=0
             while ( k< squaresCount+sideborder) {
-                this.board.push(new block(count,i,k,this))
+                this.board.push(new Block(count,i,k,this))
                 count=count+1
                 k=k+1
             }
@@ -148,7 +88,7 @@ class board{
         while ( i< Math.pow(squaresCount+sideborder,2)) { 
             let block=this.board[i]
             if(block.checkGamePiece()){
-                block.piece= new piece(block.index,block.row,block.col,this)
+                block.piece= new Piece(block.index,block.row,block.col,this)
                 if(this.myPieces.has(i+1)){
                     block.piece.owner="mine"
                 }
@@ -421,10 +361,5 @@ if(dir>0){
     
 }
 
-
-
-
-
-
-
-module.exports={board}
+// Export the Board class for use in other files.
+module.exports={Board}

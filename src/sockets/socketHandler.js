@@ -1,9 +1,8 @@
 import url from 'url';
 import base64id from 'base64id';
 import { getGame, updateGame, addGameList } from '../services/redis.js';
-import { board as Board } from '../services/board.js';
 import { BoardMax, squaresCount, sideborder } from '../shared/player.js';
-
+import { Board } from "../services/board/board.js"
 export default function initializeSockets(io) {
 
     io.engine.generateId = (req) => {
