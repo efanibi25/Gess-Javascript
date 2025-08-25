@@ -134,7 +134,7 @@ export default class gessBoard extends Phaser.GameObjects.Container {
         for (let i = 0; i < totalSize; i++) {
             const block = this.board[i];
             const piece = block.piece;
-            piece.checkGamePiece();
+            piece.isGamePiece();
 
             if (piece.gamePiece) {
                 this.addZone(block);

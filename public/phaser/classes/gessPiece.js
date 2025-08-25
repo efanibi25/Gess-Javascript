@@ -148,7 +148,7 @@ export default class boardPiece extends Phaser.GameObjects.Arc {
     /**
      * Checks if the piece is within the main playable area of the board.
      */
-    checkGamePiece() {
+    isGamePiece() {
         let col = this.block.col;
         let row = this.block.row;
         this.gamePiece = (row > data["sideborder"] / 2 && col > data["sideborder"] / 2 && col < data["squaresCount"] + (data["sideborder"] / 2) + 1 && row < data["squaresCount"] + (data["sideborder"] / 2) + 1);

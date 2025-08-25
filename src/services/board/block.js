@@ -2,34 +2,51 @@
 // This file contains the Block class, which represents a single square on the board.
 
 // Require the necessary constants from the shared player file.
-const {squaresCount,sideborder}=require("../../shared/player.js")
+const { squaresCount, sideborder } = require("../../shared/player.js");
 
-// The Block class represents a single square on the game board.
-class Block
-{ 
-    
-constructor(index,row,col,board){
-    this.index=index+1
-    this.row=row+1
-    this.col=col+1
-    this.board=board
-    this.piece=null
-
-    
-}
-
-checkGamePiece(){
-    let col=this.col
-    let row=this.row
-    if(this.piece==false){
-        return false
+class Block {
+    /**
+     * Represents a single block (square) on the game board.
+     * @param {number} index - The 0-based index of the block.
+     * @param {number} row - The 0-based row coordinate.
+     * @param {number} col - The 0-based column coordinate.
+     * @param {object} board - A reference to the parent board.
+     */
+    constructor(index, row, col, board) {
+        // Convert from 0-based to 1-based indexing for game logic
+        this.index = index + 1;
+        this.row = row + 1;
+        this.col = col + 1;
+        this.board = board;
+        this.piece = null;
     }
-    if ((row>sideborder/2 && col>sideborder/2 && col<squaresCount+(sideborder/2)+1 && row<squaresCount+(sideborder/2)+1)==true) null
-    else this.piece=false
-    return this.piece!=false
-}
 
+    /**
+     * Checks if this block is part of the main game area (not the border).
+     * If not, it sets the piece to `false` to indicate an invalid block.
+     * @returns {boolean} True if the block is a game piece block, false otherwise.
+     */
+    isGameBlock() {
+        const halfBorder = sideborder / 2;
+
+        const isInGrid = (
+            this.row > halfBorder &&
+            this.col > halfBorder &&
+            this.row <= squaresCount + halfBorder &&
+            this.col <= squaresCount + halfBorder
+        );
+
+        if (this.piece === false) {
+            return false;
+        }
+
+        if (!isInGrid) {
+            this.piece = false;
+        }
+
+        return this.piece !== false;
+    }
 }
 
 // Export the Block class for use in other files.
-module.exports={Block}
+module.exports = { Block };

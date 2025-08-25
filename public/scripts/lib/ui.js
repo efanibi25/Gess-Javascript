@@ -70,20 +70,48 @@ const UIManager = {
     // 4. Return the original message from the data attribute
     return alertBar ? alertBar.dataset.originalMessage : null;
   },
+/**
+ * Updates the text content of the player and color display using an object.
+ * @param {object} playerData An object containing player details.
+ * @param {string} playerData.player The player identifier (e.g., 'player1', 'player2').
+ * @param {string} playerData.color The color string (e.g., 'white', 'black').
+ */
+setPlayerIndicator(player, color) {
+  const playerNameDiv = document.querySelector("#yourPlayerName");
+  const playerColorDiv = document.querySelector("#yourPlayerColor");
 
+  // Exit if the required elements are not found
+  if (!playerNameDiv || !playerColorDiv || !player || !color) {
+    console.error('Invalid input or missing DOM elements for player indicator.');
+    return;
+  }
+  
+  let formattedPlayer;
+  let formattedColor = color; // Assign color directly, as it's a separate argument now
+
+  // Use a switch statement for clean conditional logic
+  switch (player) {
+    case 'player1':
+      formattedPlayer = 'Player 1';
+      break;
+    case 'player2':
+      formattedPlayer = 'Player 2';
+      break;
+    default:
+      // Fallback for unexpected input
+      formattedPlayer = player.charAt(0).toUpperCase() + player.slice(1);
+      break;
+  }
+
+  // Update the DOM elements with the new values
+  playerNameDiv.textContent = formattedPlayer;
+  playerColorDiv.style.backgroundColor = formattedColor;
+},
+ 
+  
   /**
-   * Sets the player and color information in the player indicator element.
-   * @param {string} player The player identifier (e.g., 'player1').
-   * @param {string} color The player's color (e.g., 'white' or 'black').
-   * @returns {void}
-   */
-  setPlayerIndicator(player, color) {
-    const playerIndicator = document.querySelector("#playerindicator");
-    if (playerIndicator && playerIndicator.children.length >= 2) {
-      playerIndicator.children[0].textContent = `Player: ${player}`;
-      playerIndicator.children[1].textContent = `Color: ${color || '-'}`;
-    }
-  },  /**
+
+  
    * Updates the connection status dots for both players.
    * @param {boolean} player1Connected - True if Player 1 is connected.
    * @param {boolean} player2Connected - True if Player 2 is connected.

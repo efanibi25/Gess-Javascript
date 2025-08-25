@@ -8,134 +8,172 @@
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 
-    <style>
-        /* Basic reset for the page */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+   <style>
+    /* Basic reset for the page */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        html, body {
-            height: 100%;
-            width: 100%;
-            font-family: sans-serif;
-            background-color: #333;
-            color: white;
-            overflow: hidden; /* Prevents scrollbars */
-        }
+    html, body {
+        height: 100%;
+        width: 100%;
+        font-family: sans-serif;
+        background-color: #333;
+        color: white;
+        overflow: hidden; /* Prevents scrollbars */
+    }
 
-        /* Main container for the entire application */
-        #app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+    /* Main container for the entire application */
+    #app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
 
-        /* The top bar holding all UI elements */
-        #ui-container {
-            display: flex;
-            align-items: center; /* Vertically center items */
-            justify-content: space-between; /* Distribute items with space between them */
-            flex-wrap: wrap; /* Allows items to wrap on smaller screens */
-            padding: 8px;
-            background-color: #2a2a2a;
-            border-bottom: 2px solid #555;
-            flex-shrink: 0; /* Prevents this bar from shrinking */
-        }
+    /* The top bar holding all UI elements */
+    #ui-container {
+        display: flex;
+        align-items: center; /* Vertically center items */
+        justify-content: space-between; /* Distribute items with space between them */
+        flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+        padding: 8px;
+        background-color: #2a2a2a;
+        border-bottom: 2px solid #555;
+        flex-shrink: 0; /* Prevents this bar from shrinking */
+    }
 
-        #alertBar {
-            flex-grow: 1; /* Allows it to take up the most space */
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: bold;
-            padding: 10px;
-            border: 2px solid #555;
-            border-radius: 5px;
-            background-color: #444;
-            margin-right: 10px;
-        }
-        
-        /* New styling for the connection status container - no longer absolute */
-        #player-status-container {
-            display: flex;
-            flex-direction: column; /* Stacks items vertically */
-            align-items: center; /* Centers items horizontally */
-            gap: 5px; /* Space between the rows */
-            padding: 5px 10px;
-            border-radius: 5px;
-            background-color: #2a2a2a;
-        }
+    #alertBar {
+        flex-grow: 1; /* Allows it to take up the most space */
+        text-align: center;
+        font-size: 1.1em;
+        font-weight: bold;
+        padding: 10px;
+        border: 2px solid #555;
+        border-radius: 5px;
+        background-color: #444;
+        margin-right: 10px;
+    }
+    
+    /* New styling for the connection status container - no longer absolute */
+    #player-status-container {
+        display: flex;
+        flex-direction: column; /* Stacks items vertically */
+        align-items: center; /* Centers items horizontally */
+        gap: 5px; /* Space between the rows */
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #2a2a2a;
+    }
 
-        /* Container for the two players, aligned horizontally */
-        #player-icons-container {
-            display: flex;
-            gap: 20px; /* Space between the two player items */
-        }
-        
-        /* Container for each dot and its label */
-        .player-status {
-            display: flex;
-            flex-direction: column; /* Stacks dot and text vertically */
-            align-items: center;
-            text-align: center;
-        }
-        
-        /* Styling for the connection status dots */
-        .status-dot {
-            height: 15px;
-            width: 15px;
-            background-color: gray; /* Default color: disconnected */
-            border-radius: 50%; /* Makes the element a circle */
-            border: 2px solid white;
-            margin-bottom: 5px; /* Adds space between dot and text */
-        }
-        
-        /* Specific colors for connected/disconnected states */
-        .status-dot.connected {
-            background-color: limegreen; /* Green dot for connected */
-        }
-        .status-dot.disconnected {
-            background-color: red; /* Red dot for disconnected */
-        }
+    /* Container for the two players, aligned horizontally */
+    #player-icons-container {
+        display: flex;
+        gap: 20px; /* Space between the two player items */
+    }
+    
+    /* Container for each dot and its label */
+    .player-status {
+        display: flex;
+        flex-direction: column; /* Stacks dot and text vertically */
+        align-items: center;
+        text-align: center;
+    }
+    
+    /* Styling for the connection status dots */
+    .status-dot {
+        height: 15px;
+        width: 15px;
+        background-color: gray; /* Default color: disconnected */
+        border-radius: 50%; /* Makes the element a circle */
+        border: 2px solid white;
+        margin-bottom: 5px; /* Adds space between dot and text */
+    }
+    
+    /* Specific colors for connected/disconnected states */
+    .status-dot.connected {
+        background-color: limegreen; /* Green dot for connected */
+    }
+    .status-dot.disconnected {
+        background-color: red; /* Red dot for disconnected */
+    }
+    
+    /* Corrected and combined styling for the player indicator section */
+#playerindicator {
+    display: flex;
+    align-items: center;
+    padding: 10px; /* Simplified padding for all sides */
+    text-align: center;
+    border: 2px solid #555;
+    border-radius: 5px;
+    background-color: #444;
+    margin-right: 10px;
+    /* Removed width: 180px; to allow it to grow with content */
+}
 
-        #playerindicator {
-            width: 200px;
-            padding: 10px;
-            text-align: center;
-            border: 2px solid #555;
-            border-radius: 5px;
-            background-color: #444;
-            margin-right: 10px;
-        }
+    .status-section {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
 
-        #button-container {
-            display: flex;
-            gap: 8px; /* Space between buttons */
-            margin-left: 10px;
-        }
+    #yourStatusHeading {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
 
-        .button {
-            width: 45px;
-            height: 45px;
-            font-size: 1.5em;
-            cursor: pointer;
-            background-color: #555;
-            color: white;
-            border: 1px solid #777;
-            border-radius: 5px;
-        }
-        
-        /* The container where the Phaser game canvas lives */
-        #game {
-            flex-grow: 1; /* Allows it to fill the remaining vertical space */
-            position: relative; /* Important for Phaser canvas positioning */
-            width: 100%;
-            height: 90vh; /* Example: 85% of the viewport height */
-            overflow: auto;
-            border: 2px solid grey;
-        }
-    </style>
+    .vertical-line {
+        width: 2px;
+        background-color: #555;
+        height: 40px;
+        margin: 0 10px;
+    }
+
+    .details-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+   #yourPlayerColor {
+    width: 40px; /* Wider than the height to form a bar */
+    height: 15px; /* Same height as the status dots for alignment */
+    margin-top: 5px; 
+    border-radius: 4px; /* Optional: gives it slightly rounded corners */
+    border: 2px solid white;
+}
+    #button-container {
+        display: flex;
+        gap: 8px; /* Space between buttons */
+        margin-left: 10px;
+    }
+
+    /* Updated button styling */
+    .button {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2em;
+        cursor: pointer;
+        background-color: #555;
+        color: white;
+        border: 1px solid #777;
+        border-radius: 5px;
+    }
+    
+    /* The container where the Phaser game canvas lives */
+    #game {
+        flex-grow: 1; /* Allows it to fill the remaining vertical space */
+        position: relative; /* Important for Phaser canvas positioning */
+        width: 100%;
+        height: 90vh; /* Example: 85% of the viewport height */
+        overflow: auto;
+        border: 2px solid grey;
+    }
+</style>
 
     <script type="text/javascript">
       let key = "{{key}}";
@@ -149,10 +187,14 @@
     <div id="app-container">
         <div id="ui-container">
             <div id="alertBar">Connecting...</div>
-            <div id="playerindicator">
-                <div>Player: -</div>
-                <div>Color: -</div>
+          <div id="playerindicator">
+            <div id="yourStatusHeading">My Status</div>
+            <div class="vertical-line"></div>
+            <div class="details-section">
+                <div id="yourPlayerName"></div>
+                <div id="yourPlayerColor"></div>
             </div>
+        </div>
             
             <div id="player-status-container">
                 <span>Connected Status</span>
