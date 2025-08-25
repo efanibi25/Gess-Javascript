@@ -4,7 +4,6 @@ import { data } from "../../scripts/lib/network.js";
 import { getOtherPlayerPieces, getMyPieces } from "../utils/gameUtils.js";
 import { getNeighborsOfBlock } from "../utils/boardUtils.js";
 import Zone from "./gessZone.js";
-
 // --- Constants ---
 const stroke = 8;
 const showStroke = true;
@@ -122,11 +121,14 @@ export default class gessBoard extends Phaser.GameObjects.Container {
             const block = this.board[i];
             block.index = i + 1;
             this.add(block.initPiece());
+            if (block.col==1 &&block.row==1){
+                 this.addBlockText(block,"*");
+            }
 
-            if (block.col === data.sideborder / 2) {
+            else if (block.col === data.sideborder / 2) {
                 this.addBlockNum(block, block.row);
             } else if (block.row === data.sideborder / 2) {
-                this.addBlockText(block, block.col);
+                this.addBlockAlpha(block, block.col);
             }
         }
 
@@ -214,20 +216,29 @@ export default class gessBoard extends Phaser.GameObjects.Container {
      * @param {boardBlock} block The block to add the letter to.
      * @param {number} num The column number.
      */
-    addBlockText(block, num) {
-        if (num <= data["sideborder"] / 2 || num > (data["sideborder"] / 2) + data["squaresCount"]) {
-            block.text = new Phaser.GameObjects.Text(this.scene, 0, 0, "*", {
+    addBlockAlpha(block, num) {
+        block.text = new Phaser.GameObjects.Text(this.scene, 0, 0, String.fromCharCode(64 + num - data["sideborder"] / 2 + 1), {
                 fontFamily: fontFamily,
                 fontSize: fontSize,
                 fontStyle: fontStyle
-            });
-        } else {
-            block.text = new Phaser.GameObjects.Text(this.scene, 0, 0, String.fromCharCode(63 + num - data["sideborder"] / 2 + 1), {
+        });
+        this.scene.add.existing(block.text);
+        Phaser.Display.Align.In.Center(block.text, block);
+    }
+
+
+
+    /**
+     * Adds an text label to a border block.
+     * @param {boardBlock} block The block to add the letter to.
+     * @param {number} num The column number.
+     */
+    addBlockText(block,text) {
+        block.text = new Phaser.GameObjects.Text(this.scene, 0, 0, text), {
                 fontFamily: fontFamily,
                 fontSize: fontSize,
                 fontStyle: fontStyle
-            });
-        }
+        };
         this.scene.add.existing(block.text);
         Phaser.Display.Align.In.Center(block.text, block);
     }

@@ -2,7 +2,7 @@
 // This file contains the Block class, which represents a single square on the board.
 
 // Require the necessary constants from the shared player file.
-const { squaresCount, sideborder } = require("../../shared/player.js");
+const { squaresCount, sideborder } = require("../../shared/config.js");
 
 class Block {
     /**

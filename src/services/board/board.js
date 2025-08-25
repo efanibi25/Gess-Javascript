@@ -2,9 +2,15 @@
 // This file contains the main Board class, which manages the game state.
 
 // Require the Block and Piece classes from their respective files.
-const { BoardMax, squaresCount, sideborder } = require("../../shared/player.js");
 const { Block } = require("./block.js");
 const { Piece } = require("./piece.js");
+const{BoardMax,    squaresCount, 
+    sideborder,
+    TEST_MODE_ONE_PLAYER_CONTROLS_ALL,
+    TEST_MODE_REMOVE_DIRECTION_CHECK,
+    TEST_MODE_ALLOW_ANY_DIRECTION,
+    TEST_MODE_UNLIMITED_MOVE_DISTANCE} = require("../../shared/config.js");
+
 
 // The Board class manages all game logic, including piece placement, movement validation, and win/loss conditions.
 class Board {
@@ -16,7 +22,7 @@ class Board {
         this.board = [];
         this.createBoard();
         this.addPieces();
-        this.number = number;
+        this.playerNumber = number;
     }
     
     // --- Board Initialization ---
@@ -73,11 +79,11 @@ class Board {
     getMaxMovement(start, end) {
         let positions = this.getMovementsHelper(start, end);
         let startpiece = this.getPiece(start);
-        let excluded_indexes = new Set(Object.values(startpiece.neighbors).map(e => e.index));
-        startpiece.getNeighbors();
+        const startNeighbors = this.getNeighborsOf(start);
+        let excluded_indexes = new Set(Object.values(startNeighbors).map(e => e.index));
         for (let current of positions) {
-            for (let key of Object.keys(startpiece.neighbors)) {
-                if (startpiece.neighbors[key].owner == null) continue;
+            for (let key of Object.keys(startNeighbors)) {
+                if (startNeighbors[key].owner == null) continue;
                 else if (excluded_indexes.has(current + parseInt(key))) continue;
                 else if (this.myPieces.has(current + parseInt(key) || this.opponentPieces.has(current + parseInt(key)))) return current;
             }
@@ -133,141 +139,248 @@ class Board {
 
     checkLose(index) {
         let rings = this.updateRings(index);
-        if (rings.size == 0 && this.number == 1) return { "player1Rings": [], "winner": "Player2" };
-        else if (this.number == 1) return { "player1Rings": Array.from(rings) };
-        else if (rings.size == 0 && this.number == 2) return { "player2Rings": [], "winner": "Player1" };
-        else if (this.number == 2) return { "player2Rings": Array.from(rings) };
+        if (rings.size == 0 && this.playerNumber == 1) return { "player1Rings": [], "winner": "Player2" };
+        else if (this.playerNumber == 1) return { "player1Rings": Array.from(rings) };
+        else if (rings.size == 0 && this.playerNumber == 2) return { "player2Rings": [], "winner": "Player1" };
+        else if (this.playerNumber == 2) return { "player2Rings": Array.from(rings) };
     }
 
     checkWin(index) {
         let rings = this.updateOpponentRings(index);
-        if (rings.size == 0 && this.number == 1) return { "player2Rings": [], "winner": "Player1" };
-        else if (this.number == 1) return { "player2Rings": Array.from(rings) };
-        else if (rings.size == 0 && this.number == 2) return { "player1Rings": [], "winner": "Player2" };
-        else if (this.number == 2) return { "player1Rings": Array.from(rings) };
+        if (rings.size == 0 && this.playerNumber == 1) return { "player2Rings": [], "winner": "Player1" };
+        else if (this.playerNumber == 1) return { "player2Rings": Array.from(rings) };
+        else if (rings.size == 0 && this.playerNumber == 2) return { "player1Rings": [], "winner": "Player2" };
+        else if (this.playerNumber == 2) return { "player1Rings": Array.from(rings) };
     }
 
-    updateRings(index) {
-        let potentialRings = [...Array.from(this.rings), ...this.getRingNeighbors(index)];
-        this.rings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && e.checkRing() == true).map(e => e.index));
-        return this.rings;
-    }
+updateRings(index) {
+    let potentialRings = [...Array.from(this.rings), ...this.getRingNeighbors(index)];
+    this.rings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && this.isRingAt(e.index, true) == true).map(e => e.index));
+    
+    // This log is now dynamic
+    console.log(`Player ${this.playerNumber} (mine) now has ${this.rings.size} rings.`);
 
-    updateOpponentRings(index) {
-        let potentialRings = [...Array.from(this.opponentRings), ...this.getRingNeighbors(index)];
-        this.opponentRings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && e.checkRing(true) == true).map(e => e.index));
-        return this.opponentRings;
-    }
+    return this.rings;
+}
+
+updateOpponentRings(index) {
+    let potentialRings = [...Array.from(this.opponentRings), ...this.getRingNeighbors(index)];
+    this.opponentRings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && this.isRingAt(e.index, false) == true).map(e => e.index));
+    
+    // This log correctly identifies the opponent
+    const opponentNumber = this.playerNumber === 1 ? 2 : 1;
+    console.log(`Player ${opponentNumber} (opponent) now has ${this.opponentRings.size} rings.`);
+
+    return this.opponentRings;
+}
 
     getRingNeighbors(index) {
         let piece = this.getPiece(index);
-        piece.getNeighbors();
-        return Object.keys(piece.neighbors).filter(ele => ele != 0).reduce((accumulator, currentValue) => {
-            accumulator.push(piece.neighbors[currentValue].index);
-            piece.neighbors[currentValue].getNeighbors();
+        let neighbors = this.getNeighborsOf(piece.index);
+        return Object.keys(neighbors).filter(ele => ele != 0).reduce((accumulator, currentValue) => {
+            if (neighbors[currentValue] != null) {
+                accumulator.push(neighbors[currentValue].index);
+            }
             return accumulator;
         }, [piece.index]);
+    }
+
+    /**
+     * Checks if a ring is formed at the given index.
+     * @param {number} index The index of the center of the potential ring.
+     * @param {boolean} is_mine True to check for a ring of your pieces, false for an opponent's.
+     * @returns {boolean} True if a ring is formed, false otherwise.
+     */
+    isRingAt(index, is_mine = true) {
+        const centerPiece = this.getPiece(index);
+        if (centerPiece === null || centerPiece.owner !== null) {
+            return false;
+        }
+
+        const neighbors = this.getNeighborsOf(index);
+        const requiredOwner = is_mine ? "mine" : "opponent";
+        const filledNeighborsCount = Object.values(neighbors).filter(
+            p => p && p.owner === requiredOwner
+        ).length;
+
+        return filledNeighborsCount === 8;
     }
     
     // --- Validation ---
     
     validatePiece(start) {
-        let startblock = this.getBlock(start);
-        if (this.testValidBlock(startblock) == false) {
-            return false;
-        }
-        return true;
+    let startblock = this.getBlock(start);
+    const result = this.testValidBlock(startblock);
+
+    // If result is a string, it's an error message. Otherwise, it's a boolean.
+    if (result !== true) {
+        return result;
     }
+    return true;
+}
 
     testValidBlock(startblock) {
-        if (!startblock.piece) {
-            return false;
-        }
-        startblock.piece.getNeighbors();
-        if (Object.values(startblock.piece.neighbors).filter(ele => ele.owner == "opponent").length > 0) {
-            console.log("can't move opponent pieces");
-            return false;
-        } else if (Object.values(startblock.piece.neighbors).filter(ele => ele.piece == false).length > 0) {
-            console.log("block Must Have 9 game blocks");
-            return false;
-        } else if (Object.values(startblock.piece.neighbors).filter(ele => ele.piece != false).length == 0) {
-            console.log("Can't Move Block With No Pieces");
-            return false;
-        }
-        return true;
+    if (!startblock.piece) {
+        // Return a specific error message
+        return "You must select a piece to move.";
     }
 
-    validateMove(start, end) {
-        let dir = this.getDir(start, end);
-        let startblock = this.getBlock(start);
-        if (dir == 0) {
-            console.log("You must Move at least 1 block");
-            return false;
-        } else if (dir == null) {
-            console.log("invalid movemeent");
-            return false;
-        } else if (startblock.piece.neighbors[dir].owner == null) {
-            console.log("The Given Direction does not have a piece");
-            return false;
-        } else if (startblock.piece.neighbors[dir].owner == "opponent") {
-            console.log("The Given Direction has the opponent piece");
-            return false;
-        } else if (startblock.piece.neighbors[dir].owner == null && Math.abs((start - end) / dir) > 3) {
-            return false;
-        }
-        return true;
+    const neighbors = this.getNeighborsOf(startblock.piece.index);
+    const hasOpponentPieces = Object.values(neighbors).some(p => p && p.owner === "opponent");
+    const hasMyPieces = Object.values(neighbors).some(p => p && p.owner === "mine");
+
+    if (!TEST_MODE_ONE_PLAYER_CONTROLS_ALL && hasOpponentPieces) {
+        return "You cannot move a block that contains an opponent's piece.";
     }
 
-    // --- Board Update Logic ---
-
-    updateBoard(start, end) {
-        let set = this.updateSets(start, end);
-        this.updatePieces(start, end);
-        let lost = this.checkLose(end);
-        let win = this.checkWin(end);
-        return { ...lost, ...win, ...set };
+    if (Object.values(neighbors).filter(ele => ele === false).length > 0) {
+        return "The block you selected is not a complete 3x3 square.";
+    }
+    
+    if (Object.values(neighbors).filter(ele => ele).length === 0) {
+        return "You cannot move an empty block.";
+    }
+    
+    if (hasMyPieces && hasOpponentPieces) {
+        return "You cannot move a block containing both your pieces and opponent's pieces.";
     }
 
-    updatePieces(start, end) {
-        let startblock = this.getBlock(start);
-        let endblock = this.getBlock(end);
-        let colordict = {};
-        for (const key of Object.keys(startblock.piece.getNeighbors())) {
-            colordict[key] = startblock.piece.neighbors[key].owner;
+    // All checks passed, return true
+    return true;
+}
+
+validateMove(start, end) {
+    const dir = this.getDir(start, end);
+    const startPiece = this.getPiece(start);
+
+    if (!TEST_MODE_ALLOW_ANY_DIRECTION) {
+        if (dir === undefined) {
+            return "Your move must be in a straight line (linear).";
         }
-        for (const val of Object.values(startblock.piece.getNeighbors())) {
-            val.owner = null;
-        }
-        for (const val of Object.values(endblock.piece.getNeighbors()).filter(e => e.owner == "opponent")) {
-            val.owner = null;
-        }
-        Object.keys(colordict).filter(key => colordict[key] != null).forEach(key => {
-            let piece = this.getPiece(end + parseInt(key));
-            if (piece) piece.owner = colordict[key];
-        });
     }
 
-    updateSets(start, end) {
-        let startblock = this.getBlock(start);
-        let endblock = this.getBlock(end);
-        startblock.piece.getNeighbors();
-        endblock.piece.getNeighbors();
-        let colordict = {};
-        for (const key of Object.keys(startblock.piece.neighbors)) {
-            colordict[key] = startblock.piece.neighbors[key].owner;
+    if (dir === 0) {
+        return "You must move at least one space.";
+    }
+    
+    if (!startPiece) {
+        return "No piece selected to move.";
+    }
+
+    const startNeighbors = this.getNeighborsOf(startPiece.index);
+    const directionPiece = startNeighbors[dir];
+    const centerPiece = startNeighbors[0]
+
+    if (!TEST_MODE_ONE_PLAYER_CONTROLS_ALL) {
+        if (directionPiece && directionPiece.owner === "opponent") {
+            return "The path is blocked by an opponent's piece.";
         }
-        for (const val of Object.values(startblock.piece.neighbors)) {
-            this.myPieces.delete(val.index);
+    }
+
+    if (!TEST_MODE_REMOVE_DIRECTION_CHECK) {
+        if (!directionPiece || directionPiece.owner == null) {
+            return "You must move a piece that is connected to the selected block.";
         }
-        for (const val of Object.values(endblock.piece.neighbors).filter(e => e.owner == "opponent")) {
-            this.opponentPieces.delete(val.index);
+    }
+    
+    if (!TEST_MODE_UNLIMITED_MOVE_DISTANCE &&centerPiece.owner == null) {
+        if (dir && Math.abs((start - end) / dir) > 3) {
+            return "You cannot move a block more than 3 spaces at once.";
         }
-        for (const key of Object.keys(colordict)) {
-            if (colordict[key] == "mine") {
-                this.myPieces.add(endblock.piece.neighbors[key].index);
+    }
+    
+    // All checks passed, return true
+    return true;
+}
+
+/**
+ * Finds and returns all 8 neighbors and the center piece for a given index.
+ * @param {number} index The index of the center piece of the 3x3 grid.
+ * @returns {Object} An object where keys are the offset and values are the Piece objects.
+ */
+getNeighborsOf(index) {
+    const out = {};
+    const centerPiece = this.getPiece(index);
+
+    // If the center piece doesn't exist, we can't find its neighbors.
+    if (!centerPiece) return {};
+
+    const neighborsDexes = [
+        0, -1, 1,
+        -squaresCount - sideborder,
+        squaresCount + sideborder,
+        squaresCount + sideborder + 1,
+        -squaresCount - sideborder - 1,
+        squaresCount + sideborder - 1,
+        -squaresCount - sideborder + 1
+    ];
+
+    for (const offset of neighborsDexes) {
+        // The key is the offset (e.g., -1 for 'left'), and the value is the Piece object.
+        out[offset] = this.getPiece(index + offset);
+    }
+    
+    return out;
+}
+   updateBoard(start, end) {
+        const sets = this.applyMove(start, end);
+        const lost = this.checkLose(end);
+        const win = this.checkWin(end);
+        return { ...lost, ...win, ...sets };
+    }
+    
+    
+    /**
+     * Applies a move by updating piece owners and the player's piece sets.
+     * @param {number} start The starting index of the move.
+     * @param {number} end The ending index of the move.
+     * @returns {Object} An object containing the updated piece sets.
+     */
+    applyMove(start, end) {
+        const startNeighbors = this.getNeighborsOf(start);
+        const endNeighbors = this.getNeighborsOf(end);
+
+        // Store the original owners of the starting neighbors
+        const colordict = {};
+        for (const key of Object.keys(startNeighbors)) {
+            const piece = startNeighbors[key];
+            if (piece) {
+                colordict[key] = piece.owner;
             }
         }
-        if (this.number == 1) {
+
+        // Clear the owners from the original positions and update the sets
+        for (const piece of Object.values(startNeighbors)) {
+            if (piece) {
+                piece.owner = null;
+                this.myPieces.delete(piece.index);
+            }
+        }
+
+        // Clear any opponent pieces from the end position and update the sets
+        for (const piece of Object.values(endNeighbors)) {
+            if (piece && piece.owner === "opponent") {
+                piece.owner = null;
+                this.opponentPieces.delete(piece.index);
+            }
+        }
+
+        // Apply the owners to the new positions and update the sets
+        for (const key of Object.keys(colordict)) {
+            const owner = colordict[key];
+            const piece = endNeighbors[key];
+            if (piece && owner) {
+                piece.owner = owner;
+                if (owner === "mine") {
+                    this.myPieces.add(piece.index);
+                } else if (owner === "opponent") {
+                    this.opponentPieces.add(piece.index);
+                }
+            }
+        }
+        
+        // Return the updated sets for the response
+        if (this.playerNumber === 1) {
             return { "player2Pieces": Array.from(this.opponentPieces), "player1Pieces": Array.from(this.myPieces) };
         } else {
             return { "player1Pieces": Array.from(this.opponentPieces), "player2Pieces": Array.from(this.myPieces) };

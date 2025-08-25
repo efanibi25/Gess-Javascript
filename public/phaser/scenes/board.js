@@ -98,7 +98,7 @@ export default class BoardScene extends Phaser.Scene {
             }
         });
 
-        socket.on("enableinteractive", () => this._setPiecesInteractive(true));
+        socket.on("enableinteractive", (change) => this._setPiecesInteractive(true));
         socket.on("disableinteractive", () => this._setPiecesInteractive(false));
        socket.on("playerstatus", (playerStatuses) => {
             if (playerStatuses && playerStatuses.length === 2) {
@@ -107,7 +107,10 @@ export default class BoardScene extends Phaser.Scene {
                 this.ui.setPlayerStatus(player1Status, player2Status);
             }
         });
-    }
+
+        socket.on("switchplayer", (num) => {
+            this._switchplayer(num);
+    });}
 
     // --- Board and UI Management ---
 
@@ -231,7 +234,7 @@ export default class BoardScene extends Phaser.Scene {
      * @param {boolean} isInteractive - True to enable, false to disable.
      */
     _setPiecesInteractive(isInteractive) {
-        if (!this.gessBoard) return;
+        if (!this.gessBoard) return
         const draggablePieces = getDraggablePieces(this.gessBoard.board, this.gessBoard.color);
 
         if (isInteractive) {
@@ -242,6 +245,25 @@ export default class BoardScene extends Phaser.Scene {
             draggablePieces.forEach(e => e.disableDraggable());
         }
     }
+   /**
+ * Switches the client-side perspective to a different player.
+ * THIS IS A TESTING/DEBUGGING FUNCTION ONLY.
+ * It changes the client's internal color state and which pieces are considered draggable.
+ * @param {number} playerNum - The player number to switch to (e.g., 1 or 2).
+ */
+_switchplayer(playerNum) {
+    // Disable interactivity for the current player's pieces.
+    this._setPiecesInteractive(false);
+    
+    // Update the gessBoard's internal state to the new player's perspective.
+    this.gessBoard.player = `player${playerNum}`;
+    this.gessBoard.setColor();
+    
+    // Enable interactivity for the new player's pieces.
+    this._setPiecesInteractive(true);
+}
+
+
 
     /**
      * Temporarily shows the neighbors of a piece.

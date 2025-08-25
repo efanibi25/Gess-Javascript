@@ -2,7 +2,7 @@
 // This file contains the Piece class, which represents a single game piece.
 
 // Require the necessary constants from the shared player file.
-const { squaresCount, sideborder } = require("../../shared/player.js");
+const { squaresCount, sideborder } = require("../../shared/config.js");
 
 class Piece {
     /**
@@ -33,43 +33,6 @@ class Piece {
         ];
 
         this.neighbors = null;
-    }
-
-    /**
-     * Retrieves the 9 pieces (including the center) in the 3x3 grid around this piece.
-     * @returns {object} An object containing the neighbor pieces, keyed by their offset.
-     */
-    getNeighbors() {
-        const neighbors = {};
-        for (const offset of this.neighborsDexes) {
-            const piece = this.board.getPiece(this.index + offset);
-            neighbors[offset] = piece;
-        }
-
-        this.neighbors = neighbors;
-        return neighbors;
-    }
-
-    /**
-     * Checks if this piece is the center of a "ring".
-     * A ring is a 3x3 square of pieces with a hole in the center.
-     * @param {boolean} [isOpponent=false] - True to check for an opponent's ring.
-     * @returns {boolean} True if a ring is formed, false otherwise.
-     */
-    checkRing(isOpponent = false) {
-        // A piece cannot be the center of a ring if it has an owner.
-        if (this.owner !== null) {
-            return false;
-        }
-
-        this.getNeighbors();
-        const requiredOwner = isOpponent ? "opponent" : "mine";
-        
-        const filledNeighborsCount = Object.values(this.neighbors).filter(
-            ele => ele !== null && ele.index !== this.index && ele.owner === requiredOwner
-        ).length;
-
-        return filledNeighborsCount === 8;
     }
 }
 

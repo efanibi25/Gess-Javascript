@@ -1,9 +1,10 @@
 import url from 'url';
 import base64id from 'base64id';
 import { getGame, updateGame, addGameList } from '../services/redis.js';
-import { BoardMax, squaresCount, sideborder } from '../shared/player.js';
+import { BoardMax, squaresCount, sideborder , TEST_MODE_ONE_PLAYER_CONTROLS_ALL} from '../shared/config.js';
 import { Board } from "../services/board/board.js"
 export default function initializeSockets(io) {
+
 
     io.engine.generateId = (req) => {
         const parsedUrl = url.parse(req.url, true);
@@ -145,8 +146,22 @@ async function interactiveHelper(socket, io) {
             "currentplayer": nextPlayer,
             "currentid": nextPlayerId
         });
+        if (TEST_MODE_ONE_PLAYER_CONTROLS_ALL) {
+         const player1Socket = io.sockets.sockets.get(updatedGameData.player1);
+        // 3. Check if the socket exists (the player might be disconnected)
+            if (player1Socket) {
+    // 4. Send the event directly to that specific socket
+    player1Socket.emit("setplayerturntopic", turnMessage);
+    if (updatedGameData.currentid === updatedGameData.player1) {
+        player1Socket.emit("switchplayer",1);
+    } else {
+        player1Socket.emit("switchplayer",2);
+    }
+}
 
+        }
         // Loop through the actual connected sockets to update their state
+        else{
         connectedSockets.forEach(s => {
             s.userRoom = updatedGameData; // Keep all sockets' local state in sync
             s.emit("setplayerturntopic", turnMessage);
@@ -157,7 +172,9 @@ async function interactiveHelper(socket, io) {
             } else {
                 s.emit("disableinteractive");
             }
-        });
+        })
+        }
+       
 
         console.log(`SERVER: ✅ interactiveHelper finished. Current player is ${nextPlayer}`);
     } catch (error) {
@@ -166,18 +183,25 @@ async function interactiveHelper(socket, io) {
 }
 async function processMove(socket, io, startdex, endex) {
     const gameData = await getGame(socket.room);
-    endex = socket.board.getMaxMovement(startdex, endex);
-    const update = {
-        ...{ "moves": gameData.moves + 1, "currentplayer": null, "currentid": null },
-        ...socket.board.updateBoard(startdex, endex)
-    };
-    socket.userRoom = await updateGame(socket.room, update);
-    if (socket.userRoom.winner) {
-        io.to(socket.room).emit("winner", socket.userRoom.winner);
-    } else {
-        io.to(socket.room).emit("sendmove", startdex, endex);
-    }
+    
+    // Calculate the result of the move, including the final piece sets and any winner.
+    const moveResult = socket.board.updateBoard(startdex, endex);
 
+    const update = {
+        "moves": gameData.moves + 1,
+        "currentplayer": null,
+        "currentid": null,
+        ...moveResult 
+    };
+
+    // Save the complete final state (including the winner) to the database.
+    socket.userRoom = await updateGame(socket.room, update);
+    
+    // 1. ALWAYS send the final move so the client's board is visually updated.
+    io.to(socket.room).emit("sendmove", startdex, endex);
+
+    // 2. Immediately call interactiveHelper. It will read the new 'winner' state
+    //    from the database and send the appropriate 'winner' or 'enableinteractive' event.
     await interactiveHelper(socket, io);
 }
 
@@ -186,21 +210,30 @@ function validateMove(socket, io, startdex, endex) {
         console.warn(`SERVER: ⚠️ Validation failed for socket ${socket.id}. Board or userRoom not found.`);
         return false;
     }
-    if (socket.id !== socket.userRoom.currentid) {
+    if ((socket.id !== socket.userRoom.currentid) && !TEST_MODE_ONE_PLAYER_CONTROLS_ALL) {
         io.to(socket.id).emit("sendalert", "You are not the current player");
         return false;
     }
-    if (!socket.board.validatePiece(startdex)) {
+
+    // First, validate the piece selection
+    let validationResult = socket.board.validatePiece(startdex);
+    if (typeof validationResult === 'string') {
         io.to(socket.id).emit("sendmove", startdex, startdex, false);
-        io.to(socket.id).emit("sendalert", "The Piece is not valid");
-        return false;
-    }
-    if (!socket.board.validateMove(startdex, endex)) {
-        io.to(socket.id).emit("sendmove", startdex, startdex, false);
-        io.to(socket.id).emit("sendalert", "The given move is not valid");
+        io.to(socket.id).emit("sendalert", validationResult); // Use the custom message from validatePiece
         io.to(socket.id).emit("enableinteractive");
         return false;
     }
+
+    // If piece validation passes, proceed to validate the move
+    validationResult = socket.board.validateMove(startdex, endex);
+    if (typeof validationResult === 'string') {
+        io.to(socket.id).emit("sendmove", startdex, startdex, false);
+        io.to(socket.id).emit("sendalert", validationResult); // Use the custom message from validateMove
+        io.to(socket.id).emit("enableinteractive");
+        return false;
+    }
+    
+    // If all validations pass, return true
     return true;
 }
 
