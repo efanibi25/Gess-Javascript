@@ -1,5 +1,3 @@
-// services/redis.js
-
 import { createClient } from 'redis';
 import { PLAYER1_PIECES, PLAYER2_PIECES, PLAYER2_RINGS, PLAYER1_RINGS } from "../shared/player.js";
 
@@ -18,8 +16,10 @@ client.on('error', err => console.log('Redis Client Error', err));
 
 async function addGameList(key) {
     if (!await checkGameExists(key)) {
-        await client.sAdd('games', key);
-        await client.set(key, JSON.stringify({
+        // Use a transaction to make the game initialization atomic
+        const multi = client.multi();
+        multi.sAdd('games', key);
+        multi.set(key, JSON.stringify({
             "player1": null,
             "player2": null,
             "player1Pieces": Array.from(PLAYER1_PIECES),
@@ -31,6 +31,7 @@ async function addGameList(key) {
             "moves": 0,
             "winner": null
         }));
+        await multi.exec();
     }
 }
 
@@ -52,7 +53,6 @@ async function updateGame(key, dict) {
     try {
         lock = await acquireLock(lockKey);
         if (!lock) {
-            // A simple retry logic could be implemented here
             throw new Error('Failed to acquire update lock');
         }
 
@@ -81,6 +81,7 @@ async function getNextMoveFromQueue(gameKey) {
     const moveDataString = await client.lPop(queueKey);
     return moveDataString ? JSON.parse(moveDataString) : null;
 }
+
 async function acquireLock(lockKey, timeout = 5000) {
     const lockValue = Math.random().toString(36).substring(2, 15);
     const result = await client.set(lockKey, lockValue, {
@@ -95,7 +96,6 @@ async function acquireLock(lockKey, timeout = 5000) {
 }
 
 async function releaseLock(lock) {
-    // A Lua script is used to ensure the lock is only released by the same process that acquired it
     const script = `
         if redis.call("get", KEYS[1]) == ARGV[1] then
             return redis.call("del", KEYS[1])

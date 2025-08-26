@@ -35,8 +35,10 @@ export async function processMoveQueue(gameKey, io) {
             // Player not found, move on to the next item in the queue
             continue;
         }
+        const finalEndIndex = playerSocket.board._calculateFinalDestination(nextMove.startIndex, nextMove.endIndex);
+
         
-        const moveResult = playerSocket.board.processMove(nextMove.startIndex, nextMove.endIndex, playerSocket);
+        const moveResult = playerSocket.board.processMove(nextMove.startIndex, finalEndIndex, playerSocket);
         console.log(`Move Result: ${JSON.stringify(moveResult)}`);
 
         if (!moveResult.success) {
@@ -47,7 +49,7 @@ export async function processMoveQueue(gameKey, io) {
 
 
               // Calculate the result of the move, including the final piece sets and any winner.
-    const moveResult = playerSocket.board.updateBoard(nextMove.startIndex, nextMove.endIndex);
+    const moveResult = playerSocket.board.updateBoard(nextMove.startIndex, finalEndIndex);
     const isPlayer1Turn = gameState.currentplayer === "player1";
             const nextPlayer = isPlayer1Turn ? "player2" : "player1";
             const nextPlayerId = isPlayer1Turn ? gameState.player2 : gameState.player1;
@@ -63,7 +65,7 @@ export async function processMoveQueue(gameKey, io) {
     playerSocket.userRoom = await updateGame(playerSocket.room, update);
     
     // 1. ALWAYS send the final move so the client's board is visually updated.
-    io.to(playerSocket.room).emit("sendmove", nextMove.startIndex, nextMove.endIndex);
+    io.to(playerSocket.room).emit("sendmove", nextMove.startIndex, finalEndIndex);
 
     // 2. Immediately call interactiveHelper. It will read the new 'winner' state
     //    from the database and send the appropriate 'winner' or 'enableinteractive' event.

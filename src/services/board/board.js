@@ -154,7 +154,61 @@ _validateMovePath(startIndex, endIndex, neighbors) {
     }
     return null; // All path checks passed
 }
-    
+
+/**
+ * Calculates the actual final destination of a move, stopping before any obstructions.
+ * @param {number} start - The starting index of the move's center.
+ * @param {number} end - The player's intended ending index.
+ * @returns {number} The index of the actual final destination.
+ */
+/**
+ * Calculates the actual final destination of a move, stopping before any obstructions.
+ * @param {number} start - The starting index of the move's center.
+ * @param {number} end - The player's intended ending index.
+ * @returns {number} The index of the actual final destination.
+ */
+_calculateFinalDestination(start, end) {
+    const dir = this.getDir(start, end);
+    if (!dir || dir === 0) {
+        return start; // Can't move if there's no direction or not moving.
+    }
+
+    const startNeighbors = this.getNeighborsOf(start);
+    const blockOffsets = Object.keys(startNeighbors)
+        .filter(key => startNeighbors[key] && startNeighbors[key].owner)
+        .map(key => parseInt(key));
+
+    const originalPieceIndices = new Set();
+    for (const offset of blockOffsets) {
+        originalPieceIndices.add(start + offset);
+    }
+
+    let lastSafePosition = start;
+
+    const path = [];
+    let tempPos = start + dir;
+    while ((dir > 0 && tempPos <= end) || (dir < 0 && tempPos >= end)) {
+        path.push(tempPos);
+        tempPos += dir;
+    }
+
+    for (const pathCenter of path) {
+        for (const offset of blockOffsets) {
+            const projectedIndex = pathCenter + offset;
+            const pieceOnBoard = this.getPiece(projectedIndex);
+
+            if (pieceOnBoard && pieceOnBoard.owner && !originalPieceIndices.has(projectedIndex)) {
+                // --- THIS IS THE ONLY CHANGE ---
+                // Instead of returning the last safe spot, return the spot where the collision happens.
+                return pathCenter;
+            }
+        }
+        lastSafePosition = pathCenter;
+    }
+
+    // If no obstructions are found, the original 'end' is valid.
+    return end;
+}    
     updateBoard(start, end) {
         const sets = this.applyMove(start, end);
         const lost = this.checkLose(end);
