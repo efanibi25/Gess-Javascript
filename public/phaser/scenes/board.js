@@ -80,11 +80,10 @@ export default class BoardScene extends Phaser.Scene {
             let oldMessage = this.ui.getAlert();
             this.ui.setAlert(message);
 
-            if (message === "The given move is not valid" || message === "The Piece is not valid") {
-                setTimeout(() => {
-                    this.ui.setAlert(oldMessage);
-                }, 1500);
-            }
+            setTimeout(() => {
+                this.ui.setAlert(oldMessage);
+            }, 2500);
+            
         });
 
         socket.on("sendmove", (startdex, endex, test = true) => {

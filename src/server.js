@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import exphbs from 'express-handlebars';
 import mainRoutes from './routes/mainRoutes.js';
-import initializeSockets from './sockets/socketHandler.js';
+import initializeSockets from './services/socket.js';
 
 // --- Basic Setup ---
 dotenv.config();

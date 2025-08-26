@@ -9,7 +9,7 @@ const sideborder = 2;
 const TEST_MODE =false;
 const TEST_CASE_ID = 1;
 const TEST_MODE_ONE_PLAYER_CONTROLS_ALL = true;
-const TEST_MODE_REMOVE_DIRECTION_CHECK = true;
+const TEST_MODE_REMOVE_DIRECTION_CHECK = false;
 const TEST_MODE_ALLOW_ANY_DIRECTION = true;
 const TEST_MODE_UNLIMITED_MOVE_DISTANCE = false;
 

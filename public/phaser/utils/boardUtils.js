@@ -37,7 +37,6 @@ export function getDraggablePieces(board, playerColor) {
         .filter(piece =>
             piece &&
             piece.gamePiece &&
-            piece.owner === playerColor &&
             isPieceDraggable(piece)
         );
 }

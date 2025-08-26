@@ -1,50 +1,42 @@
-// board.js
-// This file contains the main Board class, which manages the game state.
 
-// Require the Block and Piece classes from their respective files.
 const { Block } = require("./block.js");
 const { Piece } = require("./piece.js");
-const{BoardMax,    squaresCount, 
-    sideborder,
-    TEST_MODE_ONE_PLAYER_CONTROLS_ALL,
-    TEST_MODE_REMOVE_DIRECTION_CHECK,
-    TEST_MODE_ALLOW_ANY_DIRECTION,
-    TEST_MODE_UNLIMITED_MOVE_DISTANCE} = require("../../shared/config.js");
+const { BoardMax, squaresCount, sideborder, TEST_MODE_ONE_PLAYER_CONTROLS_ALL, TEST_MODE_REMOVE_DIRECTION_CHECK, TEST_MODE_ALLOW_ANY_DIRECTION, TEST_MODE_UNLIMITED_MOVE_DISTANCE } = require("../../shared/config.js");
 
-
-// The Board class manages all game logic, including piece placement, movement validation, and win/loss conditions.
+// The Board class manages all game logic.
 class Board {
-    constructor(pieces, opponent, rings, oppRings, number) {
+    // =================================================================
+    // --- 1. Constructor & Initialization ---
+    // =================================================================
+
+    constructor(pieces, opponent, rings, oppRings, number, socket) {
         this.myPieces = new Set(pieces);
         this.opponentPieces = new Set(opponent);
         this.rings = new Set(rings);
         this.opponentRings = new Set(oppRings);
         this.board = [];
+        this.playerNumber = number;
+        this.socket = socket;
+        
         this.createBoard();
         this.addPieces();
-        this.playerNumber = number;
     }
-    
-    // --- Board Initialization ---
-    
+
     createBoard() {
-        let i = 0;
-        let k = 0;
-        let count = 0;
+        let i = 0, k = 0, count = 0;
         while (i < squaresCount + sideborder) {
             k = 0;
             while (k < squaresCount + sideborder) {
                 this.board.push(new Block(count, i, k, this));
-                count = count + 1;
-                k = k + 1;
+                count++;
+                k++;
             }
-            i = i + 1;
+            i++;
         }
     }
 
     addPieces() {
-        let i = 0;
-        while (i < Math.pow(squaresCount + sideborder, 2)) {
+        for (let i = 0; i < Math.pow(squaresCount + sideborder, 2); i++) {
             let block = this.board[i];
             if (block.isGameBlock()) {
                 block.piece = new Piece(block.index, block.row, block.col, this);
@@ -54,310 +46,145 @@ class Board {
                     block.piece.owner = "opponent";
                 }
             }
-            i = i + 1;
+        }
+    }
+
+    // =================================================================
+    // --- 2. Core Gameplay Loop ---
+    // (High-level methods called by the server)
+    // =================================================================
+
+processMove(startIndex, endIndex, socket) {
+    // 1. Initial Setup & Basic Check
+    const startBlock = this.getBlock(startIndex);
+    if (!startBlock || !startBlock.piece) {
+        return { success: false, message: "You must select a piece to move." };
+    }
+    const neighbors = this.getNeighborsOf(startBlock.piece.index);
+
+    // 2. Run Validation Phases
+    const validationSteps = [
+        this._validateOwnershipAndTurn(socket, neighbors),
+        this._validateBlockIntegrity(neighbors),
+        this._validateMovePath(startIndex, endIndex, neighbors)
+    ];
+
+    for (const errorMessage of validationSteps) {
+        if (errorMessage) {
+            return { success: false, message: errorMessage };
         }
     }
     
-    // --- Piece and Block Accessors ---
-
-    getBlock(index) {
-        if (index < 0) return;
-        else if (index >= BoardMax) return;
-        return this.board[index - 1];
-    }
-
-    getPiece(index) {
-        let block = this.getBlock(index);
-        if (block) {
-            return block.piece;
-        }
-        return block;
-    }
-
-    // --- Position and Direction Helpers ---
-
-    getMaxMovement(start, end) {
-        let positions = this.getMovementsHelper(start, end);
-        let startpiece = this.getPiece(start);
-        const startNeighbors = this.getNeighborsOf(start);
-        let excluded_indexes = new Set(Object.values(startNeighbors).map(e => e.index));
-        for (let current of positions) {
-            for (let key of Object.keys(startNeighbors)) {
-                if (startNeighbors[key].owner == null) continue;
-                else if (excluded_indexes.has(current + parseInt(key))) continue;
-                else if (this.myPieces.has(current + parseInt(key) || this.opponentPieces.has(current + parseInt(key)))) return current;
-            }
-        }
-        return end;
-    }
-
-    getMovementsHelper(start, end) {
-        let dir = this.getDir(start, end);
-        let positions = [];
-
-        if (dir > 0) {
-            for (let current = start + dir; current < end; current = current + dir) {
-                positions.push(current);
-            }
-        } else {
-            for (let current = start + dir; current > end; current = current + dir) {
-                positions.push(current);
-            }
-        }
-        return positions;
-    }
-
-    getDir(start, end) {
-        let startblock = this.getBlock(start);
-        let endblock = this.getBlock(end);
-        let rowchange = endblock.row - startblock.row;
-        let colchange = endblock.col - startblock.col;
-        if (colchange == 0 && rowchange == 0) {
-            return 0;
-        } else if (colchange == 0 && rowchange >= 1) {
-            return squaresCount + sideborder;
-        } else if (colchange == 0 && rowchange < 0) {
-            return -squaresCount - sideborder;
-        } else if (rowchange == 0 && colchange >= 1) {
-            return 1;
-        } else if (rowchange == 0 && colchange < 0) {
-            return -1;
-        } else if (Math.abs(rowchange) != Math.abs(colchange)) {
-            return;
-        } else if (rowchange < 0 && colchange < 0) {
-            return -squaresCount - sideborder - 1;
-        } else if (rowchange < 0 && colchange > 0) {
-            return -squaresCount - sideborder + 1;
-        } else if (rowchange > 0 && colchange < 0) {
-            return squaresCount + sideborder - 1;
-        } else if (rowchange > 0 && colchange > 0) {
-            return squaresCount + sideborder + 1;
-        }
-    }
-
-    // --- Ring Logic ---
-
-    checkLose(index) {
-        let rings = this.updateRings(index);
-        if (rings.size == 0 && this.playerNumber == 1) return { "player1Rings": [], "winner": "Player2" };
-        else if (this.playerNumber == 1) return { "player1Rings": Array.from(rings) };
-        else if (rings.size == 0 && this.playerNumber == 2) return { "player2Rings": [], "winner": "Player1" };
-        else if (this.playerNumber == 2) return { "player2Rings": Array.from(rings) };
-    }
-
-    checkWin(index) {
-        let rings = this.updateOpponentRings(index);
-        if (rings.size == 0 && this.playerNumber == 1) return { "player2Rings": [], "winner": "Player1" };
-        else if (this.playerNumber == 1) return { "player2Rings": Array.from(rings) };
-        else if (rings.size == 0 && this.playerNumber == 2) return { "player1Rings": [], "winner": "Player2" };
-        else if (this.playerNumber == 2) return { "player1Rings": Array.from(rings) };
-    }
-
-updateRings(index) {
-    let potentialRings = [...Array.from(this.rings), ...this.getRingNeighbors(index)];
-    this.rings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && this.isRingAt(e.index, true) == true).map(e => e.index));
-    
-    // This log is now dynamic
-    console.log(`Player ${this.playerNumber} (mine) now has ${this.rings.size} rings.`);
-
-    return this.rings;
+    // 3. If all checks pass, the move is valid
+    return { success: true, message: "Move successful!" };
 }
 
-updateOpponentRings(index) {
-    let potentialRings = [...Array.from(this.opponentRings), ...this.getRingNeighbors(index)];
-    this.opponentRings = new Set(potentialRings.map(e => this.getPiece(e)).filter(e => e != null && e != false && this.isRingAt(e.index, false) == true).map(e => e.index));
-    
-    // This log correctly identifies the opponent
-    const opponentNumber = this.playerNumber === 1 ? 2 : 1;
-    console.log(`Player ${opponentNumber} (opponent) now has ${this.opponentRings.size} rings.`);
 
-    return this.opponentRings;
-}
+/**
+ * Phase 1: Validates piece ownership and the current player's turn.
+ * @returns {string|null} An error message string if invalid, otherwise null.
+ */
+_validateOwnershipAndTurn(socket, neighbors) {
+    const containsOpponentPieces = Object.values(neighbors).some(p => p && p.owner === "opponent");
+    const containsOwnPieces = Object.values(neighbors).some(p => p && p.owner === "mine");
+    const isTestMode = TEST_MODE_ONE_PLAYER_CONTROLS_ALL;
+    const isPlayersTurn = socket.id === socket.userRoom.currentid;
 
-    getRingNeighbors(index) {
-        let piece = this.getPiece(index);
-        let neighbors = this.getNeighborsOf(piece.index);
-        return Object.keys(neighbors).filter(ele => ele != 0).reduce((accumulator, currentValue) => {
-            if (neighbors[currentValue] != null) {
-                accumulator.push(neighbors[currentValue].index);
-            }
-            return accumulator;
-        }, [piece.index]);
+    if (containsOwnPieces && containsOpponentPieces) {
+        return "You cannot move a block containing pieces from both players.";
     }
 
-    /**
-     * Checks if a ring is formed at the given index.
-     * @param {number} index The index of the center of the potential ring.
-     * @param {boolean} is_mine True to check for a ring of your pieces, false for an opponent's.
-     * @returns {boolean} True if a ring is formed, false otherwise.
-     */
-    isRingAt(index, is_mine = true) {
-        const centerPiece = this.getPiece(index);
-        if (centerPiece === null || centerPiece.owner !== null) {
-            return false;
+    if (isTestMode) {
+        if (isPlayersTurn && !containsOwnPieces) {
+            return "Test Mode: It is Player 1's turn; move Player 1's pieces.";
         }
-
-        const neighbors = this.getNeighborsOf(index);
-        const requiredOwner = is_mine ? "mine" : "opponent";
-        const filledNeighborsCount = Object.values(neighbors).filter(
-            p => p && p.owner === requiredOwner
-        ).length;
-
-        return filledNeighborsCount === 8;
-    }
-    
-    // --- Validation ---
-    
-    validatePiece(start) {
-    let startblock = this.getBlock(start);
-    const result = this.testValidBlock(startblock);
-
-    // If result is a string, it's an error message. Otherwise, it's a boolean.
-    if (result !== true) {
-        return result;
-    }
-    return true;
-}
-
-    testValidBlock(startblock) {
-    if (!startblock.piece) {
-        // Return a specific error message
-        return "You must select a piece to move.";
-    }
-
-    const neighbors = this.getNeighborsOf(startblock.piece.index);
-    const hasOpponentPieces = Object.values(neighbors).some(p => p && p.owner === "opponent");
-    const hasMyPieces = Object.values(neighbors).some(p => p && p.owner === "mine");
-
-    if (!TEST_MODE_ONE_PLAYER_CONTROLS_ALL && hasOpponentPieces) {
-        return "You cannot move a block that contains an opponent's piece.";
-    }
-
-    if (Object.values(neighbors).filter(ele => ele === false).length > 0) {
-        return "The block you selected is not a complete 3x3 square.";
-    }
-    
-    if (Object.values(neighbors).filter(ele => ele).length === 0) {
-        return "You cannot move an empty block.";
-    }
-    
-    if (hasMyPieces && hasOpponentPieces) {
-        return "You cannot move a block containing both your pieces and opponent's pieces.";
-    }
-
-    // All checks passed, return true
-    return true;
-}
-
-validateMove(start, end) {
-    const dir = this.getDir(start, end);
-    const startPiece = this.getPiece(start);
-
-    if (!TEST_MODE_ALLOW_ANY_DIRECTION) {
-        if (dir === undefined) {
-            return "Your move must be in a straight line (linear).";
+        if (!isPlayersTurn && containsOwnPieces) {
+            return "Test Mode: It is Player 2's turn; move Player 2's pieces.";
+        }
+      
+    } else {
+        if (!isPlayersTurn) {
+            return "It's not your turn.";
+        }
+        if (containsOpponentPieces) {
+            return "You must move your own pieces.";
         }
     }
-
-    if (dir === 0) {
-        return "You must move at least one space.";
-    }
-    
-    if (!startPiece) {
-        return "No piece selected to move.";
-    }
-
-    const startNeighbors = this.getNeighborsOf(startPiece.index);
-    const directionPiece = startNeighbors[dir];
-    const centerPiece = startNeighbors[0]
-
-    if (!TEST_MODE_ONE_PLAYER_CONTROLS_ALL) {
-        if (directionPiece && directionPiece.owner === "opponent") {
-            return "The path is blocked by an opponent's piece.";
-        }
-    }
-
-    if (!TEST_MODE_REMOVE_DIRECTION_CHECK) {
-        if (!directionPiece || directionPiece.owner == null) {
-            return "You must move a piece that is connected to the selected block.";
-        }
-    }
-    
-    if (!TEST_MODE_UNLIMITED_MOVE_DISTANCE &&centerPiece.owner == null) {
-        if (dir && Math.abs((start - end) / dir) > 3) {
-            return "You cannot move a block more than 3 spaces at once.";
-        }
-    }
-    
-    // All checks passed, return true
-    return true;
+    return null; // All ownership checks passed
 }
 
 /**
- * Finds and returns all 8 neighbors and the center piece for a given index.
- * @param {number} index The index of the center piece of the 3x3 grid.
- * @returns {Object} An object where keys are the offset and values are the Piece objects.
+ * Phase 2: Validates the integrity of the 3x3 block itself.
+ * @returns {string|null} An error message string if invalid, otherwise null.
  */
-getNeighborsOf(index) {
-    const out = {};
-    const centerPiece = this.getPiece(index);
-
-    // If the center piece doesn't exist, we can't find its neighbors.
-    if (!centerPiece) return {};
-
-    const neighborsDexes = [
-        0, -1, 1,
-        -squaresCount - sideborder,
-        squaresCount + sideborder,
-        squaresCount + sideborder + 1,
-        -squaresCount - sideborder - 1,
-        squaresCount + sideborder - 1,
-        -squaresCount - sideborder + 1
-    ];
-
-    for (const offset of neighborsDexes) {
-        // The key is the offset (e.g., -1 for 'left'), and the value is the Piece object.
-        out[offset] = this.getPiece(index + offset);
+_validateBlockIntegrity(neighbors) {
+    if (Object.values(neighbors).some(ele => ele === false)) {
+        return "The block you selected is not a complete 3x3 square.";
     }
-    
-    return out;
+    if (Object.values(neighbors).every(ele => ele && ele.owner == null)) {
+        return "You cannot move an empty block.";
+    }
+    return null; // All integrity checks passed
 }
-   updateBoard(start, end) {
+
+/**
+ * Phase 3: Validates the path of the move from start to end.
+ * @returns {string|null} An error message string if invalid, otherwise null.
+ */
+_validateMovePath(startIndex, endIndex, neighbors) {
+    const dir = this.getDir(startIndex, endIndex);
+    if (!TEST_MODE_ALLOW_ANY_DIRECTION && dir === undefined) {
+        return "Your move must be in a straight line (linear).";
+    }
+    if (dir === 0) {
+        return "You must move at least one space.";
+    }
+
+    const directionPiece = neighbors[dir];
+    const centerPiece = neighbors[0];
+
+    if (!TEST_MODE_ONE_PLAYER_CONTROLS_ALL && directionPiece && directionPiece.owner === "opponent") {
+        return "The path is blocked by an opponent's piece.";
+    }
+    if (!TEST_MODE_REMOVE_DIRECTION_CHECK && (!directionPiece || directionPiece.owner == null)) {
+        return "There is no piece in the direction selected";
+    }
+    if (!TEST_MODE_UNLIMITED_MOVE_DISTANCE && centerPiece.owner == null && dir && Math.abs((startIndex - endIndex) / dir) > 3) {
+        return "You cannot move a block more than 3 spaces at once.";
+    }
+    return null; // All path checks passed
+}
+    
+    updateBoard(start, end) {
         const sets = this.applyMove(start, end);
         const lost = this.checkLose(end);
         const win = this.checkWin(end);
         return { ...lost, ...win, ...sets };
     }
-    
-    
-    /**
-     * Applies a move by updating piece owners and the player's piece sets.
-     * @param {number} start The starting index of the move.
-     * @param {number} end The ending index of the move.
-     * @returns {Object} An object containing the updated piece sets.
-     */
+
+    // =================================================================
+    // --- 3. Move Execution Logic ---
+    // (Functions that modify the board state)
+    // =================================================================
+
     applyMove(start, end) {
         const startNeighbors = this.getNeighborsOf(start);
         const endNeighbors = this.getNeighborsOf(end);
-
-        // Store the original owners of the starting neighbors
         const colordict = {};
+
         for (const key of Object.keys(startNeighbors)) {
             const piece = startNeighbors[key];
-            if (piece) {
-                colordict[key] = piece.owner;
-            }
+            if (piece) colordict[key] = piece.owner;
         }
 
-        // Clear the owners from the original positions and update the sets
         for (const piece of Object.values(startNeighbors)) {
             if (piece) {
                 piece.owner = null;
                 this.myPieces.delete(piece.index);
+                this.opponentPieces.delete(piece.index); // Also clear opponent pieces from start
             }
         }
 
-        // Clear any opponent pieces from the end position and update the sets
         for (const piece of Object.values(endNeighbors)) {
             if (piece && piece.owner === "opponent") {
                 piece.owner = null;
@@ -365,28 +192,169 @@ getNeighborsOf(index) {
             }
         }
 
-        // Apply the owners to the new positions and update the sets
         for (const key of Object.keys(colordict)) {
             const owner = colordict[key];
             const piece = endNeighbors[key];
             if (piece && owner) {
                 piece.owner = owner;
-                if (owner === "mine") {
-                    this.myPieces.add(piece.index);
-                } else if (owner === "opponent") {
-                    this.opponentPieces.add(piece.index);
-                }
+                if (owner === "mine") this.myPieces.add(piece.index);
+                else if (owner === "opponent") this.opponentPieces.add(piece.index);
             }
         }
-        
-        // Return the updated sets for the response
+
         if (this.playerNumber === 1) {
             return { "player2Pieces": Array.from(this.opponentPieces), "player1Pieces": Array.from(this.myPieces) };
         } else {
             return { "player1Pieces": Array.from(this.opponentPieces), "player2Pieces": Array.from(this.myPieces) };
         }
     }
+    
+    // =================================================================
+    // --- 4. Ring & Win/Loss Logic ---
+    // (All functions related to the game's objective)
+    // =================================================================
+
+    checkLose(index) {
+        const rings = this.updateRings(index);
+        if (this.playerNumber === 1) {
+            return rings.size === 0 ? { "player1Rings": [], "winner": "Player2" } : { "player1Rings": Array.from(rings) };
+        } else {
+            return rings.size === 0 ? { "player2Rings": [], "winner": "Player1" } : { "player2Rings": Array.from(rings) };
+        }
+    }
+
+    checkWin(index) {
+        const rings = this.updateOpponentRings(index);
+        if (this.playerNumber === 1) {
+            return rings.size === 0 ? { "player2Rings": [], "winner": "Player1" } : { "player2Rings": Array.from(rings) };
+        } else {
+            return rings.size === 0 ? { "player1Rings": [], "winner": "Player2" } : { "player1Rings": Array.from(rings) };
+        }
+    }
+
+    updateRings(end) {
+        this.rings = this._findUpdatedRings(end, this.rings, true);
+        console.log(`Player ${this.playerNumber} (mine) now has ${this.rings.size} rings.`);
+        return this.rings;
+    }
+
+    updateOpponentRings(end) {
+        this.opponentRings = this._findUpdatedRings(end, this.opponentRings, false);
+        const opponentNumber = this.playerNumber === 1 ? 2 : 1;
+        console.log(`Player ${opponentNumber} (opponent) now has ${this.opponentRings.size} rings.`);
+        return this.opponentRings;
+    }
+
+    _findUpdatedRings(end, existingRings, isMine) {
+        const movedPieces = Object.values(this.getNeighborsOf(end));
+        let potentialRingIndexes = new Set(existingRings);
+        for (const piece of movedPieces) {
+            if (piece) {
+                this.getRingNeighbors(piece.index).forEach(index => potentialRingIndexes.add(index));
+            }
+        }
+        return new Set(
+            Array.from(potentialRingIndexes)
+            .filter(index => this.isRingAt(index, isMine))
+        );
+    }
+
+    isRingAt(index, is_mine = true) {
+        const centerPiece = this.getPiece(index);
+        if (!centerPiece || centerPiece.owner !== null) return false;
+
+        const neighbors = this.getNeighborsOf(index);
+        const requiredOwner = is_mine ? "mine" : "opponent";
+        const hasEightNeighbors = Object.values(neighbors).filter(p => p).length === 9;
+        if (!hasEightNeighbors) return false;
+        
+        const allNeighborsOwned = Object.values(neighbors).every(p => !p || p.index === index || p.owner === requiredOwner);
+        return allNeighborsOwned;
+    }
+    
+    // =================================================================
+    // --- 5. Position & Geometry Helpers ---
+    // (Low-level utility functions)
+    // =================================================================
+
+    getDir(start, end) {
+        const startblock = this.getBlock(start);
+        const endblock = this.getBlock(end);
+        if (!startblock || !endblock) return undefined;
+
+        const rowchange = endblock.row - startblock.row;
+        const colchange = endblock.col - startblock.col;
+        if (colchange === 0 && rowchange === 0) return 0;
+        if (colchange === 0) return rowchange > 0 ? squaresCount + sideborder : -squaresCount - sideborder;
+        if (rowchange === 0) return colchange > 0 ? 1 : -1;
+        if (Math.abs(rowchange) !== Math.abs(colchange)) return undefined;
+        if (rowchange < 0 && colchange < 0) return -squaresCount - sideborder - 1;
+        if (rowchange < 0 && colchange > 0) return -squaresCount - sideborder + 1;
+        if (rowchange > 0 && colchange < 0) return squaresCount + sideborder - 1;
+        if (rowchange > 0 && colchange > 0) return squaresCount + sideborder + 1;
+    }
+
+    getNeighborsOf(index) {
+        const out = {};
+        const centerPiece = this.getPiece(index);
+        if (!centerPiece) return {};
+        
+        const neighborsDexes = [0, -1, 1, -squaresCount - sideborder, squaresCount + sideborder, squaresCount + sideborder + 1, -squaresCount - sideborder - 1, squaresCount + sideborder - 1, -squaresCount - sideborder + 1];
+        for (const offset of neighborsDexes) {
+            out[offset] = this.getPiece(index + offset);
+        }
+        return out;
+    }
+
+    getRingNeighbors(index) {
+        const piece = this.getPiece(index);
+        if (!piece) return [];
+        const neighbors = this.getNeighborsOf(piece.index);
+        return Object.values(neighbors).filter(p => p).map(p => p.index);
+    }
+    
+    getMaxMovement(start, end) {
+        // This function seems complex and may need review, but logic is unchanged.
+        const positions = this.getMovementsHelper(start, end);
+        const startNeighbors = this.getNeighborsOf(start);
+        const excluded_indexes = new Set(Object.values(startNeighbors).map(e => e.index));
+        for (const current of positions) {
+            for (const key of Object.keys(startNeighbors)) {
+                if (startNeighbors[key].owner == null) continue;
+                if (excluded_indexes.has(current + parseInt(key))) continue;
+                if (this.myPieces.has(current + parseInt(key)) || this.opponentPieces.has(current + parseInt(key))) return current;
+            }
+        }
+        return end;
+    }
+
+    getMovementsHelper(start, end) {
+        const dir = this.getDir(start, end);
+        let positions = [];
+        if (dir === 0 || dir === undefined) return positions;
+        
+        if (dir > 0) {
+            for (let current = start + dir; current <= end; current += dir) positions.push(current);
+        } else {
+            for (let current = start + dir; current >= end; current += dir) positions.push(current);
+        }
+        return positions;
+    }
+
+    // =================================================================
+    // --- 6. Basic Accessors ---
+    // (Fundamental getter methods)
+    // =================================================================
+
+    getBlock(index) {
+        if (index < 0 || index >= BoardMax) return undefined;
+        return this.board[index - 1];
+    }
+
+    getPiece(index) {
+        const block = this.getBlock(index);
+        return block ? block.piece : undefined;
+    }
 }
 
-// Export the Board class for use in other files.
 module.exports = { Board };
