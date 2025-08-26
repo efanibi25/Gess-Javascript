@@ -1,10 +1,7 @@
-// block.js
-// This file contains the Block class, which represents a single square on the board.
+// Import the necessary constants from the shared config file.
+import { squaresCount, sideborder } from "../../shared/config.js";
 
-// Require the necessary constants from the shared player file.
-const { squaresCount, sideborder } = require("../../shared/config.js");
-
-class Block {
+export class Block {
     /**
      * Represents a single block (square) on the game board.
      * @param {number} index - The 0-based index of the block.
@@ -47,6 +44,3 @@ class Block {
         return this.piece !== false;
     }
 }
-
-// Export the Block class for use in other files.
-module.exports = { Block };

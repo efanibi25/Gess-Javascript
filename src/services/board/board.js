@@ -1,8 +1,7 @@
 
-const { Block } = require("./block.js");
-const { Piece } = require("./piece.js");
-const { BoardMax, squaresCount, sideborder, TEST_MODE_ONE_PLAYER_CONTROLS_ALL, TEST_MODE_REMOVE_DIRECTION_CHECK, TEST_MODE_ALLOW_ANY_DIRECTION, TEST_MODE_UNLIMITED_MOVE_DISTANCE } = require("../../shared/config.js");
-
+import { Block } from "./block.js";
+import { Piece } from "./piece.js";
+import { BoardMax, squaresCount, sideborder, TEST_MODE_ONE_PLAYER_CONTROLS_ALL, TEST_MODE_REMOVE_DIRECTION_CHECK, TEST_MODE_ALLOW_ANY_DIRECTION, TEST_MODE_UNLIMITED_MOVE_DISTANCE } from "../../shared/config.js";
 // The Board class manages all game logic.
 class Board {
     // =================================================================
@@ -410,5 +409,4 @@ _calculateFinalDestination(start, end) {
         return block ? block.piece : undefined;
     }
 }
-
-module.exports = { Board };
+export { Board };

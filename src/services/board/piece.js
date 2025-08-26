@@ -1,10 +1,9 @@
-// piece.js
 // This file contains the Piece class, which represents a single game piece.
 
-// Require the necessary constants from the shared player file.
-const { squaresCount, sideborder } = require("../../shared/config.js");
+// Import the necessary constants from the shared config file.
+import { squaresCount, sideborder } from "../../shared/config.js";
 
-class Piece {
+export class Piece {
     /**
      * Represents a single game piece on the board.
      * @param {number} index - The 1-based index of the piece's block.
@@ -35,6 +34,3 @@ class Piece {
         this.neighbors = null;
     }
 }
-
-// Export the Piece class for use in other files.
-module.exports = { Piece };

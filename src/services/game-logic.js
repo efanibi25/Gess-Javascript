@@ -22,13 +22,6 @@ export async function processMoveQueue(gameKey, io) {
             break;
         }
 
-        // --- All the game logic here ---
-        if (nextMove.playerID !== gameState.currentplayer && !TEST_MODE_ONE_PLAYER_CONTROLS_ALL) {
-            io.to(nextMove.playerID).emit("sendalert", "You are not the current player");
-            // The loop will automatically continue to the next iteration
-            continue;
-        }
-
         const sockets = await io.in(gameKey).fetchSockets();
         const playerSocket = sockets.find(s => s.id === nextMove.playerID);
         if (!playerSocket) {

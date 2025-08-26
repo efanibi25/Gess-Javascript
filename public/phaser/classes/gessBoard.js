@@ -65,17 +65,28 @@ export default class gessBoard extends Phaser.GameObjects.Container {
     /**
      * Creates and aligns the `boardBlock` objects in a grid.
      */
-    createBoard() {
-        this.extendBoardArray();
-        Phaser.Actions.GridAlign(this.board, {
-            width: data["squaresCount"] + data["sideborder"],
-            height: data["squaresCount"] + data["sideborder"],
-            x: this.chessboardOffsetX / 2 + (this.width / 2) - (this.squareSize * (data["squaresCount"] + data["sideborder"]) / 2),
-            y: this.chessboardOffsetY / 2,
-            cellWidth: this.squareSize,
-            cellHeight: this.squareSize
-        });
-    }
+ createBoard() {
+    this.extendBoardArray();
+
+    // 1. Calculate the total dimensions of your grid
+    const gridWidth = (data["squaresCount"] + data["sideborder"]) * this.squareSize;
+    const gridHeight = (data["squaresCount"] + data["sideborder"]) * this.squareSize;
+
+    // 2. Calculate the top-left position to center the grid on the screen
+    // This automatically creates your "padding"
+    const startX = (this.width - gridWidth) / 2 + (this.chessboardOffsetX || 0);
+    const startY = (this.height - gridHeight) / 2 + (this.chessboardOffsetY || 0);
+
+    // 3. Use these calculated values in GridAlign
+    Phaser.Actions.GridAlign(this.board, {
+        width: data["squaresCount"] + data["sideborder"],
+        height: data["squaresCount"] + data["sideborder"],
+        cellWidth: this.squareSize,
+        cellHeight: this.squareSize,
+        x: startX,
+        y: startY
+    });
+}
 
     /**
      * Populates the board array with `boardBlock` instances.
